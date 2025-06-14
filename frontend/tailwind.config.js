@@ -63,7 +63,7 @@ module.exports = {
                 },
             },
             fontFamily: {
-                nunito: ['var(--font-nunito)'],
+                IBM_plex: ['var(--font-IBM_Plex_Sans_Thai)'],
             },
             spacing: {
                 4.5: '18px',

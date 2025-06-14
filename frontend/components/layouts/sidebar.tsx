@@ -91,7 +91,7 @@ const Sidebar = () => {
                     <div className="flex items-center justify-between px-4 py-3">
                         <Link href="/" className="main-logo flex shrink-0 items-center">
                             <img className="ml-[5px] w-8 flex-none" src="/assets/images/logo.svg" alt="logo" />
-                            <span className="align-middle text-2xl font-semibold ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light lg:inline">VRISTO</span>
+                            <span className="align-middle text-2xl font-semibold ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light lg:inline">PEA-iTT</span>
                         </Link>
 
                         <button
@@ -104,127 +104,43 @@ const Sidebar = () => {
                     </div>
                     <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
                         <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'dashboard' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('dashboard')}>
-                                    <div className="flex items-center">
-                                        <IconMenuDashboard className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('dashboard')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'dashboard' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'dashboard' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/">{t('sales')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/analytics">{t('analytics')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/finance">{t('finance')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/crypto">{t('crypto')}</Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
 
                             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                                 <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('apps')}</span>
+                                <span>{t('นักศึกษา')}</span>
                             </h2>
 
                             <li className="nav-item">
                                 <ul>
-                                    <li className="nav-item">
-                                        <Link href="/apps/chat" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuChat className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('chat')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/mailbox" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuMailbox className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('mailbox')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/todolist" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuTodo className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('todo_list')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/notes" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuNotes className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('notes')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/scrumboard" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuScrumboard className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('scrumboard')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/contacts" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuContacts className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('contacts')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-
                                     <li className="menu nav-item">
-                                        <button type="button" className={`${currentMenu === 'invoice' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('invoice')}>
+                                        <button type="button" className={`${currentMenu === 'time_check' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('time_check')}>
                                             <div className="flex items-center">
                                                 <IconMenuInvoice className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('invoice')}</span>
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('การลงเวลาปฏิบัติงาน')}</span>
                                             </div>
 
-                                            <div className={currentMenu !== 'invoice' ? '-rotate-90 rtl:rotate-90' : ''}>
+                                            <div className={currentMenu !== 'time_check' ? '-rotate-90 rtl:rotate-90' : ''}>
                                                 <IconCaretDown />
                                             </div>
                                         </button>
 
-                                        <AnimateHeight duration={300} height={currentMenu === 'invoice' ? 'auto' : 0}>
+                                        <AnimateHeight duration={300} height={currentMenu === 'time_check' ? 'auto' : 0}>
                                             <ul className="sub-menu text-gray-500">
                                                 <li>
-                                                    <Link href="/apps/invoice/list">{t('list')}</Link>
+                                                    <Link href="#">{t('ลงเวลาทำงาน')}</Link>
                                                 </li>
                                                 <li>
-                                                    <Link href="/apps/invoice/preview">{t('preview')}</Link>
-                                                </li>
-                                                <li>
-                                                    <Link href="/apps/invoice/add">{t('add')}</Link>
-                                                </li>
-                                                <li>
-                                                    <Link href="/apps/invoice/edit">{t('edit')}</Link>
+                                                    <Link href="#">{t('ประวัติการลงเวลา')}</Link>
                                                 </li>
                                             </ul>
                                         </AnimateHeight>
                                     </li>
 
                                     <li className="nav-item">
-                                        <Link href="/apps/calendar" className="group">
+                                        <Link href="#" className="group">
                                             <div className="flex items-center">
                                                 <IconMenuCalendar className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('calendar')}</span>
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('การลาปฏิบัติงาน')}</span>
                                             </div>
                                         </Link>
                                     </li>
@@ -233,485 +149,61 @@ const Sidebar = () => {
 
                             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                                 <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('user_interface')}</span>
+                                <span>{t('พี่เลี้ยง')}</span>
                             </h2>
 
                             <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'component' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('component')}>
-                                    <div className="flex items-center">
-                                        <IconMenuComponents className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('components')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'component' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'component' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/components/tabs">{t('tabs')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/accordions">{t('accordions')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/modals">{t('modals')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/cards">{t('cards')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/carousel">{t('carousel')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/countdown">{t('countdown')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/counter">{t('counter')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/sweetalert">{t('sweet_alerts')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/timeline">{t('timeline')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/notifications">{t('notifications')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/media-object">{t('media_object')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/list-group">{t('list_group')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/pricing-table">{t('pricing_tables')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/components/lightbox">{t('lightbox')}</Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'element' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('element')}>
-                                    <div className="flex items-center">
-                                        <IconMenuElements className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('elements')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'element' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'element' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/elements/alerts">{t('alerts')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/avatar">{t('avatar')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/badges">{t('badges')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/breadcrumbs">{t('breadcrumbs')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/buttons">{t('buttons')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/buttons-group">{t('button_groups')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/color-library">{t('color_library')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/dropdown">{t('dropdown')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/infobox">{t('infobox')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/jumbotron">{t('jumbotron')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/loader">{t('loader')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/pagination">{t('pagination')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/popovers">{t('popovers')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/progress-bar">{t('progress_bar')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/search">{t('search')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/tooltips">{t('tooltips')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/treeview">{t('treeview')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/elements/typography">{t('typography')}</Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <li className="menu nav-item">
-                                <Link href="/charts" className="group">
+                                <Link href="#" className="group">
                                     <div className="flex items-center">
                                         <IconMenuCharts className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('charts')}</span>
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('นักศึกษาของคุณ')}</span>
                                     </div>
                                 </Link>
                             </li>
 
                             <li className="menu nav-item">
-                                <Link href="/widgets" className="group">
-                                    <div className="flex items-center">
-                                        <IconMenuWidgets className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('widgets')}</span>
-                                    </div>
-                                </Link>
-                            </li>
+                                        <button type="button" className={`${currentMenu === 'leave_approve' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('leave_approve')}>
+                                            <div className="flex items-center">
+                                                <IconMenuInvoice className="shrink-0 group-hover:!text-primary" />
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('รายการอนุมัติ')}</span>
+                                            </div>
 
-                            <li className="menu nav-item">
-                                <Link href="/font-icons" className="group">
-                                    <div className="flex items-center">
-                                        <IconMenuFontIcons className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('font_icons')}</span>
-                                    </div>
-                                </Link>
-                            </li>
+                                            <div className={currentMenu !== 'leave_approve' ? '-rotate-90 rtl:rotate-90' : ''}>
+                                                <IconCaretDown />
+                                            </div>
+                                        </button>
 
-                            <li className="menu nav-item">
-                                <Link href="/dragndrop" className="group">
-                                    <div className="flex items-center">
-                                        <IconMenuDragAndDrop className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('drag_and_drop')}</span>
-                                    </div>
-                                </Link>
-                            </li>
+                                        <AnimateHeight duration={300} height={currentMenu === 'leave_approve' ? 'auto' : 0}>
+                                            <ul className="sub-menu text-gray-500">
+                                                <li>
+                                                    <Link href="#">{t('อนุมัติแก้ไขเวลาทำงาน')}</Link>
+                                                </li>
+                                                <li>
+                                                    <Link href="#">{t('อนุมัติการลา')}</Link>
+                                                </li>
+                                            </ul>
+                                        </AnimateHeight>
+                                    </li>
 
                             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                                 <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('tables_and_forms')}</span>
+                                <span>{t('Administrator')}</span>
                             </h2>
 
                             <li className="menu nav-item">
-                                <Link href="/tables" className="group">
+                                <Link href="#" className="group">
                                     <div className="flex items-center">
                                         <IconMenuTables className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('tables')}</span>
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('จัดการข้อมูลนักศึกษา')}</span>
                                     </div>
                                 </Link>
                             </li>
 
                             <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'datalabel' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('datalabel')}>
+                                <Link href="#" className="group">
                                     <div className="flex items-center">
-                                        <IconMenuDatatables className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('datatables')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'datalabel' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'datalabel' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/datatables/basic">{t('basic')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/advanced">{t('advanced')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/skin">{t('skin')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/order-sorting">{t('order_sorting')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/multi-column">{t('multi_column')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/multiple-tables">{t('multiple_tables')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/alt-pagination">{t('alt_pagination')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/checkbox">{t('checkbox')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/range-search">{t('range_search')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/export">{t('export')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/datatables/column-chooser">{t('column_chooser')}</Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'forms' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('forms')}>
-                                    <div className="flex items-center">
-                                        <IconMenuForms className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('forms')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'forms' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'forms' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/forms/basic">{t('basic')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/input-group">{t('input_group')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/layouts">{t('layouts')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/validation">{t('validation')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/input-mask">{t('input_mask')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/select2">{t('select2')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/touchspin">{t('touchspin')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/checkbox-radio">{t('checkbox_and_radio')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/switches">{t('switches')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/wizards">{t('wizards')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/file-upload">{t('file_upload')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/quill-editor">{t('quill_editor')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/markdown-editor">{t('markdown_editor')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/date-picker">{t('date_and_range_picker')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/forms/clipboard">{t('clipboard')}</Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
-                                <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('user_and_pages')}</span>
-                            </h2>
-
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'users' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('users')}>
-                                    <div className="flex items-center">
-                                        <IconMenuUsers className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('users')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'users' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'users' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/users/profile">{t('profile')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/users/user-account-settings">{t('account_settings')}</Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'page' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('page')}>
-                                    <div className="flex items-center">
-                                        <IconMenuPages className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('pages')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'page' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'page' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/pages/knowledge-base">{t('knowledge_base')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/pages/contact-us-boxed" target="_blank">
-                                                {t('contact_us_boxed')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/pages/contact-us-cover" target="_blank">
-                                                {t('contact_us_cover')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/pages/faq">{t('faq')}</Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/pages/coming-soon-boxed" target="_blank">
-                                                {t('coming_soon_boxed')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/pages/coming-soon-cover" target="_blank">
-                                                {t('coming_soon_cover')}
-                                            </Link>
-                                        </li>
-                                        <li className="menu nav-item">
-                                            <button
-                                                type="button"
-                                                className={`${
-                                                    errorSubMenu ? 'open' : ''
-                                                } w-full before:h-[5px] before:w-[5px] before:rounded before:bg-gray-300 hover:bg-gray-100 ltr:before:mr-2 rtl:before:ml-2 dark:text-[#888ea8] dark:hover:bg-gray-900`}
-                                                onClick={() => setErrorSubMenu(!errorSubMenu)}
-                                            >
-                                                {t('error')}
-                                                <div className={`${errorSubMenu ? '-rotate-90 rtl:rotate-90' : ''} ltr:ml-auto rtl:mr-auto`}>
-                                                    <IconCaretsDown fill={true} className="h-4 w-4" />
-                                                </div>
-                                            </button>
-                                            <AnimateHeight duration={300} height={errorSubMenu ? 'auto' : 0}>
-                                                <ul className="sub-menu text-gray-500">
-                                                    <li>
-                                                        <a href="/pages/error404" target="_blank">
-                                                            {t('404')}
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="/pages/error500" target="_blank">
-                                                            {t('500')}
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="/pages/error503" target="_blank">
-                                                            {t('503')}
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </AnimateHeight>
-                                        </li>
-
-                                        <li>
-                                            <Link href="/pages/maintenence" target="_blank">
-                                                {t('maintenence')}
-                                            </Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'auth' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('auth')}>
-                                    <div className="flex items-center">
-                                        <IconMenuAuthentication className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('authentication')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'auth' ? '-rotate-90 rtl:rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'auth' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <Link href="/auth/boxed-signin" target="_blank">
-                                                {t('login_boxed')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/boxed-signup" target="_blank">
-                                                {t('register_boxed')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/boxed-lockscreen" target="_blank">
-                                                {t('unlock_boxed')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/boxed-password-reset" target="_blank">
-                                                {t('recover_id_boxed')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/cover-login" target="_blank">
-                                                {t('login_cover')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/cover-register" target="_blank">
-                                                {t('register_cover')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/cover-lockscreen" target="_blank">
-                                                {t('unlock_cover')}
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/auth/cover-password-reset" target="_blank">
-                                                {t('recover_id_cover')}
-                                            </Link>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
-
-                            <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
-                                <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('supports')}</span>
-                            </h2>
-
-                            <li className="menu nav-item">
-                                <Link href="https://vristo.sbthemes.com" target="_blank" className="nav-link group">
-                                    <div className="flex items-center">
-                                        <IconMenuDocumentation className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('documentation')}</span>
+                                        <IconMenuTables className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('จัดการข้อมูลพี่เลี้ยง')}</span>
                                     </div>
                                 </Link>
                             </li>
