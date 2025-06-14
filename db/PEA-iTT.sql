@@ -18,8 +18,8 @@ CREATE TABLE public."user" (
   "phone_number" VARCHAR(20),
   "email" VARCHAR(255) UNIQUE,
   "password_hash" VARCHAR(255),
-  "created_at" TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP',
-  "updated_at" TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP'
+  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE public."mentor_profile" (
@@ -41,7 +41,7 @@ CREATE TABLE public."student_profile" (
 CREATE TABLE public."check_time" (
   "id" SERIAL PRIMARY KEY,
   "user_id" INT NOT NULL,
-  "time" TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP',
+  "time" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "type_check" VARCHAR(30),
   "location" VARCHAR(255),
   "note" TEXT,
@@ -52,7 +52,7 @@ CREATE TABLE public."check_time" (
 CREATE TABLE public."leave_request" (
   "id" SERIAL PRIMARY KEY,
   "user_id" INT NOT NULL,
-  "leave_datetime" TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP',
+  "leave_datetime" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "reason" TEXT,
   "file" BYTEA,
   "status" VARCHAR(30) DEFAULT 'pending',
@@ -64,7 +64,7 @@ CREATE TABLE public."admin_log" (
   "id" SERIAL PRIMARY KEY,
   "admin_id" INT NOT NULL,
   "action" TEXT,
-  "created_at" TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP'
+  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 COMMENT ON TABLE public."role" IS 'บทบาทของผู้ใช้งานในระบบ';
