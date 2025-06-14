@@ -1,0 +1,60 @@
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: peaitt-db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "${DATABASE_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      peaitt-network:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: peaitt-backend
+    depends_on:
+      - db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      ORIGIN: ${ORIGIN}
+    ports:
+      - "${BACKEND_PORT}:2501"
+    networks:
+      peaitt-network:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: peaitt-frontend
+    depends_on:
+      - backend
+      - db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "${FRONTEND_PORT}:2500"
+    networks:
+      peaitt-network:
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  peaitt-network:
+    driver: bridge
