@@ -14,6 +14,7 @@
 อยู่ในโฟลเดอร์ frontend-playground โดยใช้คำสั่ง
 ```bash
 cd frontend-playground
+npm i
 npm run dev
 ```
 
