@@ -33,8 +33,16 @@ export const createRole = async (req: Request, res: Response) => {
 export const getAllRoles = async (req: Request, res: Response) => {
   try {
     const data = await prisma.role.findMany();
+
+    if (data.length === 0) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "No roles found",
+        data: null,
+      });
+    }
+
     res.status(httpStatus.OK).json({
-      message: "",
+      message: "Roles retrieved successfully",
       data: data,
     });
   } catch (error) {
