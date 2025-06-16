@@ -5,6 +5,9 @@ import httpStatus from "http-status-codes";
 import * as authModels from "./authModels";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const registerStu = async (req: Request, res: Response) => {
   try {
@@ -12,6 +15,18 @@ export const registerStu = async (req: Request, res: Response) => {
       ...req.body,
       picture: req.file?.buffer,
     });
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: validatedData.email,
+      },
+    });
+
+    if (existingUser) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Email already exists",
+      });
+    }
 
     //Hash password
     const salt = await bcrypt.genSalt(10);
@@ -48,7 +63,6 @@ export const registerStu = async (req: Request, res: Response) => {
     res.status(httpStatus.CREATED).json({
       message: "Student registered successfully",
     });
-    
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(httpStatus.BAD_REQUEST).json({
@@ -63,6 +77,104 @@ export const registerStu = async (req: Request, res: Response) => {
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
         message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const validateData = authModels.loginSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: validateData.email,
+      },
+    });
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "Invalid email or password",
+      });
+      return;
+    }
+
+    if (!user.password_hash) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "User has no password set",
+      });
+      return;
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      validateData.password_hash,
+      user.password_hash
+    );
+
+    if (!isPasswordValid) {
+      res.status(httpStatus.UNAUTHORIZED).json({
+        message: "Invalid email or password",
+      });
+      return;
+    }
+
+    const payloadUser = {
+      id: user.id,
+      role: user.role_id,
+    };
+
+    //Create JWT token
+    const token = jwt.sign(payloadUser, process.env.JWT_SECRET as string, {
+      expiresIn: "1h",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3600000,
+      sameSite: "strict",
+    });
+
+    res.status(httpStatus.OK).json({
+      message: `Login successful. Welcome back, ${user.fname}!`,
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.status(httpStatus.OK).json({
+      message: "Logout successful",
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Something went wrong",
       });
     }
   }

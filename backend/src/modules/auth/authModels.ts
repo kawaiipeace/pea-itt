@@ -7,7 +7,9 @@ export const RegisterStuSchema = z
       .min(1, "Department ID must be greater than 0"),
     fname: z.string().min(2, "First name must be at least 2 characters"),
     lname: z.string().min(2, "Last name must be at least 2 characters"),
-    phone_number: z.coerce.string().min(10, "Phone number must be at least 10 digits"),
+    phone_number: z.coerce
+      .string()
+      .min(10, "Phone number must be at least 10 digits"),
     email: z.string().email("Invalid email format"),
     password_hash: z.string().min(8, "Password must be at least 8 characters"),
     student_id: z.string().min(5, "Student ID must be at least 5 characters"),
@@ -21,4 +23,18 @@ export const RegisterStuSchema = z
   })
   .refine((data) => data.end_date > data.start_date, {
     message: "End date must be after start date",
+  });
+
+export const loginSchema = z
+  .object({
+    email: z.string().email("Invalid email format").optional(),
+    phone_number: z.coerce
+      .string()
+      .min(10, "Phone number must be at least 10 digits")
+      .optional(),
+    password_hash: z.string().min(8, "Password must be at least 8 characters"),
+  })
+  .refine((data) => data.email || data.phone_number, {
+    message: "Either email or phone number is required",
+    path: ["email", "phone_number"],
   });
