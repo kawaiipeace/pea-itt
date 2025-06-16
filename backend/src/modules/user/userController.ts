@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../../common/config/prismaClient";
+import httpStatus from "http-status-codes";
 export const getAllUsers = (req: Request, res: Response) => {
   res.json([
     { id: 1, name: "Alice" },
@@ -18,25 +19,27 @@ export const updateUserById = (req: Request, res: Response) => {
   res.json({ id: userId, ...updatedData });
 };
 
-export const getInternPicture = async (req: Request, res: Response) => {
+export const getStuPicture = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
 
     if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid ID" });
+      res.status(httpStatus.BAD_REQUEST).json({ error: "Invalid ID" });
     }
 
     const intern = await prisma.student_profile.findUnique({
       where: { id },
-      select: { picture: true }, // ดึงเฉพาะรูป
+      select: { picture: true },
     });
 
     if (!intern || !intern.picture) {
-      res.status(404).send("Image not found");
+      res.status(httpStatus.NOT_FOUND).send("Image not found");
     }
     res.setHeader("Content-Type", "image/jpeg");
     res.send(intern?.picture);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Server error" });
   }
 };

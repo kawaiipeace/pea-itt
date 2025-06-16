@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get("/users", userController.getAllUsers);
 router.get("/users/:id", userController.getUserById);
-router.get("/users/:id/picture", userController.getInternPicture);
+router.get("/users/:id/picture", userController.getStuPicture);
 
 export default router;
