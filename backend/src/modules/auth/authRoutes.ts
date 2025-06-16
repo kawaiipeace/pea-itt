@@ -17,6 +17,13 @@ router.post(
 router.post("/login", authController.login);
 
 router.get(
+  "/me",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  authController.me
+);
+
+router.get(
   "/logout",
   authenticateJWT,
   authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),

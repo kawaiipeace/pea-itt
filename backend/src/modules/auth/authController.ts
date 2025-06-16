@@ -157,6 +157,42 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const me = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+      include: {
+        student_profile: true,
+      },
+    });
+
+    res.status(httpStatus.OK).json({
+      message: "Hello ,World",
+      data: user,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Something went wrong",
+      });
+    }
+  }
+};
+
 export const logout = async (req: Request, res: Response) => {
   try {
     res.clearCookie("token", {
