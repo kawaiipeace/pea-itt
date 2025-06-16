@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/common/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model admin_log {
+  id         Int       @id @default(autoincrement())
+  admin_id   Int
+  action     String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  user       user      @relation(fields: [admin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model check_time {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  time       DateTime? @default(now()) @db.Timestamp(6)
+  type_check String?   @db.VarChar(30)
+  location   String?   @db.VarChar(255)
+  note       String?
+  latitude   Decimal?  @db.Decimal(10, 7)
+  longitude  Decimal?  @db.Decimal(10, 7)
+  user       user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model department {
+  dept_id   Int    @id @default(autoincrement())
+  dept_name String @unique @db.VarChar(255)
+  user      user[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model leave_request {
+  id                                Int       @id @default(autoincrement())
+  user_id                           Int
+  leave_datetime                    DateTime? @default(now()) @db.Timestamp(6)
+  reason                            String?
+  file                              Bytes?
+  status                            String?   @default("pending") @db.VarChar(30)
+  approver                          Int?
+  approved_at                       DateTime? @db.Timestamp(6)
+  user_leave_request_approverTouser user?     @relation("leave_request_approverTouser", fields: [approver], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_leave_request_user_idTouser  user      @relation("leave_request_user_idTouser", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mentor_profile {
+  id              Int               @id @default(autoincrement())
+  user_id         Int               @unique
+  user            user              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  student_profile student_profile[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(100)
+  description String?
+  user        user[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model student_profile {
+  id             Int             @id @default(autoincrement())
+  user_id        Int             @unique
+  student_id     String          @unique @db.VarChar(50)
+  mentor_id      Int?
+  picture        Bytes?
+  university     String?         @db.VarChar(255)
+  start_date     DateTime?       @db.Timestamp(6)
+  end_date       DateTime?       @db.Timestamp(6)
+  mentor_profile mentor_profile? @relation(fields: [mentor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user           user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user {
+  id                                         Int              @id @default(autoincrement())
+  role_id                                    Int
+  department_id                              Int?
+  fname                                      String?          @db.VarChar(255)
+  lname                                      String?          @db.VarChar(255)
+  phone_number                               String?          @db.VarChar(20)
+  email                                      String?          @unique @db.VarChar(255)
+  password_hash                              String?          @db.VarChar(255)
+  created_at                                 DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at                                 DateTime?        @default(now()) @db.Timestamp(6)
+  admin_log                                  admin_log[]
+  check_time                                 check_time[]
+  leave_request_leave_request_approverTouser leave_request[]  @relation("leave_request_approverTouser")
+  leave_request_leave_request_user_idTouser  leave_request[]  @relation("leave_request_user_idTouser")
+  mentor_profile                             mentor_profile?
+  student_profile                            student_profile?
+  department                                 department?      @relation(fields: [department_id], references: [dept_id], onDelete: NoAction, onUpdate: NoAction)
+  role                                       role             @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
