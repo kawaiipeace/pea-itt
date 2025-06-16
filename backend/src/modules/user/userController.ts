@@ -8,3 +8,9 @@ export const getUserById = (req: Request, res: Response) => {
   const userId = req.params.id;
   res.json({ id: userId, name: `User ${userId}` });
 };
+
+export const updateUserById = (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const updatedData = req.body;
+  res.json({ id: userId, ...updatedData });
+};
