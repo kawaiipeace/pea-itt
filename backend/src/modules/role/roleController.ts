@@ -38,10 +38,14 @@ export const getAllRoles = async (req: Request, res: Response) => {
       data: data,
     });
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(httpStatus.BAD_REQUEST).json({
-        message: "Someting went worng!",
+        message: "Something went wrong!",
         errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
       });
     }
   }
