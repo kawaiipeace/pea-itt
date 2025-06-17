@@ -1,12 +1,10 @@
 import express from "express";
 import { upload } from "../../common/middleware/upload";
-const router = express.Router();
 import * as authController from "./authController";
 import { authenticateJWT } from "../../common/middleware/authenticateJWT";
-import {
-  authorizeRoles,
-  ROLE_IDS,
-} from "../../common/middleware/authorizeRoles";
+import { authorizeRoles, ROLE_IDS } from "../../common/middleware/authorizeRoles";
+
+const router = express.Router();
 
 /**
  * @swagger
@@ -28,28 +26,65 @@ import {
  *           schema:
  *             type: object
  *             required:
- *               - picture
- *               - username
- *               - password
+ *               - department_id
+ *               - fname
+ *               - lname
+ *               - phone_number
+ *               - email
+ *               - password_hash
+ *               - university
+ *               - start_date
+ *               - end_date
  *             properties:
  *               picture:
  *                 type: string
  *                 format: binary
- *               username:
+ *                 description: Optional profile picture
+ *               department_id:
+ *                 type: integer
+ *                 example: 1
+ *               fname:
  *                 type: string
- *               password:
+ *                 example: Apiwat
+ *               lname:
  *                 type: string
+ *                 example: Lantong
+ *               phone_number:
+ *                 type: string
+ *                 example: "0812345678"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: apiwat@example.com
+ *               password_hash:
+ *                 type: string
+ *                 example: mypassword123
+ *               mentor_id:
+ *                 type: integer
+ *                 example: 2
+ *                 nullable: true
+ *               university:
+ *                 type: string
+ *                 example: Kasetsart University
+ *               start_date:
+ *                 type: string
+ *                 format: date
+ *                 example: "2024-06-01"
+ *               end_date:
+ *                 type: string
+ *                 format: date
+ *                 example: "2025-03-31"
  *     responses:
  *       201:
  *         description: Student registered successfully
  *       400:
- *         description: Invalid input data
+ *         description: Validation error or invalid input data
+ *       409:
+ *         description: Email already exists
+ *       500:
+ *         description: Internal server error
  */
-router.post(
-  "/register/student",
-  upload.single("picture"),
-  authController.registerStu
-);
+router.post("/register/student", upload.single("picture"), authController.registerStu);
 
 /**
  * @swagger
@@ -63,29 +98,39 @@ router.post(
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - username
- *               - password
  *             properties:
- *               username:
+ *               email:
  *                 type: string
- *                 example: user1
- *               password:
+ *                 format: email
+ *                 example: user@example.com
+ *               phone_number:
  *                 type: string
- *                 example: secret
+ *                 example: "0812345678"
+ *               password_hash:
+ *                 type: string
+ *                 example: mypassword123
+ *             oneOf:
+ *               - required: ["email", "password_hash"]
+ *               - required: ["phone_number", "password_hash"]
  *     responses:
  *       200:
- *         description: Successfully logged in, returns JWT token
+ *         description: Login successful, JWT token returned in cookie
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 message:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                   example: Login successful. Welcome back, Apiwat!
+ *       400:
+ *         description: Validation error
  *       401:
  *         description: Invalid credentials
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
  */
 router.post("/login", authController.login);
 
@@ -93,27 +138,62 @@ router.post("/login", authController.login);
  * @swagger
  * /me:
  *   get:
- *     summary: Get current user info
+ *     summary: Get current logged-in user information with profile
  *     tags: [Authentication]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Logged-in user details
+ *         description: User info retrieved successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 username:
+ *                 message:
  *                   type: string
- *                   example: user1
- *                 role:
- *                   type: string
- *                   example: STUDENT
+ *                   example: Hello ,World
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     role_id:
+ *                       type: integer
+ *                       example: 1
+ *                     fname:
+ *                       type: string
+ *                       example: Apiwat
+ *                     lname:
+ *                       type: string
+ *                       example: Lantong
+ *                     email:
+ *                       type: string
+ *                       format: email
+ *                       example: apiwat@example.com
+ *                     student_profile:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         mentor_id:
+ *                           type: integer
+ *                           example: 2
+ *                         picture:
+ *                           type: string
+ *                           format: binary
+ *                           nullable: true
+ *                         university:
+ *                           type: string
+ *                           example: Kasetsart University
+ *                         start_date:
+ *                           type: string
+ *                           format: date
+ *                           example: "2024-06-01"
+ *                         end_date:
+ *                           type: string
+ *                           format: date
+ *                           example: "2025-03-31"
  *       401:
  *         description: Unauthorized
  */
