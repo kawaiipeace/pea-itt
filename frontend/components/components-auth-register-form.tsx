@@ -1,8 +1,7 @@
 "use client";
 import Select from "react-select";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import "sweetalert2/dist/sweetalert2.min.css";
 import Swal from "sweetalert2";
 import axios from "axios";
 
@@ -29,7 +28,6 @@ const ComponentsAuthRegisterForm = () => {
     email: "",
     phone_number: "",
     university: "",
-    
     start_date: "",
     end_date: "",
     password_hash: "",
@@ -48,7 +46,7 @@ const ComponentsAuthRegisterForm = () => {
     end_date: "",
     department: 0,
     mentor_id: 0,
-    password_hash:""
+    password_hash: "",
   });
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
@@ -80,52 +78,42 @@ const ComponentsAuthRegisterForm = () => {
       newErrors.fname = "กรุณากรอกชื่อจริง";
       valid = false;
     }
-
     if (!formData.lname.trim()) {
       newErrors.lname = "กรุณากรอกนามสกุล";
       valid = false;
     }
-
     if (!formData.email.trim()) {
       newErrors.email = "กรุณากรอกอีเมล";
       valid = false;
     }
-
     if (!formData.university.trim()) {
       newErrors.university = "กรุณากรอกมหาวิทยาลัย";
       valid = false;
     }
-
     if (formData.phone_number.length < 10) {
       newErrors.phone_number = "กรุณากรอกเบอร์โทรศัพท์มือถือ 10 หลัก";
       valid = false;
     }
-
     if (password.length < 8) {
       newErrors.password_hash = "รหัสผ่านต้องมีอย่างน้อย 8 ตัว";
       valid = false;
     }
-
     if (password !== confirmPassword) {
       newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
       valid = false;
     }
-
     if (!formData.start_date.trim()) {
       newErrors.start_date = "กรุณากรอกวันที่เริ่มฝึกงาน";
       valid = false;
     }
-
     if (!formData.end_date.trim()) {
       newErrors.end_date = "กรุณากรอกวันที่สิ้นสุดฝึกงาน";
       valid = false;
     }
-
     if (formData.department <= 0) {
       newErrors.department = "กรุณาเลือกชื่อสถานที่ฝึกงาน";
       valid = false;
     }
-
     if (formData.mentor_id <= 0) {
       newErrors.mentor_id = "กรุณาเลือกชื่อพี่เลี้ยง";
       valid = false;
@@ -135,36 +123,23 @@ const ComponentsAuthRegisterForm = () => {
     return valid;
   };
 
-  // useEffect(() => {
-  //   const fetchdata = async () => {
-  //     const data = await axios.get(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/api/users`
-  //     );
-  //     console.log(data.data);
-  //   };
-  //   fetchdata();
-  // }, []);
-
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
+
     try {
-      console.log(`${process.env.NEXT_PUBLIC_API_URL}/api/register/student`);
-
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}register/student`,{
-          fname: formData.fname,
-          lname:formData.lname,
-          email:formData.email,
-          phone_number:formData.phone_number,
-          password_hash:formData.password_hash,
-          department_id:formData.department,
-          
-
-
-        } 
-      );
-
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}register/student`, {
+        fname: formData.fname,
+        lname: formData.lname,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        password_hash: password,
+        department_id: formData.department,
+        university: formData.university,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        // mentor_id: formData.mentor_id,
+      });
 
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
@@ -186,7 +161,7 @@ const ComponentsAuthRegisterForm = () => {
         end_date: "",
         department: 0,
         mentor_id: 0,
-        password_hash:""
+        password_hash: "",
       });
       setPassword("");
       setConfirmPassword("");
@@ -217,63 +192,57 @@ const ComponentsAuthRegisterForm = () => {
         <label className="mb-1 block font-medium">ชื่อจริง</label>
         <input
           type="text"
-          onChange={handleChange}
           name="fname"
-          placeholder="กรอกชื่อจริง"
+          onChange={handleChange}
           value={formData.fname}
+          placeholder="กรอกชื่อจริง"
           className={`w-full rounded border px-3 py-2 ${
             errors.fname ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.fname && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>
-        )}
+        {errors.fname && <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>}
       </div>
 
       <div>
         <label className="mb-1 block font-medium">นามสกุล</label>
         <input
           type="text"
-          onChange={handleChange}
           name="lname"
-          placeholder="กรอกนามสกุล"
+          onChange={handleChange}
           value={formData.lname}
+          placeholder="กรอกนามสกุล"
           className={`w-full rounded border px-3 py-2 ${
             errors.lname ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.lname && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>
-        )}
+        {errors.lname && <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>}
       </div>
 
       <div>
         <label className="mb-1 block font-medium">อีเมล</label>
         <input
           type="email"
-          onChange={handleChange}
           name="email"
-          placeholder="example@email.com"
+          onChange={handleChange}
           value={formData.email}
+          placeholder="example@email.com"
           className={`w-full rounded border px-3 py-2 ${
             errors.email ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.email && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>
-        )}
+        {errors.email && <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>}
       </div>
 
       <div>
         <label className="mb-1 block font-medium">เบอร์โทรศัพท์</label>
         <input
           type="tel"
-          pattern="[0-9]*"
-          inputMode="numeric"
-          onChange={handleChange}
           name="phone_number"
-          placeholder="0812345678"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          onChange={handleChange}
           value={formData.phone_number}
+          placeholder="0812345678"
           className={`w-full rounded border px-3 py-2 ${
             errors.phone_number ? "border-red-400" : "border-gray-300"
           }`}
@@ -284,20 +253,17 @@ const ComponentsAuthRegisterForm = () => {
       </div>
 
       <div>
-        <label className="mb-1 block font-medium">
-          มหาวิทยาลัยที่ศึกษาอยู่
-        </label>
+        <label className="mb-1 block font-medium">มหาวิทยาลัย</label>
         <input
           type="text"
-          onChange={handleChange}
           name="university"
-          placeholder="กรอกชื่อมหาวิทยาลัย"
+          onChange={handleChange}
           value={formData.university}
+          placeholder="ชื่อมหาวิทยาลัย"
           className={`w-full rounded border px-3 py-2 ${
             errors.university ? "border-red-400" : "border-gray-300"
           }`}
         />
-
         {errors.university && (
           <p className="mt-1 text-[11px] text-red-500">{errors.university}</p>
         )}
@@ -308,8 +274,8 @@ const ComponentsAuthRegisterForm = () => {
           <label className="mb-1 block font-medium">วันที่เริ่มฝึกงาน</label>
           <input
             type="date"
-            onChange={handleChange}
             name="start_date"
+            onChange={handleChange}
             value={formData.start_date}
             className={`w-full rounded border px-3 py-2 ${
               errors.start_date ? "border-red-400" : "border-gray-300"
@@ -323,8 +289,8 @@ const ComponentsAuthRegisterForm = () => {
           <label className="mb-1 block font-medium">วันที่สิ้นสุดฝึกงาน</label>
           <input
             type="date"
-            onChange={handleChange}
             name="end_date"
+            onChange={handleChange}
             value={formData.end_date}
             className={`w-full rounded border px-3 py-2 ${
               errors.end_date ? "border-red-400" : "border-gray-300"
@@ -377,23 +343,17 @@ const ComponentsAuthRegisterForm = () => {
           {showConfirmPassword ? "Hide" : "Show"}
         </button>
         {errors.confirmPassword && (
-          <p className="mt-1 text-[11px] text-red-500">
-            {errors.confirmPassword}
-          </p>
+          <p className="mt-1 text-[11px] text-red-500">{errors.confirmPassword}</p>
         )}
       </div>
 
       <div>
-        <label className="mb-1 block font-medium">
-          ชื่อสถานที่ฝึกงาน (กฟภ.)
-        </label>
+        <label className="mb-1 block font-medium">ชื่อสถานที่ฝึกงาน</label>
         <Select
           options={locationOptions}
           classNamePrefix="react-select"
           placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={locationOptions.find(
-            (option) => option.value === formData.department
-          )}
+          value={locationOptions.find((opt) => opt.value === formData.department)}
           onChange={(selected: any) =>
             setFormData((prev) => ({
               ...prev,
@@ -412,9 +372,7 @@ const ComponentsAuthRegisterForm = () => {
           options={mentorOptions}
           classNamePrefix="react-select"
           placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={mentorOptions.find(
-            (option) => option.value === formData.mentor_id
-          )}
+          value={mentorOptions.find((opt) => opt.value === formData.mentor_id)}
           onChange={(selected: any) =>
             setFormData((prev) => ({
               ...prev,
