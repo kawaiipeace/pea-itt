@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 
 const BoxedSignUp = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-2 py-6">
-      <div className="w-1/2 rounded-lg border border-gray-300 bg-white p-6 shadow-md">
-        <div className="px-6backdrop-blur-lg relative flex flex-col justify-center py-3 px-2 rounded-md bg-white/60 dark:bg-black/50">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-2 py-6 ">
+      {/* <div className="w-1/2 rounded-lg border border-gray-300 bg-white p-6 shadow-md"> */}
+        <div className="px-6backdrop-blur-lg relative flex flex-col justify-center py-3 px-2 rounded-md bg-white/60 dark:bg-black/50 border border-gray-300 bg-white p-6 shadow-md">
           <div className="mx-auto w-full">
             <div className="mb-4 text-center">
               <img
@@ -31,7 +31,7 @@ const BoxedSignUp = () => {
             <ComponentsAuthRegisterForm />
           </div>
         </div>
-      </div>
+      {/* </div> */}
     </div>
   );
 };

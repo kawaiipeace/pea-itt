@@ -1,9 +1,10 @@
 "use client";
 import Select from "react-select";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "sweetalert2/dist/sweetalert2.min.css";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const locationOptions = [
   { value: 1, label: "กอง.1" },
@@ -28,9 +29,10 @@ const ComponentsAuthRegisterForm = () => {
     email: "",
     phone_number: "",
     university: "",
+    
     start_date: "",
     end_date: "",
-    password: "",
+    password_hash: "",
     confirmPassword: "",
     department: "",
     mentor_id: "",
@@ -46,6 +48,7 @@ const ComponentsAuthRegisterForm = () => {
     end_date: "",
     department: 0,
     mentor_id: 0,
+    password_hash:""
   });
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
@@ -67,7 +70,7 @@ const ComponentsAuthRegisterForm = () => {
       university: "",
       start_date: "",
       end_date: "",
-      password: "",
+      password_hash: "",
       confirmPassword: "",
       department: "",
       mentor_id: "",
@@ -99,7 +102,7 @@ const ComponentsAuthRegisterForm = () => {
     }
 
     if (password.length < 8) {
-      newErrors.password = "รหัสผ่านต้องมีอย่างน้อย 8 ตัว";
+      newErrors.password_hash = "รหัสผ่านต้องมีอย่างน้อย 8 ตัว";
       valid = false;
     }
 
@@ -132,55 +135,83 @@ const ComponentsAuthRegisterForm = () => {
     return valid;
   };
 
-  const submitForm = (e: React.FormEvent<HTMLFormElement>) => {
+  // useEffect(() => {
+  //   const fetchdata = async () => {
+  //     const data = await axios.get(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/api/users`
+  //     );
+  //     console.log(data.data);
+  //   };
+  //   fetchdata();
+  // }, []);
+
+  const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // if (!validateForm()) return;
+    if (!validateForm()) return;
+    try {
+      console.log(`${process.env.NEXT_PUBLIC_API_URL}/api/register/student`);
 
-    console.log("Form Data:", { ...formData, password });
-    // สามารถเพิ่มส่งข้อมูล API หรือเปลี่ยนหน้าได้ที่นี่
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}register/student`,{
+          fname: formData.fname,
+          lname:formData.lname,
+          email:formData.email,
+          phone_number:formData.phone_number,
+          password_hash:formData.password_hash,
+          department_id:formData.department,
+          
 
-    Swal.fire({
-      title: "บันทึกข้อมูลเรียบร้อย",
-      icon: "success",
-      confirmButtonText: "ตกลง",
-      width: "400px",
-      customClass: {
-        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
-      },
-    });
 
-    setFormData({
-      fname: "",
-      lname: "",
-      email: "",
-      phone_number: "",
-      university: "",
-      start_date: "",
-      end_date: "",
-      department: 0,
-      mentor_id: 0,
-    });
-    setPassword("");
-    setConfirmPassword("");
-    setErrors({
-      fname: "",
-      lname: "",
-      email: "",
-      phone_number: "",
-      university: "",
-      start_date: "",
-      end_date: "",
-      password: "",
-      confirmPassword: "",
-      department: "",
-      mentor_id: "",
-    });
+        } 
+      );
+
+
+      Swal.fire({
+        title: "บันทึกข้อมูลเรียบร้อย",
+        icon: "success",
+        confirmButtonText: "ตกลง",
+        width: "400px",
+        customClass: {
+          confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+        },
+      });
+
+      setFormData({
+        fname: "",
+        lname: "",
+        email: "",
+        phone_number: "",
+        university: "",
+        start_date: "",
+        end_date: "",
+        department: 0,
+        mentor_id: 0,
+        password_hash:""
+      });
+      setPassword("");
+      setConfirmPassword("");
+      setErrors({
+        fname: "",
+        lname: "",
+        email: "",
+        phone_number: "",
+        university: "",
+        start_date: "",
+        end_date: "",
+        password_hash: "",
+        confirmPassword: "",
+        department: "",
+        mentor_id: "",
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <form
       onSubmit={submitForm}
-      className="grid grid-cols-1 gap-5 text-[15px] md:grid-cols-2"
+      className="grid grid-cols-1 gap-5 p-10 text-[15px] md:grid-cols-2"
     >
       <div>
         <label className="mb-1 block font-medium">ชื่อจริง</label>
@@ -313,7 +344,7 @@ const ComponentsAuthRegisterForm = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="อย่างน้อย 8 ตัว"
           className={`w-full rounded border px-3 py-2 pr-16 ${
-            errors.password ? "border-red-400" : "border-gray-300"
+            errors.password_hash ? "border-red-400" : "border-gray-300"
           }`}
         />
         <button
@@ -323,8 +354,8 @@ const ComponentsAuthRegisterForm = () => {
         >
           {showPassword ? "Hide" : "Show"}
         </button>
-        {errors.password && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.password}</p>
+        {errors.password_hash && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.password_hash}</p>
         )}
       </div>
 
@@ -396,10 +427,10 @@ const ComponentsAuthRegisterForm = () => {
         )}
       </div>
 
-      <div className="text-center md:col-span-2">
+      <div className="mt-2 text-center md:col-span-2">
         <button
           type="submit"
-          className="mt-3 rounded bg-purple-700 px-6 py-2.5 font-medium text-white hover:bg-purple-800"
+          className="rounded bg-purple-700 px-6 py-2.5 font-medium text-white hover:bg-purple-800"
         >
           สมัครเข้าใช้งาน
         </button>
