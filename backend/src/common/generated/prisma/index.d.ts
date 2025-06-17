@@ -8305,7 +8305,6 @@ export namespace Prisma {
   export type Student_profileMinAggregateOutputType = {
     id: number | null
     user_id: number | null
-    student_id: string | null
     mentor_id: number | null
     picture: Uint8Array | null
     university: string | null
@@ -8316,7 +8315,6 @@ export namespace Prisma {
   export type Student_profileMaxAggregateOutputType = {
     id: number | null
     user_id: number | null
-    student_id: string | null
     mentor_id: number | null
     picture: Uint8Array | null
     university: string | null
@@ -8327,7 +8325,6 @@ export namespace Prisma {
   export type Student_profileCountAggregateOutputType = {
     id: number
     user_id: number
-    student_id: number
     mentor_id: number
     picture: number
     university: number
@@ -8352,7 +8349,6 @@ export namespace Prisma {
   export type Student_profileMinAggregateInputType = {
     id?: true
     user_id?: true
-    student_id?: true
     mentor_id?: true
     picture?: true
     university?: true
@@ -8363,7 +8359,6 @@ export namespace Prisma {
   export type Student_profileMaxAggregateInputType = {
     id?: true
     user_id?: true
-    student_id?: true
     mentor_id?: true
     picture?: true
     university?: true
@@ -8374,7 +8369,6 @@ export namespace Prisma {
   export type Student_profileCountAggregateInputType = {
     id?: true
     user_id?: true
-    student_id?: true
     mentor_id?: true
     picture?: true
     university?: true
@@ -8472,7 +8466,6 @@ export namespace Prisma {
   export type Student_profileGroupByOutputType = {
     id: number
     user_id: number
-    student_id: string
     mentor_id: number | null
     picture: Uint8Array | null
     university: string | null
@@ -8502,7 +8495,6 @@ export namespace Prisma {
   export type student_profileSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     user_id?: boolean
-    student_id?: boolean
     mentor_id?: boolean
     picture?: boolean
     university?: boolean
@@ -8515,7 +8507,6 @@ export namespace Prisma {
   export type student_profileSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     user_id?: boolean
-    student_id?: boolean
     mentor_id?: boolean
     picture?: boolean
     university?: boolean
@@ -8528,7 +8519,6 @@ export namespace Prisma {
   export type student_profileSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     user_id?: boolean
-    student_id?: boolean
     mentor_id?: boolean
     picture?: boolean
     university?: boolean
@@ -8541,7 +8531,6 @@ export namespace Prisma {
   export type student_profileSelectScalar = {
     id?: boolean
     user_id?: boolean
-    student_id?: boolean
     mentor_id?: boolean
     picture?: boolean
     university?: boolean
@@ -8549,7 +8538,7 @@ export namespace Prisma {
     end_date?: boolean
   }
 
-  export type student_profileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "student_id" | "mentor_id" | "picture" | "university" | "start_date" | "end_date", ExtArgs["result"]["student_profile"]>
+  export type student_profileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "mentor_id" | "picture" | "university" | "start_date" | "end_date", ExtArgs["result"]["student_profile"]>
   export type student_profileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     mentor_profile?: boolean | student_profile$mentor_profileArgs<ExtArgs>
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -8572,7 +8561,6 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       user_id: number
-      student_id: string
       mentor_id: number | null
       picture: Uint8Array | null
       university: string | null
@@ -9005,7 +8993,6 @@ export namespace Prisma {
   interface student_profileFieldRefs {
     readonly id: FieldRef<"student_profile", 'Int'>
     readonly user_id: FieldRef<"student_profile", 'Int'>
-    readonly student_id: FieldRef<"student_profile", 'String'>
     readonly mentor_id: FieldRef<"student_profile", 'Int'>
     readonly picture: FieldRef<"student_profile", 'Bytes'>
     readonly university: FieldRef<"student_profile", 'String'>
@@ -10876,7 +10863,6 @@ export namespace Prisma {
   export const Student_profileScalarFieldEnum: {
     id: 'id',
     user_id: 'user_id',
-    student_id: 'student_id',
     mentor_id: 'mentor_id',
     picture: 'picture',
     university: 'university',
@@ -11358,7 +11344,6 @@ export namespace Prisma {
     NOT?: student_profileWhereInput | student_profileWhereInput[]
     id?: IntFilter<"student_profile"> | number
     user_id?: IntFilter<"student_profile"> | number
-    student_id?: StringFilter<"student_profile"> | string
     mentor_id?: IntNullableFilter<"student_profile"> | number | null
     picture?: BytesNullableFilter<"student_profile"> | Uint8Array | null
     university?: StringNullableFilter<"student_profile"> | string | null
@@ -11371,7 +11356,6 @@ export namespace Prisma {
   export type student_profileOrderByWithRelationInput = {
     id?: SortOrder
     user_id?: SortOrder
-    student_id?: SortOrder
     mentor_id?: SortOrderInput | SortOrder
     picture?: SortOrderInput | SortOrder
     university?: SortOrderInput | SortOrder
@@ -11384,7 +11368,6 @@ export namespace Prisma {
   export type student_profileWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     user_id?: number
-    student_id?: string
     AND?: student_profileWhereInput | student_profileWhereInput[]
     OR?: student_profileWhereInput[]
     NOT?: student_profileWhereInput | student_profileWhereInput[]
@@ -11395,12 +11378,11 @@ export namespace Prisma {
     end_date?: DateTimeNullableFilter<"student_profile"> | Date | string | null
     mentor_profile?: XOR<Mentor_profileNullableScalarRelationFilter, mentor_profileWhereInput> | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
-  }, "id" | "user_id" | "student_id">
+  }, "id" | "user_id">
 
   export type student_profileOrderByWithAggregationInput = {
     id?: SortOrder
     user_id?: SortOrder
-    student_id?: SortOrder
     mentor_id?: SortOrderInput | SortOrder
     picture?: SortOrderInput | SortOrder
     university?: SortOrderInput | SortOrder
@@ -11419,7 +11401,6 @@ export namespace Prisma {
     NOT?: student_profileScalarWhereWithAggregatesInput | student_profileScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"student_profile"> | number
     user_id?: IntWithAggregatesFilter<"student_profile"> | number
-    student_id?: StringWithAggregatesFilter<"student_profile"> | string
     mentor_id?: IntNullableWithAggregatesFilter<"student_profile"> | number | null
     picture?: BytesNullableWithAggregatesFilter<"student_profile"> | Uint8Array | null
     university?: StringNullableWithAggregatesFilter<"student_profile"> | string | null
@@ -11474,6 +11455,7 @@ export namespace Prisma {
 
   export type userWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    phone_number?: string
     email?: string
     AND?: userWhereInput | userWhereInput[]
     OR?: userWhereInput[]
@@ -11482,7 +11464,6 @@ export namespace Prisma {
     department_id?: IntNullableFilter<"user"> | number | null
     fname?: StringNullableFilter<"user"> | string | null
     lname?: StringNullableFilter<"user"> | string | null
-    phone_number?: StringNullableFilter<"user"> | string | null
     password_hash?: StringNullableFilter<"user"> | string | null
     created_at?: DateTimeNullableFilter<"user"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"user"> | Date | string | null
@@ -11494,7 +11475,7 @@ export namespace Prisma {
     student_profile?: XOR<Student_profileNullableScalarRelationFilter, student_profileWhereInput> | null
     department?: XOR<DepartmentNullableScalarRelationFilter, departmentWhereInput> | null
     role?: XOR<RoleScalarRelationFilter, roleWhereInput>
-  }, "id" | "email">
+  }, "id" | "phone_number" | "email">
 
   export type userOrderByWithAggregationInput = {
     id?: SortOrder
@@ -11836,7 +11817,6 @@ export namespace Prisma {
   }
 
   export type student_profileCreateInput = {
-    student_id: string
     picture?: Uint8Array | null
     university?: string | null
     start_date?: Date | string | null
@@ -11848,7 +11828,6 @@ export namespace Prisma {
   export type student_profileUncheckedCreateInput = {
     id?: number
     user_id: number
-    student_id: string
     mentor_id?: number | null
     picture?: Uint8Array | null
     university?: string | null
@@ -11857,7 +11836,6 @@ export namespace Prisma {
   }
 
   export type student_profileUpdateInput = {
-    student_id?: StringFieldUpdateOperationsInput | string
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11869,7 +11847,6 @@ export namespace Prisma {
   export type student_profileUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     user_id?: IntFieldUpdateOperationsInput | number
-    student_id?: StringFieldUpdateOperationsInput | string
     mentor_id?: NullableIntFieldUpdateOperationsInput | number | null
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11880,7 +11857,6 @@ export namespace Prisma {
   export type student_profileCreateManyInput = {
     id?: number
     user_id: number
-    student_id: string
     mentor_id?: number | null
     picture?: Uint8Array | null
     university?: string | null
@@ -11889,7 +11865,6 @@ export namespace Prisma {
   }
 
   export type student_profileUpdateManyMutationInput = {
-    student_id?: StringFieldUpdateOperationsInput | string
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11899,7 +11874,6 @@ export namespace Prisma {
   export type student_profileUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     user_id?: IntFieldUpdateOperationsInput | number
-    student_id?: StringFieldUpdateOperationsInput | string
     mentor_id?: NullableIntFieldUpdateOperationsInput | number | null
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12446,7 +12420,6 @@ export namespace Prisma {
   export type student_profileCountOrderByAggregateInput = {
     id?: SortOrder
     user_id?: SortOrder
-    student_id?: SortOrder
     mentor_id?: SortOrder
     picture?: SortOrder
     university?: SortOrder
@@ -12463,7 +12436,6 @@ export namespace Prisma {
   export type student_profileMaxOrderByAggregateInput = {
     id?: SortOrder
     user_id?: SortOrder
-    student_id?: SortOrder
     mentor_id?: SortOrder
     picture?: SortOrder
     university?: SortOrder
@@ -12474,7 +12446,6 @@ export namespace Prisma {
   export type student_profileMinOrderByAggregateInput = {
     id?: SortOrder
     user_id?: SortOrder
-    student_id?: SortOrder
     mentor_id?: SortOrder
     picture?: SortOrder
     university?: SortOrder
@@ -13783,7 +13754,6 @@ export namespace Prisma {
   }
 
   export type student_profileCreateWithoutMentor_profileInput = {
-    student_id: string
     picture?: Uint8Array | null
     university?: string | null
     start_date?: Date | string | null
@@ -13794,7 +13764,6 @@ export namespace Prisma {
   export type student_profileUncheckedCreateWithoutMentor_profileInput = {
     id?: number
     user_id: number
-    student_id: string
     picture?: Uint8Array | null
     university?: string | null
     start_date?: Date | string | null
@@ -13879,7 +13848,6 @@ export namespace Prisma {
     NOT?: student_profileScalarWhereInput | student_profileScalarWhereInput[]
     id?: IntFilter<"student_profile"> | number
     user_id?: IntFilter<"student_profile"> | number
-    student_id?: StringFilter<"student_profile"> | string
     mentor_id?: IntNullableFilter<"student_profile"> | number | null
     picture?: BytesNullableFilter<"student_profile"> | Uint8Array | null
     university?: StringNullableFilter<"student_profile"> | string | null
@@ -14191,7 +14159,6 @@ export namespace Prisma {
   }
 
   export type student_profileCreateWithoutUserInput = {
-    student_id: string
     picture?: Uint8Array | null
     university?: string | null
     start_date?: Date | string | null
@@ -14201,7 +14168,6 @@ export namespace Prisma {
 
   export type student_profileUncheckedCreateWithoutUserInput = {
     id?: number
-    student_id: string
     mentor_id?: number | null
     picture?: Uint8Array | null
     university?: string | null
@@ -14378,7 +14344,6 @@ export namespace Prisma {
   }
 
   export type student_profileUpdateWithoutUserInput = {
-    student_id?: StringFieldUpdateOperationsInput | string
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14388,7 +14353,6 @@ export namespace Prisma {
 
   export type student_profileUncheckedUpdateWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
-    student_id?: StringFieldUpdateOperationsInput | string
     mentor_id?: NullableIntFieldUpdateOperationsInput | number | null
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14500,7 +14464,6 @@ export namespace Prisma {
   export type student_profileCreateManyMentor_profileInput = {
     id?: number
     user_id: number
-    student_id: string
     picture?: Uint8Array | null
     university?: string | null
     start_date?: Date | string | null
@@ -14508,7 +14471,6 @@ export namespace Prisma {
   }
 
   export type student_profileUpdateWithoutMentor_profileInput = {
-    student_id?: StringFieldUpdateOperationsInput | string
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14519,7 +14481,6 @@ export namespace Prisma {
   export type student_profileUncheckedUpdateWithoutMentor_profileInput = {
     id?: IntFieldUpdateOperationsInput | number
     user_id?: IntFieldUpdateOperationsInput | number
-    student_id?: StringFieldUpdateOperationsInput | string
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14529,7 +14490,6 @@ export namespace Prisma {
   export type student_profileUncheckedUpdateManyWithoutMentor_profileInput = {
     id?: IntFieldUpdateOperationsInput | number
     user_id?: IntFieldUpdateOperationsInput | number
-    student_id?: StringFieldUpdateOperationsInput | string
     picture?: NullableBytesFieldUpdateOperationsInput | Uint8Array | null
     university?: NullableStringFieldUpdateOperationsInput | string | null
     start_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

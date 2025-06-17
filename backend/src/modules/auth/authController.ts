@@ -48,7 +48,6 @@ export const registerStu = async (req: Request, res: Response) => {
 
     const stuData = {
       user_id: user?.id,
-      student_id: validatedData.student_id,
       mentor_id: validatedData.mentor_id,
       picture: validatedData.picture,
       university: validatedData.university,

@@ -71,7 +71,6 @@ model role {
 model student_profile {
   id             Int             @id @default(autoincrement())
   user_id        Int             @unique
-  student_id     String          @unique @db.VarChar(50)
   mentor_id      Int?
   picture        Bytes?
   university     String?         @db.VarChar(255)
@@ -88,7 +87,7 @@ model user {
   department_id                              Int?
   fname                                      String?          @db.VarChar(255)
   lname                                      String?          @db.VarChar(255)
-  phone_number                               String?          @db.VarChar(20)
+  phone_number                               String?          @unique@db.VarChar(20)
   email                                      String?          @unique @db.VarChar(255)
   password_hash                              String?          @db.VarChar(255)
   created_at                                 DateTime?        @default(now()) @db.Timestamp(6)

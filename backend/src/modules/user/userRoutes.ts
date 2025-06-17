@@ -1,5 +1,10 @@
 import express from "express";
 import * as userController from "../user/userController";
+import { authenticateJWT } from "../../common/middleware/authenticateJWT";
+import {
+  authorizeRoles,
+  ROLE_IDS,
+} from "../../common/middleware/authorizeRoles";
 
 const router = express.Router();
 
@@ -16,6 +21,8 @@ const router = express.Router();
  *   get:
  *     summary: Retrieve a list of users
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of users.
@@ -32,8 +39,15 @@ const router = express.Router();
  *                   name:
  *                     type: string
  *                     example: John Doe
+ *       401:
+ *         description: Unauthorized - invalid or missing token
  */
-router.get("/users", userController.getAllUsers);
+router.get(
+  "/users",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  userController.getAllUsers
+);
 
 /**
  * @swagger
@@ -41,6 +55,8 @@ router.get("/users", userController.getAllUsers);
  *   get:
  *     summary: Retrieve a user by ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -62,10 +78,19 @@ router.get("/users", userController.getAllUsers);
  *                 name:
  *                   type: string
  *                   example: John Doe
+ *       400:
+ *         description: Invalid ID supplied
+ *       401:
+ *         description: Unauthorized - invalid or missing token
  *       404:
  *         description: User not found
  */
-router.get("/users/:id", userController.getUserById);
+router.get(
+  "/users/:id",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  userController.getUserById
+);
 
 /**
  * @swagger
@@ -73,6 +98,8 @@ router.get("/users/:id", userController.getUserById);
  *   get:
  *     summary: Retrieve a user's picture by user ID
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -84,13 +111,22 @@ router.get("/users/:id", userController.getUserById);
  *       200:
  *         description: User picture returned successfully
  *         content:
- *           image/png:
+ *           image/jpeg:
  *             schema:
  *               type: string
  *               format: binary
+ *       400:
+ *         description: Invalid ID supplied
+ *       401:
+ *         description: Unauthorized - invalid or missing token
  *       404:
  *         description: User or picture not found
  */
-router.get("/users/:id/picture", userController.getStuPicture);
+router.get(
+  "/users/:id/picture",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  userController.getStuPicture
+);
 
 export default router;
