@@ -45,3 +45,5 @@ bun.lockb
 bun.lock
 .vscode
 /src/generated/prisma
+/src/common/generated/
+
