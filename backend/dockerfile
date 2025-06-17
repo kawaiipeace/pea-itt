@@ -4,6 +4,7 @@ RUN npm install -g pnpm
 COPY package*.json ./
 RUN pnpm install
 COPY . .
+RUN npx prisma generate
 RUN pnpm run build
 EXPOSE 10001
 CMD ["node", "dist/index.js"]
