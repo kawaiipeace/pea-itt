@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import React from "react";
 
+
 export const metadata: Metadata = {
   title: "Register Boxed",
 };

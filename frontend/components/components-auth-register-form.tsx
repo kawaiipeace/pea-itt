@@ -2,6 +2,8 @@
 import Select from "react-select";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import "sweetalert2/dist/sweetalert2.min.css";
+import Swal from "sweetalert2";
 
 const locationOptions = [
   { value: 1, label: "กอง.1" },
@@ -132,12 +134,21 @@ const ComponentsAuthRegisterForm = () => {
 
   const submitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    // if (!validateForm()) return;
 
     console.log("Form Data:", { ...formData, password });
     // สามารถเพิ่มส่งข้อมูล API หรือเปลี่ยนหน้าได้ที่นี่
 
-    // ตัวอย่างรีเซตฟอร์ม (ถ้าต้องการ)
+    Swal.fire({
+      title: "บันทึกข้อมูลเรียบร้อย",
+      icon: "success",
+      confirmButtonText: "ตกลง",
+      width: "400px",
+      customClass: {
+        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+      },
+    });
+
     setFormData({
       fname: "",
       lname: "",
@@ -342,7 +353,9 @@ const ComponentsAuthRegisterForm = () => {
       </div>
 
       <div>
-        <label className="mb-1 block font-medium">ชื่อสถานที่ฝึกงาน (กฟภ.)</label>
+        <label className="mb-1 block font-medium">
+          ชื่อสถานที่ฝึกงาน (กฟภ.)
+        </label>
         <Select
           options={locationOptions}
           classNamePrefix="react-select"
