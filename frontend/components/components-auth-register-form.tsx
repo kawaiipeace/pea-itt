@@ -1,6 +1,6 @@
 "use client";
 import Select from "react-select";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -11,10 +11,11 @@ const locationOptions = [
   { value: 3, label: "กอง.3" },
 ];
 
-const mentorOptions = [
-  { value: 101, label: "นายวิทยา สว่างวงษ์" },
-  { value: 102, label: "นางสาวสุภัค สายทอง" },
-];
+interface MentorData {
+  id: number;
+  fname: String;
+  lname: String;
+}
 
 const ComponentsAuthRegisterForm = () => {
   const router = useRouter();
@@ -22,6 +23,9 @@ const ComponentsAuthRegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [mentorOptions, setMentorOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
   const [errors, setErrors] = useState({
     fname: "",
     lname: "",
@@ -35,6 +39,25 @@ const ComponentsAuthRegisterForm = () => {
     department: "",
     mentor_id: "",
   });
+
+  useEffect(() => {
+    const fetchMentor = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor`
+        );
+        setMentorOptions(res.data.data);
+        const mappedOptions = res.data.data.map((mentor: MentorData) => ({
+          value: mentor.id,
+          label: `${mentor.fname} ${mentor.lname}`, // หรือ `mentor.lname` ถ้าชื่อถูกต้อง
+        }));
+        setMentorOptions(mappedOptions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchMentor();
+  }, []);
 
   const [formData, setFormData] = useState({
     fname: "",
@@ -200,7 +223,9 @@ const ComponentsAuthRegisterForm = () => {
             errors.fname ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.fname && <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>}
+        {errors.fname && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>
+        )}
       </div>
 
       <div>
@@ -215,7 +240,9 @@ const ComponentsAuthRegisterForm = () => {
             errors.lname ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.lname && <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>}
+        {errors.lname && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>
+        )}
       </div>
 
       <div>
@@ -230,7 +257,9 @@ const ComponentsAuthRegisterForm = () => {
             errors.email ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.email && <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>}
+        {errors.email && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>
+        )}
       </div>
 
       <div>
@@ -321,7 +350,9 @@ const ComponentsAuthRegisterForm = () => {
           {showPassword ? "Hide" : "Show"}
         </button>
         {errors.password_hash && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.password_hash}</p>
+          <p className="mt-1 text-[11px] text-red-500">
+            {errors.password_hash}
+          </p>
         )}
       </div>
 
@@ -343,7 +374,9 @@ const ComponentsAuthRegisterForm = () => {
           {showConfirmPassword ? "Hide" : "Show"}
         </button>
         {errors.confirmPassword && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.confirmPassword}</p>
+          <p className="mt-1 text-[11px] text-red-500">
+            {errors.confirmPassword}
+          </p>
         )}
       </div>
 
@@ -353,7 +386,9 @@ const ComponentsAuthRegisterForm = () => {
           options={locationOptions}
           classNamePrefix="react-select"
           placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={locationOptions.find((opt) => opt.value === formData.department)}
+          value={locationOptions.find(
+            (opt) => opt.value === formData.department
+          )}
           onChange={(selected: any) =>
             setFormData((prev) => ({
               ...prev,
