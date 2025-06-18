@@ -186,7 +186,7 @@ const ComponentsAuthRegisterForm = () => {
   return (
     <form
       onSubmit={submitForm}
-      className="grid grid-cols-1 gap-5 p-10 text-[15px] md:grid-cols-2"
+      className="grid grid-cols-1 gap-5 p-5 text-[15px] md:grid-cols-2"
     >
       <div>
         <label className="mb-1 block font-medium">ชื่อจริง</label>
@@ -388,7 +388,7 @@ const ComponentsAuthRegisterForm = () => {
       <div className="mt-2 text-center md:col-span-2">
         <button
           type="submit"
-          className="rounded bg-purple-700 px-6 py-2.5 font-medium text-white hover:bg-purple-800"
+          className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
         >
           สมัครเข้าใช้งาน
         </button>
