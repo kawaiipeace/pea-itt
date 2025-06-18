@@ -22,6 +22,7 @@ const ComponentsAuthRegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [deptMentor, setDeptMentor] = useState<number>();
   const [departmentOptions, setDepartmentOptions] = useState<
     { value: number; label: string }[]
   >([]);
@@ -41,64 +42,6 @@ const ComponentsAuthRegisterForm = () => {
     department: "",
     mentor_id: "",
   });
-
-  // useEffect(() => {
-  //   const fetchDepartments = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `${process.env.NEXT_PUBLIC_API_URL}department`
-  //       );
-  //       setDepartmentOptions(res.data.data);
-  //       const mappedOptions = res.data.data.map((department: DepartmentData) => ({
-  //         value: department.dept_id,
-  //         label: department.dept_name,
-  //       }));
-  //       setDepartmentOptions(mappedOptions);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   fetchDepartments();
-  // }, []);
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}dept`
-        );
-        const mappedOptions = res.data.data.map(
-          (department: DepartmentData) => ({
-            value: department.dept_id,
-            label: department.dept_name,
-          })
-        );
-        setDepartmentOptions(mappedOptions);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    const fetchMentor = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}user/mentor`
-        );
-        setMentorOptions(res.data.data);
-        const mappedOptions = res.data.data.map((mentor: MentorData) => ({
-          value: mentor.id,
-          label: `${mentor.fname} ${mentor.lname}`, // หรือ `mentor.lname` ถ้าชื่อถูกต้อง
-        }));
-        setMentorOptions(mappedOptions);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchDepartments();
-    fetchMentor();
-  }, []);
-
   const [formData, setFormData] = useState({
     fname: "",
     lname: "",
@@ -111,6 +54,48 @@ const ComponentsAuthRegisterForm = () => {
     mentor_id: 0,
     password_hash: "",
   });
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}dept`);
+        const mappedOptions = res.data.data.map(
+          (department: DepartmentData) => ({
+            value: department.dept_id,
+            label: department.dept_name,
+          })
+        );
+        setDepartmentOptions(mappedOptions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
+  useEffect(() => {
+    const fetchMentor = async () => {
+      if (!formData.department) {
+        setMentorOptions([]);
+        return;
+      }
+
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?department_id=${formData.department}`
+        );
+        const mappedOptions = res.data.data.map((mentor: MentorData) => ({
+          value: mentor.id,
+          label: `${mentor.fname} ${mentor.lname}`,
+        }));
+        setMentorOptions(mappedOptions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchMentor();
+  }, [formData.department]);
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
   const toggleConfirmPasswordVisibility = () =>
@@ -201,7 +186,7 @@ const ComponentsAuthRegisterForm = () => {
         university: formData.university,
         start_date: formData.start_date,
         end_date: formData.end_date,
-        // mentor_id: formData.mentor_id,
+        mentor_id: formData.mentor_id,
       });
 
       Swal.fire({
@@ -435,6 +420,7 @@ const ComponentsAuthRegisterForm = () => {
             setFormData((prev) => ({
               ...prev,
               department: selected ? selected.value : 0,
+              mentor_id: 0, // reset พี่เลี้ยงเมื่อเปลี่ยนกอง
             }))
           }
           isClearable
