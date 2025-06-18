@@ -1,6 +1,7 @@
 const cookieObj = typeof window === 'undefined' ? require('next/headers') : require('universal-cookie');
 
 import en from './public/locales/en.json';
+import th from './public/locales/en.json';
 import ae from './public/locales/ae.json';
 import da from './public/locales/da.json';
 import de from './public/locales/de.json';
@@ -16,7 +17,7 @@ import ru from './public/locales/ru.json';
 import sv from './public/locales/sv.json';
 import tr from './public/locales/tr.json';
 import zh from './public/locales/zh.json';
-const langObj: any = { en, ae, da, de, el, es, fr, hu, it, ja, pl, pt, ru, sv, tr, zh };
+const langObj: any = { en, ae, da, de, el, es, fr, hu, it, ja, pl, pt, ru, sv, tr, zh, th };
 
 const getLang = () => {
     let lang = null;
