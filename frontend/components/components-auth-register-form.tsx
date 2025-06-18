@@ -1,15 +1,14 @@
 "use client";
 import Select from "react-select";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const locationOptions = [
-  { value: 1, label: "กอง.1" },
-  { value: 2, label: "กอง.2" },
-  { value: 3, label: "กอง.3" },
-];
+interface DepartmentData {
+  dept_id: number;
+  dept_name: string;
+}
 
 interface MentorData {
   id: number;
@@ -23,6 +22,9 @@ const ComponentsAuthRegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [departmentOptions, setDepartmentOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
   const [mentorOptions, setMentorOptions] = useState<
     { value: number; label: string }[]
   >([]);
@@ -40,7 +42,43 @@ const ComponentsAuthRegisterForm = () => {
     mentor_id: "",
   });
 
+  // useEffect(() => {
+  //   const fetchDepartments = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `${process.env.NEXT_PUBLIC_API_URL}department`
+  //       );
+  //       setDepartmentOptions(res.data.data);
+  //       const mappedOptions = res.data.data.map((department: DepartmentData) => ({
+  //         value: department.dept_id,
+  //         label: department.dept_name,
+  //       }));
+  //       setDepartmentOptions(mappedOptions);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   fetchDepartments();
+  // }, []);
+
   useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}dept`
+        );
+        const mappedOptions = res.data.data.map(
+          (department: DepartmentData) => ({
+            value: department.dept_id,
+            label: department.dept_name,
+          })
+        );
+        setDepartmentOptions(mappedOptions);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     const fetchMentor = async () => {
       try {
         const res = await axios.get(
@@ -56,6 +94,8 @@ const ComponentsAuthRegisterForm = () => {
         console.log(error);
       }
     };
+
+    fetchDepartments();
     fetchMentor();
   }, []);
 
@@ -383,18 +423,21 @@ const ComponentsAuthRegisterForm = () => {
       <div>
         <label className="mb-1 block font-medium">ชื่อสถานที่ฝึกงาน</label>
         <Select
-          options={locationOptions}
+          options={departmentOptions}
           classNamePrefix="react-select"
           placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={locationOptions.find(
-            (opt) => opt.value === formData.department
-          )}
-          onChange={(selected: any) =>
+          value={
+            departmentOptions.find(
+              (opt) => opt.value === formData.department
+            ) || null
+          }
+          onChange={(selected: { value: number; label: string } | null) =>
             setFormData((prev) => ({
               ...prev,
-              department: selected?.value || 0,
+              department: selected ? selected.value : 0,
             }))
           }
+          isClearable
         />
         {errors.department && (
           <p className="mt-1 text-[11px] text-red-500">{errors.department}</p>
