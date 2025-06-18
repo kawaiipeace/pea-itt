@@ -71,7 +71,6 @@ model role {
 model student_profile {
   id             Int             @id @default(autoincrement())
   user_id        Int             @unique
-  student_id     String          @unique @db.VarChar(50)
   mentor_id      Int?
   picture        Bytes?
   university     String?         @db.VarChar(255)

@@ -168,7 +168,6 @@ exports.Prisma.RoleScalarFieldEnum = {
 exports.Prisma.Student_profileScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
-  student_id: 'student_id',
   mentor_id: 'mentor_id',
   picture: 'picture',
   university: 'university',
