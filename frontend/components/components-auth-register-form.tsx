@@ -1,15 +1,14 @@
 "use client";
 import Select from "react-select";
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const locationOptions = [
-  { value: 1, label: "กอง.1" },
-  { value: 2, label: "กอง.2" },
-  { value: 3, label: "กอง.3" },
-];
+interface DepartmentOption {
+  dept_id: number;
+  dept_name: string;
+}
 
 const mentorOptions = [
   { value: 101, label: "นายวิทยา สว่างวงษ์" },
@@ -22,6 +21,7 @@ const ComponentsAuthRegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [DepartmentOption,setDepartmentOption] = useState<DepartmentOption[]>([]);
   const [errors, setErrors] = useState({
     fname: "",
     lname: "",
@@ -35,6 +35,25 @@ const ComponentsAuthRegisterForm = () => {
     department: "",
     mentor_id: "",
   });
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}department`);
+        const departments = response.data.map((dept: any) => ({
+          value: dept.dept_id,
+          label: dept.dept_name,
+        }));
+        setDepartmentOption(departments);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
+  
 
   const [formData, setFormData] = useState({
     fname: "",
@@ -350,10 +369,10 @@ const ComponentsAuthRegisterForm = () => {
       <div>
         <label className="mb-1 block font-medium">ชื่อสถานที่ฝึกงาน</label>
         <Select
-          options={locationOptions}
+          options={DepartmentOption}
           classNamePrefix="react-select"
           placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={locationOptions.find((opt) => opt.value === formData.department)}
+          value={DepartmentOption.find((opt) => opt.dept_id === formData.department)}
           onChange={(selected: any) =>
             setFormData((prev) => ({
               ...prev,
