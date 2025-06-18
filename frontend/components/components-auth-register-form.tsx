@@ -1,19 +1,21 @@
 "use client";
 import Select from "react-select";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-interface DepartmentOption {
-  dept_id: number;
-  dept_name: string;
-}
-
-const mentorOptions = [
-  { value: 101, label: "นายวิทยา สว่างวงษ์" },
-  { value: 102, label: "นางสาวสุภัค สายทอง" },
+const locationOptions = [
+  { value: 1, label: "กอง.1" },
+  { value: 2, label: "กอง.2" },
+  { value: 3, label: "กอง.3" },
 ];
+
+interface MentorData {
+  id: number;
+  fname: String;
+  lname: String;
+}
 
 const ComponentsAuthRegisterForm = () => {
   const router = useRouter();
@@ -21,7 +23,9 @@ const ComponentsAuthRegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [DepartmentOption,setDepartmentOption] = useState<DepartmentOption[]>([]);
+  const [mentorOptions, setMentorOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
   const [errors, setErrors] = useState({
     fname: "",
     lname: "",
@@ -37,23 +41,23 @@ const ComponentsAuthRegisterForm = () => {
   });
 
   useEffect(() => {
-    const fetchDepartments = async () => {
+    const fetchMentor = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}department`);
-        const departments = response.data.map((dept: any) => ({
-          value: dept.dept_id,
-          label: dept.dept_name,
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor`
+        );
+        setMentorOptions(res.data.data);
+        const mappedOptions = res.data.data.map((mentor: MentorData) => ({
+          value: mentor.id,
+          label: `${mentor.fname} ${mentor.lname}`, // หรือ `mentor.lname` ถ้าชื่อถูกต้อง
         }));
-        setDepartmentOption(departments);
+        setMentorOptions(mappedOptions);
       } catch (error) {
-        console.error("Error fetching departments:", error);
+        console.log(error);
       }
     };
-
-    fetchDepartments();
+    fetchMentor();
   }, []);
-
-  
 
   const [formData, setFormData] = useState({
     fname: "",
@@ -219,7 +223,9 @@ const ComponentsAuthRegisterForm = () => {
             errors.fname ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.fname && <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>}
+        {errors.fname && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>
+        )}
       </div>
 
       <div>
@@ -234,7 +240,9 @@ const ComponentsAuthRegisterForm = () => {
             errors.lname ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.lname && <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>}
+        {errors.lname && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>
+        )}
       </div>
 
       <div>
@@ -249,7 +257,9 @@ const ComponentsAuthRegisterForm = () => {
             errors.email ? "border-red-400" : "border-gray-300"
           }`}
         />
-        {errors.email && <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>}
+        {errors.email && (
+          <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>
+        )}
       </div>
 
       <div>
@@ -340,7 +350,9 @@ const ComponentsAuthRegisterForm = () => {
           {showPassword ? "Hide" : "Show"}
         </button>
         {errors.password_hash && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.password_hash}</p>
+          <p className="mt-1 text-[11px] text-red-500">
+            {errors.password_hash}
+          </p>
         )}
       </div>
 
@@ -362,17 +374,21 @@ const ComponentsAuthRegisterForm = () => {
           {showConfirmPassword ? "Hide" : "Show"}
         </button>
         {errors.confirmPassword && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.confirmPassword}</p>
+          <p className="mt-1 text-[11px] text-red-500">
+            {errors.confirmPassword}
+          </p>
         )}
       </div>
 
       <div>
         <label className="mb-1 block font-medium">ชื่อสถานที่ฝึกงาน</label>
         <Select
-          options={DepartmentOption}
+          options={locationOptions}
           classNamePrefix="react-select"
           placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={DepartmentOption.find((opt) => opt.dept_id === formData.department)}
+          value={locationOptions.find(
+            (opt) => opt.value === formData.department
+          )}
           onChange={(selected: any) =>
             setFormData((prev) => ({
               ...prev,
