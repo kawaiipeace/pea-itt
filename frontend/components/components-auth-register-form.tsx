@@ -17,12 +17,10 @@ interface MentorData {
 }
 
 const ComponentsAuthRegisterForm = () => {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [deptMentor, setDeptMentor] = useState<number>();
   const [departmentOptions, setDepartmentOptions] = useState<
     { value: number; label: string }[]
   >([]);
@@ -186,9 +184,21 @@ const ComponentsAuthRegisterForm = () => {
         university: formData.university,
         start_date: formData.start_date,
         end_date: formData.end_date,
-        mentor_id: formData.mentor_id,
+        // mentor_id: formData.mentor_id,
       });
 
+
+      console.log("fname:" + formData.fname +`${typeof formData.fname}`);
+      console.log("lname:" + formData.lname +`${typeof formData.lname}`);
+      console.log("email:" + formData.email +`${typeof formData.email}`);
+      console.log("phone_number:" + formData.phone_number +`${typeof formData.phone_number}`);
+      console.log("password:" + password +`${typeof password}`);
+      console.log("department:" + formData.department +`${typeof formData.department}`);
+      console.log("university:" + formData.university +`${typeof formData.university}`);
+      console.log("start_date:" + formData.start_date +`${typeof formData.start_date}`);
+      console.log("end_date:" + formData.end_date +`${typeof formData.end_date}`);
+      console.log("mentor_id:" + formData.mentor_id +`${typeof formData.mentor_id}`);
+      
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
