@@ -93,6 +93,98 @@ router.post(
   authController.registerStu
 );
 
+/**
+ * @swagger
+ * /register/mentor:
+ *   post:
+ *     summary: Register a new mentor (Admin only)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - department_id
+ *               - fname
+ *               - lname
+ *               - phone_number
+ *               - email
+ *               - password_hash
+ *             properties:
+ *               department_id:
+ *                 type: integer
+ *                 minimum: 1
+ *                 description: Department ID must be greater than 0
+ *                 example: 1
+ *               fname:
+ *                 type: string
+ *                 minLength: 2
+ *                 description: First name must be at least 2 characters
+ *                 example: John
+ *               lname:
+ *                 type: string
+ *                 minLength: 2
+ *                 description: Last name must be at least 2 characters
+ *                 example: Doe
+ *               phone_number:
+ *                 type: string
+ *                 minLength: 10
+ *                 description: Phone number must be at least 10 digits
+ *                 example: "0812345678"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Valid email format
+ *                 example: john.doe@example.com
+ *               password_hash:
+ *                 type: string
+ *                 minLength: 6
+ *                 description: Password must be at least 6 characters
+ *                 example: "password123"
+ *     responses:
+ *       201:
+ *         description: Mentor registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Mentor registered successfully
+ *       400:
+ *         description: Validation error or invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Validation error
+ *                 errors:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       403:
+ *         description: Forbidden - insufficient role (Admin only)
+ *       409:
+ *         description: Email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Email already exists
+ *       500:
+ *         description: Internal server error
+ */
 router.post(
   "/register/mentor",
   authenticateJWT,
