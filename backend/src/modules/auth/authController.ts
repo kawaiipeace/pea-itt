@@ -170,8 +170,23 @@ export const me = async (req: Request, res: Response) => {
       where: {
         id: req.user.id,
       },
-      include: {
-        student_profile: true,
+      select: {
+        id: true,
+        role_id: true,
+        department_id: true,
+        fname: true,
+        lname: true,
+        phone_number: true,
+        email: true,
+        student_profile: {
+          select: {
+            id: true,
+            mentor_id: true,
+            university: true,
+            start_date: true,
+            end_date: true,
+          },
+        },
       },
     });
 
@@ -186,7 +201,7 @@ export const me = async (req: Request, res: Response) => {
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-        message: "Something went wrong",
+        message: "Something went wrong!",
       });
     }
   }
