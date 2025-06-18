@@ -2,7 +2,10 @@ import express from "express";
 import { upload } from "../../common/middleware/upload";
 import * as authController from "./authController";
 import { authenticateJWT } from "../../common/middleware/authenticateJWT";
-import { authorizeRoles, ROLE_IDS } from "../../common/middleware/authorizeRoles";
+import {
+  authorizeRoles,
+  ROLE_IDS,
+} from "../../common/middleware/authorizeRoles";
 
 const router = express.Router();
 
@@ -84,7 +87,18 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/register/student", upload.single("picture"), authController.registerStu);
+router.post(
+  "/register/student",
+  upload.single("picture"),
+  authController.registerStu
+);
+
+router.post(
+  "/register/mentor",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.ADMIN),
+  authController.registerMentor
+);
 
 /**
  * @swagger

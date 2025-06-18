@@ -81,6 +81,69 @@ export const registerStu = async (req: Request, res: Response) => {
   }
 };
 
+export const registerMentor = async (req: Request, res: Response) => {
+  try {
+    const validateData = authModels.createMentorSchema.parse(req.body);
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: validateData.email,
+      },
+    });
+
+    if (existingUser) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Email already exists",
+      });
+      return;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(validateData.password_hash, salt);
+
+    const userData = {
+      role_id: 2, // role_id : 2 => พี่เลี้ยง
+      department_id: validateData.department_id,
+      fname: validateData.fname,
+      lname: validateData.lname,
+      phone_number: validateData.phone_number,
+      email: validateData.email,
+      password_hash: hashedPassword,
+    };
+
+    const user = await prisma.user.create({
+      data: userData,
+    });
+
+    await prisma.mentor_profile.create({
+      data: {
+        user_id: user?.id,
+      },
+    });
+
+    res.status(httpStatus.CREATED).json({
+      message: "Mentor registered successfully",
+    });
+    
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
 export const login = async (req: Request, res: Response) => {
   try {
     const validateData = authModels.loginSchema.parse(req.body);
