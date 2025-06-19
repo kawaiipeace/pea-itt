@@ -42,25 +42,6 @@ const ComponentsAuthRegisterForm = () => {
     mentor_id: "",
   });
 
-  // useEffect(() => {
-  //   const fetchDepartments = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `${process.env.NEXT_PUBLIC_API_URL}department`
-  //       );
-  //       setDepartmentOptions(res.data.data);
-  //       const mappedOptions = res.data.data.map((department: DepartmentData) => ({
-  //         value: department.dept_id,
-  //         label: department.dept_name,
-  //       }));
-  //       setDepartmentOptions(mappedOptions);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   fetchDepartments();
-  // }, []);
-
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -201,7 +182,7 @@ const ComponentsAuthRegisterForm = () => {
         university: formData.university,
         start_date: formData.start_date,
         end_date: formData.end_date,
-        // mentor_id: formData.mentor_id,
+        mentor_id: formData.mentor_id,
       });
 
       Swal.fire({
