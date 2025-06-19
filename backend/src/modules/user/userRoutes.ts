@@ -45,7 +45,7 @@ const router = express.Router();
 router.get(
   "/users",
   authenticateJWT,
-  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  authorizeRoles(ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
   userController.getAllUsers
 );
 
@@ -88,7 +88,7 @@ router.get(
 router.get(
   "/users/:id",
   authenticateJWT,
-  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  authorizeRoles(ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
   userController.getUserById
 );
 
@@ -127,6 +127,84 @@ router.get(
   authenticateJWT,
   authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
   userController.getStuPicture
+);
+
+/**
+ * @swagger
+ * /user/mentor:
+ *   get:
+ *     summary: Retrieve all mentors with optional department filter
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: department_id
+ *         schema:
+ *           type: integer
+ *         description: Filter mentors by department ID (optional)
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: A list of mentors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       fname:
+ *                         type: string
+ *                         example: John
+ *                       lname:
+ *                         type: string
+ *                         example: Doe
+ *                       email:
+ *                         type: string
+ *                         example: john.doe@example.com
+ *                       phone_number:
+ *                         type: string
+ *                         example: "0812345678"
+ *                       department:
+ *                         type: object
+ *                         properties:
+ *                           dept_id:
+ *                             type: integer
+ *                             example: 1
+ *                           dept_name:
+ *                             type: string
+ *                             example: IT Department
+ *                       mentor_profile:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                 message:
+ *                   type: string
+ *                   example: Mentors retrieved successfully
+ *       404:
+ *         description: No mentors found
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/user/mentor",
+  // authenticateJWT,
+  // authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  userController.getMentors
 );
 
 export default router;
