@@ -202,8 +202,8 @@ router.get(
  */
 router.get(
   "/user/mentor",
-  authenticateJWT,
-  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  // authenticateJWT,
+  // authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
   userController.getMentors
 );
 

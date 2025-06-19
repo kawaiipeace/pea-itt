@@ -6,6 +6,7 @@ import * as authModels from "./authModels";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { logAction } from "../../common/utils/logger";
 
 dotenv.config();
 
@@ -121,10 +122,22 @@ export const registerMentor = async (req: Request, res: Response) => {
       },
     });
 
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    await logAction({
+      admin_id: req.user.id,
+      action: `Registered mentor: ${validateData.fname} ${validateData.lname} (email: ${validateData.email})`,
+    });
+
     res.status(httpStatus.CREATED).json({
       message: "Mentor registered successfully",
     });
-    
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(httpStatus.BAD_REQUEST).json({
