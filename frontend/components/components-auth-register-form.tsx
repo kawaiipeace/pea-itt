@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import InputField from "./elements/inputField";
 import PasswordField from "./elements/PasswordField";
 import SelectField, { OptionType } from "./elements/SelectField";
+import { useRouter } from "next/navigation";
 
 interface FormDataType {
   fname: string;
@@ -23,6 +24,9 @@ interface ErrorType {
 }
 
 const ComponentsAuthRegisterForm = () => {
+
+  const router = useRouter()
+
   const [formData, setFormData] = useState<FormDataType>({
     fname: "",
     lname: "",
@@ -106,6 +110,7 @@ const ComponentsAuthRegisterForm = () => {
         department_id: Number(formData.department),
         password_hash: password,
       });
+      router.push("/login")
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
