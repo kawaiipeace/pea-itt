@@ -20,7 +20,7 @@ export default function LoginPage() {
         </div>
 
         {/* ฟอร์มจัดให้อยู่กึ่งกลางของกล่อง */}
-        <div className="flex-1 flex items-center justify-center mb-7">
+        <div className="flex-1 flex flex-col items-center justify-center mb-7">
           <ComponentsAuthLoginForm />
         </div>
       </div>
