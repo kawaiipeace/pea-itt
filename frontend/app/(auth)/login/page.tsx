@@ -7,7 +7,7 @@ export default function LoginPage() {
         {/* โลโก้และหัวข้อ */}
         <div className="text-center mb-4">
           <img
-            src="/assets/images/PEAITT-LOGO.png"
+            src="/assets/images/PEAITT-LOGO2.png"
             alt="PEA Logo"
             className="mx-auto h-[50px] w-[20x] sm:w-[200px] mt-4"
           />
