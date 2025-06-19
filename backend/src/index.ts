@@ -39,7 +39,7 @@ const swaggerSpec = swaggerJSDoc(options);
 
 app.use(
   cors({
-    origin: "http://localhost:10000",
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
