@@ -46,15 +46,40 @@ const ComponentsAuthRegisterForm = () => {
   const [mentorOptions, setMentorOptions] = useState<OptionType[]>([]);
 
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}dept`).then((res) => {
+  axios
+    .get(`${process.env.NEXT_PUBLIC_API_URL}dept`)
+    .then((res) => {
+      const departments = res.data.data;
+
+      if (!departments || departments.length === 0) {
+        console.warn("No departments found.");
+        setDepartmentOptions([]);
+        Swal.fire({
+          title: "ไม่พบสถานที่ฝึกงาน",
+          text: "ขออภัย ไม่พบข้อมูลสถานที่ฝึกงานในระบบ",
+          icon: "warning",
+        });
+        return;
+      }
+
       setDepartmentOptions(
-        res.data.data.map((d: any) => ({
+        departments.map((d: any) => ({
           value: d.dept_id,
           label: d.dept_name,
         }))
       );
+    })
+    .catch((err) => {
+      console.error("Failed to fetch departments:", err);
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถโหลดข้อมูลสถานที่ฝึกงานได้",
+        icon: "error",
+      });
     });
-  }, []);
+}, []);
+
+
 
   useEffect(() => {
     if (!formData.department) return setMentorOptions([]);
