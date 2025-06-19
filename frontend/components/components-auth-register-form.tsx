@@ -1,20 +1,8 @@
 "use client";
 import Select from "react-select";
-import React, { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
-
-interface DepartmentData {
-  dept_id: number;
-  dept_name: string;
-}
-
-interface MentorData {
-  id: number;
-  fname: String;
-  lname: String;
-}
 
 const ComponentsAuthRegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +15,7 @@ const ComponentsAuthRegisterForm = () => {
   const [mentorOptions, setMentorOptions] = useState<
     { value: number; label: string }[]
   >([]);
+
   const [errors, setErrors] = useState({
     fname: "",
     lname: "",
@@ -40,6 +29,7 @@ const ComponentsAuthRegisterForm = () => {
     department: "",
     mentor_id: "",
   });
+
   const [formData, setFormData] = useState({
     fname: "",
     lname: "",
@@ -52,22 +42,20 @@ const ComponentsAuthRegisterForm = () => {
     mentor_id: 0,
     password_hash: "",
   });
+
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}dept`);
-        const mappedOptions = res.data.data.map(
-          (department: DepartmentData) => ({
-            value: department.dept_id,
-            label: department.dept_name,
-          })
-        );
+        const mappedOptions = res.data.data.map((d: any) => ({
+          value: d.dept_id,
+          label: d.dept_name,
+        }));
         setDepartmentOptions(mappedOptions);
       } catch (error) {
         console.log(error);
       }
     };
-
     fetchDepartments();
   }, []);
 
@@ -82,8 +70,8 @@ const ComponentsAuthRegisterForm = () => {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}user/mentor?department_id=${formData.department}`
         );
-        const mappedOptions = res.data.data.map((mentor: MentorData) => ({
-          value: mentor.id,
+        const mappedOptions = res.data.data.map((mentor: any) => ({
+          value: mentor.mentor_profile?.id,
           label: `${mentor.fname} ${mentor.lname}`,
         }));
         setMentorOptions(mappedOptions);
@@ -91,7 +79,6 @@ const ComponentsAuthRegisterForm = () => {
         console.log(error);
       }
     };
-
     fetchMentor();
   }, [formData.department]);
 
@@ -106,19 +93,7 @@ const ComponentsAuthRegisterForm = () => {
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = {
-      fname: "",
-      lname: "",
-      email: "",
-      phone_number: "",
-      university: "",
-      start_date: "",
-      end_date: "",
-      password_hash: "",
-      confirmPassword: "",
-      department: "",
-      mentor_id: "",
-    };
+    const newErrors = { ...errors };
 
     if (!formData.fname.trim()) {
       newErrors.fname = "กรุณากรอกชื่อจริง";
@@ -136,10 +111,12 @@ const ComponentsAuthRegisterForm = () => {
       newErrors.university = "กรุณากรอกมหาวิทยาลัย";
       valid = false;
     }
-    if (formData.phone_number.length < 10) {
-      newErrors.phone_number = "กรุณากรอกเบอร์โทรศัพท์มือถือ 10 หลัก";
+    const phoneRegex = /^0[0-9]{9}$/;
+    if (!phoneRegex.test(formData.phone_number)) {
+      newErrors.phone_number = "กรุณากรอกเบอร์โทรศัพท์มือถือให้ถูกต้อง 10 หลัก";
       valid = false;
     }
+
     if (password.length < 8) {
       newErrors.password_hash = "รหัสผ่านต้องมีอย่างน้อย 8 ตัว";
       valid = false;
@@ -184,21 +161,9 @@ const ComponentsAuthRegisterForm = () => {
         university: formData.university,
         start_date: formData.start_date,
         end_date: formData.end_date,
-        // mentor_id: formData.mentor_id,
+        mentor_id: Number(formData.mentor_id),
       });
 
-
-      console.log("fname:" + formData.fname +`${typeof formData.fname}`);
-      console.log("lname:" + formData.lname +`${typeof formData.lname}`);
-      console.log("email:" + formData.email +`${typeof formData.email}`);
-      console.log("phone_number:" + formData.phone_number +`${typeof formData.phone_number}`);
-      console.log("password:" + password +`${typeof password}`);
-      console.log("department:" + formData.department +`${typeof formData.department}`);
-      console.log("university:" + formData.university +`${typeof formData.university}`);
-      console.log("start_date:" + formData.start_date +`${typeof formData.start_date}`);
-      console.log("end_date:" + formData.end_date +`${typeof formData.end_date}`);
-      console.log("mentor_id:" + formData.mentor_id +`${typeof formData.mentor_id}`);
-      
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
@@ -237,7 +202,16 @@ const ComponentsAuthRegisterForm = () => {
         mentor_id: "",
       });
     } catch (error) {
-      console.log(error);
+      Swal.fire({
+        title: "ปฏิเสธการบันทึกข้อมูล",
+        text: `${error}`,
+        icon: "error",
+        confirmButtonText: "ตกลง",
+        width: "400px",
+        customClass: {
+          confirmButton: "swal2-confirm !bg-red-600 !text-white !px-6 !py-3",
+        },
+      });
     }
   };
 
@@ -255,11 +229,11 @@ const ComponentsAuthRegisterForm = () => {
           value={formData.fname}
           placeholder="กรอกชื่อจริง"
           className={`w-full rounded border px-3 py-2 ${
-            errors.fname ? "border-red-400" : "border-gray-300"
+            errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
           }`}
         />
         {errors.fname && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>
+          <p className="mt-1 text-[11px] text-red-500 ">{errors.fname}</p>
         )}
       </div>
 
@@ -303,6 +277,7 @@ const ComponentsAuthRegisterForm = () => {
           type="tel"
           name="phone_number"
           inputMode="numeric"
+          maxLength={10}
           pattern="[0-9]*"
           onChange={handleChange}
           value={formData.phone_number}
