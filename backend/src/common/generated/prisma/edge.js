@@ -198,6 +198,7 @@ const config = {
     },
     "output": {
       "value": "C:\\Users\\sukha\\OneDrive\\เดสก์ท็อป\\pea-itt\\backend\\src\\common\\generated\\prisma",
+      "value": "C:\\Users\\18987\\Desktop\\pea-itt\\backend\\src\\common\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -212,6 +213,7 @@ const config = {
     ],
     "previewFeatures": [],
     "sourceFilePath": "C:\\Users\\sukha\\OneDrive\\เดสก์ท็อป\\pea-itt\\backend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\18987\\Desktop\\pea-itt\\backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -225,6 +227,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

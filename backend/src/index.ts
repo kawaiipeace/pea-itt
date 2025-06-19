@@ -32,7 +32,7 @@ const swaggerDefinition = {
 const options = {
   swaggerDefinition,
   // Paths to files containing OpenAPI definitions in JSDoc comments
-  apis: ["./src/modules/**/*.ts"],  // adjust this path to point to where your route files are
+  apis: ["./src/modules/**/*.ts"], // adjust this path to point to where your route files are
 };
 
 const swaggerSpec = swaggerJSDoc(options);
@@ -44,6 +44,8 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+
+// app.use(cors());
 
 app.use(morgan("dev"));
 app.use(express.json());

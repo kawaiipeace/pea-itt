@@ -6,6 +6,7 @@ import * as authModels from "./authModels";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { logAction } from "../../common/utils/logger";
 
 dotenv.config();
 
@@ -81,15 +82,96 @@ export const registerStu = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const registerMentor = async (req: Request, res: Response) => {
   try {
-    const validateData = authModels.loginSchema.parse(req.body);
+    const validateData = authModels.createMentorSchema.parse(req.body);
 
-    const user = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: {
         email: validateData.email,
       },
     });
+
+    if (existingUser) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Email already exists",
+      });
+      return;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(validateData.password_hash, salt);
+
+    const userData = {
+      role_id: 2, // role_id : 2 => พี่เลี้ยง
+      department_id: validateData.department_id,
+      fname: validateData.fname,
+      lname: validateData.lname,
+      phone_number: validateData.phone_number,
+      email: validateData.email,
+      password_hash: hashedPassword,
+    };
+
+    const user = await prisma.user.create({
+      data: userData,
+    });
+
+    await prisma.mentor_profile.create({
+      data: {
+        user_id: user?.id,
+      },
+    });
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    await logAction({
+      admin_id: req.user.id,
+      action: `Registered mentor: ${validateData.fname} ${validateData.lname} (email: ${validateData.email})`,
+    });
+
+    res.status(httpStatus.CREATED).json({
+      message: "Mentor registered successfully",
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const validateData = authModels.loginSchema.parse(req.body);
+
+    let user;
+
+    if (validateData.email) {
+      user = await prisma.user.findUnique({
+        where: { email: validateData.email },
+      });
+    } else if (validateData.phone_number) {
+      user = await prisma.user.findUnique({
+        where: { phone_number: validateData.phone_number },
+      });
+    }
 
     if (!user) {
       res.status(httpStatus.NOT_FOUND).json({
@@ -170,8 +252,23 @@ export const me = async (req: Request, res: Response) => {
       where: {
         id: req.user.id,
       },
-      include: {
-        student_profile: true,
+      select: {
+        id: true,
+        role_id: true,
+        department_id: true,
+        fname: true,
+        lname: true,
+        phone_number: true,
+        email: true,
+        student_profile: {
+          select: {
+            id: true,
+            mentor_id: true,
+            university: true,
+            start_date: true,
+            end_date: true,
+          },
+        },
       },
     });
 
@@ -186,7 +283,7 @@ export const me = async (req: Request, res: Response) => {
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-        message: "Something went wrong",
+        message: "Something went wrong!",
       });
     }
   }

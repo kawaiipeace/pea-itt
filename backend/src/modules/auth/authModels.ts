@@ -37,3 +37,17 @@ export const loginSchema = z
     message: "Either email or phone number is required",
     path: ["email", "phone_number"],
   });
+
+  export const createMentorSchema = z
+  .object({
+    department_id: z.coerce
+      .number()
+      .min(1, "Department ID must be greater than 0"),
+    fname: z.string().min(2, "First name must be at least 2 characters"),
+    lname: z.string().min(2, "Last name must be at least 2 characters"),
+    phone_number: z.coerce
+      .string()
+      .min(10, "Phone number must be at least 10 digits"),
+    email: z.string().email("Invalid email format"),
+    password_hash: z.string().min(6, "Password must be at least 6 characters")   
+  })
