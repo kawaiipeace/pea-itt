@@ -161,11 +161,17 @@ export const login = async (req: Request, res: Response) => {
   try {
     const validateData = authModels.loginSchema.parse(req.body);
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email: validateData.email,
-      },
-    });
+    let user;
+
+    if (validateData.email) {
+      user = await prisma.user.findUnique({
+        where: { email: validateData.email },
+      });
+    } else if (validateData.phone_number) {
+      user = await prisma.user.findUnique({
+        where: { phone_number: validateData.phone_number },
+      });
+    }
 
     if (!user) {
       res.status(httpStatus.NOT_FOUND).json({
