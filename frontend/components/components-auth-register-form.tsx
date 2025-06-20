@@ -2,7 +2,7 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import InputField from "./elements/inputField";
+import InputField from "./elements/InputField";
 import PasswordField from "./elements/PasswordField";
 import SelectField, { OptionType } from "./elements/SelectField";
 import { useRouter } from "next/navigation";
