@@ -14,7 +14,10 @@ const ComponentsAuthLoginForm = () => {
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ emailOrPhone?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{
+    emailOrPhone?: string;
+    password?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
@@ -24,7 +27,10 @@ const ComponentsAuthLoginForm = () => {
 
     if (!emailOrPhone) {
       newErrors.emailOrPhone = "กรุณากรอกเบอร์โทรศัพท์หรืออีเมล";
-    } else if (!phoneRegex.test(emailOrPhone) && !emailRegex.test(emailOrPhone)) {
+    } else if (
+      !phoneRegex.test(emailOrPhone) &&
+      !emailRegex.test(emailOrPhone)
+    ) {
       newErrors.emailOrPhone = "กรุณากรอกเบอร์โทรศัพท์หรืออีเมลให้ถูกต้อง";
     }
 
@@ -42,27 +48,38 @@ const ComponentsAuthLoginForm = () => {
 
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    // if (!validate()) return;
     setLoading(true);
 
     try {
-  const payload = emailOrPhone.includes("@")
-  ? { email: emailOrPhone,  password_hash: password }       // ✅
-  : { phone_number: emailOrPhone,  password_hash: password };
+      // const payload = emailOrPhone.includes("@")
+      // ? { email: emailOrPhone,  password_hash: password }       // ✅
+      // : { phone_number: emailOrPhone,  password_hash: password };
 
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}login`, payload);
+      const payload = {
+        email: emailOrPhone,
+        password_hash: password,
+      };
 
-      if (response.status === 200 && response.data.user) {
-        // ✅ บันทึก user ลง store
-        actionLogin(response.data.user);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}login`,
+        payload
+      );
 
-        const role = response.data.user.role;
-        if (role === "student" || role === "mentor" || role === "admin") {
-          router.push("/");
-        } 
-      } else {
-        setErrors({ password: "เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล" });
-      }
+      console.log(response);
+      
+
+      // if (response.status === 200 && response.data.user) {
+      //   // ✅ บันทึก user ลง store
+      //   actionLogin(response.data.user);
+
+      //   const role = response.data.user.role;
+      //   if (role === "STUDENT" || role === "mentor" || role === "admin") {
+      //     router.push("/");
+      //   }
+      // } else {
+      //   setErrors({ password: "เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล" });
+      // }
     } catch (err: any) {
       console.error("Login error:", err);
       if (err?.response?.data?.message) {
@@ -78,11 +95,11 @@ const ComponentsAuthLoginForm = () => {
   return (
     <form
       onSubmit={submitForm}
-      className="font-nunito space-y-6 text-sm px-4 md:px-8 py-6 w-full flex flex-col items-center"
+      className="font-nunito flex w-full flex-col items-center space-y-6 px-4 py-6 text-sm md:px-8"
     >
       {/* เบอร์โทรศัพท์หรืออีเมล */}
-      <div className="w-full max-w-[340px] space-y-2 min-h-[9px]"> 
-        <label className="block text-sm font-semibold text-black dark:text-white mb-2">
+      <div className="min-h-[9px] w-full max-w-[340px] space-y-2">
+        <label className="mb-2 block text-sm font-semibold text-black dark:text-white">
           เบอร์โทรศัพท์หรืออีเมล
         </label>
         <div className="relative">
@@ -91,9 +108,9 @@ const ComponentsAuthLoginForm = () => {
             value={emailOrPhone}
             onChange={(e) => setEmailOrPhone(e.target.value)}
             placeholder="กรุณากรอกเบอร์โทรศัพท์หรืออีเมล"
-            className={`form-input pe-26 ps-14 w-full h-[52px] rounded-md border text-black placeholder-gray-400 transition-colors ${
+            className={`pe-26 form-input h-[52px] w-full rounded-md border ps-14 text-black placeholder-gray-400 transition-colors ${
               errors.emailOrPhone
-                ? "border-red-500 bg-red-50 focus:ring-0 focus:border-red-500"
+                ? "border-red-500 bg-red-50 focus:border-red-500 focus:ring-0"
                 : "border-gray-300 focus:border-[#51158C]"
             }`}
           />
@@ -109,8 +126,8 @@ const ComponentsAuthLoginForm = () => {
       </div>
 
       {/* รหัสผ่าน */}
-      <div className="w-full max-w-[340px] space-y-2 min-h-[96px] ">
-        <label className="block text-sm font-semibold text-black dark:text-white mb-2">
+      <div className="min-h-[96px] w-full max-w-[340px] space-y-2 ">
+        <label className="mb-2 block text-sm font-semibold text-black dark:text-white">
           รหัสผ่าน
         </label>
         <div className="relative">
@@ -119,9 +136,9 @@ const ComponentsAuthLoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="กรุณากรอกรหัสผ่าน"
-            className={`form-input pe-26 ps-14 w-full h-[52px] rounded-md border text-black placeholder-gray-400 transition-colors ${
+            className={`pe-26 form-input h-[52px] w-full rounded-md border ps-14 text-black placeholder-gray-400 transition-colors ${
               errors.password
-                ? "border-red-500 bg-red-50 focus:ring-0 focus:border-red-500"
+                ? "border-red-500 bg-red-50 focus:border-red-500 focus:ring-0"
                 : "border-gray-300 focus:border-[#51158C]"
             }`}
           />
@@ -141,7 +158,7 @@ const ComponentsAuthLoginForm = () => {
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#B10073] text-white rounded-lg h-[40px] w-full max-w-[218px] text-sm font-semibold mt-3.5"
+          className="mt-3.5 h-[40px] w-full max-w-[218px] rounded-lg bg-[#B10073] text-sm font-semibold text-white"
         >
           {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
         </button>
