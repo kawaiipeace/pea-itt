@@ -46,9 +46,9 @@ const ComponentsAuthLoginForm = () => {
     setLoading(true);
 
     try {
-      const payload = emailOrPhone.includes("@")
-        ? { email: emailOrPhone, password }
-        : { phone_number: emailOrPhone, password };
+  const payload = emailOrPhone.includes("@")
+  ? { email: emailOrPhone,  password_hash: password }       // ✅
+  : { phone_number: emailOrPhone,  password_hash: password };
 
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}login`, payload);
 
