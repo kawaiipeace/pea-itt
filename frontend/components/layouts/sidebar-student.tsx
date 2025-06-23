@@ -73,7 +73,7 @@ const SidebarStudent = () => {
                 <div className="h-full bg-white dark:bg-black">
                     <div className="flex items-center justify-between px-4 py-3">
                         <Link href="/" className="main-logo flex shrink-0 items-center">
-                            <img className="ml-[5px] w-[132px] flex-none" src="/assets/images/PEAITT-LOGO.png" alt="logo" />
+                            <img className="ml-[5px] w-[132px] flex-none" src="/assets/images/PEAITT-LOGO2.png" alt="logo" />
                             
                         </Link>
 
