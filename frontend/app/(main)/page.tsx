@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 const Home = () => {
-    return <div>เริ่มสนุกสนานกับการ Coding กันเลย (เอาให้เสร็จนะจ๊ะ...)</div>;
+    return <div>ครีมจะสู้ เริ่มสนุกสนานกับการ Coding กันเลย (เอาให้เสร็จนะจ๊ะ...)</div>;
 };
 
 export default Home;
