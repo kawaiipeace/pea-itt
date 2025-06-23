@@ -11,6 +11,7 @@ import logger from "./common/middleware/logger";
 import roleRoutes from "./modules/role/roleRoutes";
 import departmentRoutes from "./modules/department/deptRoutes";
 import authRoutes from "./modules/auth/authRoutes";
+import checkRoutes from "./modules/check_time/checkRoutes";
 
 const app = express();
 const port = 10001;
@@ -61,6 +62,7 @@ app.use("/api", userRoutes);
 app.use("/api", roleRoutes);
 app.use("/api", authRoutes);
 app.use("/api", departmentRoutes);
+app.use("/api", checkRoutes);
 
 app.listen(port, () => {
   console.log(`🚀 Server is running on http://localhost:${port}`);
