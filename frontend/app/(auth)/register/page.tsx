@@ -16,7 +16,7 @@ const BoxedSignUp = () => {
           <div className="mx-auto w-full">
             <div className="mb-2 text-center">
               <img
-                src="/assets/images/PEAITT-LOGO.png"
+                src="/assets/images/PEAITT-LOGO2.png"
                 alt="Logo"
                 className="mx-auto w-72 mt-5 object-contain"
               />
