@@ -1,86 +1,29 @@
 "use client";
-import Select from "react-select";
-import React, { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
+import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
+import InputField from "./elements/InputField";
+import PasswordField from "./elements/PasswordField";
+import SelectField, { OptionType } from "./elements/SelectField";
 
-interface DepartmentData {
-  dept_id: number;
-  dept_name: string;
+interface FormDataType {
+  fname: string;
+  lname: string;
+  email: string;
+  phone_number: string;
+  university: string;
+  start_date: string;
+  end_date: string;
+  department: number;
+  mentor_id: number;
 }
 
-interface MentorData {
-  id: number;
-  fname: String;
-  lname: String;
+interface ErrorType {
+  [key: string]: string;
 }
 
 const ComponentsAuthRegisterForm = () => {
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [departmentOptions, setDepartmentOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
-  const [mentorOptions, setMentorOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
-  const [errors, setErrors] = useState({
-    fname: "",
-    lname: "",
-    email: "",
-    phone_number: "",
-    university: "",
-    start_date: "",
-    end_date: "",
-    password_hash: "",
-    confirmPassword: "",
-    department: "",
-    mentor_id: "",
-  });
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}dept`
-        );
-        const mappedOptions = res.data.data.map(
-          (department: DepartmentData) => ({
-            value: department.dept_id,
-            label: department.dept_name,
-          })
-        );
-        setDepartmentOptions(mappedOptions);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    const fetchMentor = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}user/mentor`
-        );
-        setMentorOptions(res.data.data);
-        const mappedOptions = res.data.data.map((mentor: MentorData) => ({
-          value: mentor.id,
-          label: `${mentor.fname} ${mentor.lname}`, // หรือ `mentor.lname` ถ้าชื่อถูกต้อง
-        }));
-        setMentorOptions(mappedOptions);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchDepartments();
-    fetchMentor();
-  }, []);
-
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataType>({
     fname: "",
     lname: "",
     email: "",
@@ -90,101 +33,79 @@ const ComponentsAuthRegisterForm = () => {
     end_date: "",
     department: 0,
     mentor_id: 0,
-    password_hash: "",
   });
 
-  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-  const toggleConfirmPasswordVisibility = () =>
-    setShowConfirmPassword((prev) => !prev);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<ErrorType>({});
+  const [departmentOptions, setDepartmentOptions] = useState<OptionType[]>([]);
+  const [mentorOptions, setMentorOptions] = useState<OptionType[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}dept`).then((res) => {
+      setDepartmentOptions(
+        res.data.data.map((d: any) => ({
+          value: d.dept_id,
+          label: d.dept_name,
+        }))
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!formData.department) return setMentorOptions([]);
+    axios
+      .get(
+        `${process.env.NEXT_PUBLIC_API_URL}user/mentor?department_id=${formData.department}`
+      )
+      .then((res) => {
+        setMentorOptions(
+          res.data.data.map((m: any) => ({
+            value: m.mentor_profile?.id,
+            label: `${m.fname} ${m.lname}`,
+          }))
+        );
+      });
+  }, [formData.department]);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validateForm = () => {
-    let valid = true;
-    const newErrors = {
-      fname: "",
-      lname: "",
-      email: "",
-      phone_number: "",
-      university: "",
-      start_date: "",
-      end_date: "",
-      password_hash: "",
-      confirmPassword: "",
-      department: "",
-      mentor_id: "",
-    };
-
-    if (!formData.fname.trim()) {
-      newErrors.fname = "กรุณากรอกชื่อจริง";
-      valid = false;
+  const validate = () => {
+    const newErr: ErrorType = {};
+    if (!formData.fname) newErr.fname = "กรุณากรอกชื่อจริง";
+    if (!formData.lname) newErr.lname = "กรุณากรอกนามสกุล";
+    if (!formData.email) newErr.email = "กรุณากรอกอีเมล";
+    if (!/^0[0-9]{9}$/.test(formData.phone_number))
+      newErr.phone_number = "กรุณากรอกเบอร์ 10 หลัก";
+    if (!formData.university) newErr.university = "กรุณากรอกมหาวิทยาลัย";
+    if (!formData.start_date) newErr.start_date = "กรุณากรอกวันที่เริ่มฝึก";
+    if (!formData.end_date) newErr.end_date = "กรุณากรอกวันที่สิ้นสุดฝึก";
+    if (!password || password.length < 8)
+      newErr.password = "รหัสผ่านต้อง 8 ตัวขึ้นไป";
+    if (password !== confirmPassword)
+      newErr.confirmPassword = "รหัสผ่านไม่ตรงกัน";
+    if (!formData.department) newErr.department = "กรุณาเลือกสถานที่ฝึก";
+    if (!formData.mentor_id) newErr.mentor_id = "กรุณาเลือกพี่เลี้ยง";
+    if(formData.phone_number.split("0")[0] >= formData.phone_number.split("0")[1]){
+      newErr.phone_number = "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง"
     }
-    if (!formData.lname.trim()) {
-      newErrors.lname = "กรุณากรอกนามสกุล";
-      valid = false;
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "กรุณากรอกอีเมล";
-      valid = false;
-    }
-    if (!formData.university.trim()) {
-      newErrors.university = "กรุณากรอกมหาวิทยาลัย";
-      valid = false;
-    }
-    if (formData.phone_number.length < 10) {
-      newErrors.phone_number = "กรุณากรอกเบอร์โทรศัพท์มือถือ 10 หลัก";
-      valid = false;
-    }
-    if (password.length < 8) {
-      newErrors.password_hash = "รหัสผ่านต้องมีอย่างน้อย 8 ตัว";
-      valid = false;
-    }
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
-      valid = false;
-    }
-    if (!formData.start_date.trim()) {
-      newErrors.start_date = "กรุณากรอกวันที่เริ่มฝึกงาน";
-      valid = false;
-    }
-    if (!formData.end_date.trim()) {
-      newErrors.end_date = "กรุณากรอกวันที่สิ้นสุดฝึกงาน";
-      valid = false;
-    }
-    if (formData.department <= 0) {
-      newErrors.department = "กรุณาเลือกชื่อสถานที่ฝึกงาน";
-      valid = false;
-    }
-    if (formData.mentor_id <= 0) {
-      newErrors.mentor_id = "กรุณาเลือกชื่อพี่เลี้ยง";
-      valid = false;
-    }
-
-    setErrors(newErrors);
-    return valid;
+    setErrors(newErr);
+    return Object.keys(newErr).length === 0;
   };
 
-  const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validate()) return;
 
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}register/student`, {
-        fname: formData.fname,
-        lname: formData.lname,
-        email: formData.email,
-        phone_number: formData.phone_number,
+        ...formData,
+        department_id: Number(formData.department),
         password_hash: password,
-        department_id: formData.department,
-        university: formData.university,
-        start_date: formData.start_date,
-        end_date: formData.end_date,
-        mentor_id: formData.mentor_id,
       });
-
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
@@ -205,83 +126,59 @@ const ComponentsAuthRegisterForm = () => {
         end_date: "",
         department: 0,
         mentor_id: 0,
-        password_hash: "",
       });
       setPassword("");
       setConfirmPassword("");
-      setErrors({
-        fname: "",
-        lname: "",
-        email: "",
-        phone_number: "",
-        university: "",
-        start_date: "",
-        end_date: "",
-        password_hash: "",
-        confirmPassword: "",
-        department: "",
-        mentor_id: "",
+    } catch (err: any) {
+      console.log(err);
+
+      Swal.fire({
+        title: "ผิดพลาด",
+        text: err?.message || "เกิดข้อผิดพลาด",
+        icon: "error",
       });
-    } catch (error) {
-      console.log(error);
     }
   };
 
   return (
     <form
-      onSubmit={submitForm}
-      className="grid grid-cols-1 gap-5 p-5 text-[15px] md:grid-cols-2"
+      onSubmit={submit}
+      className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2"
     >
-      <div>
-        <label className="mb-1 block font-medium">ชื่อจริง</label>
-        <input
-          type="text"
-          name="fname"
-          onChange={handleChange}
-          value={formData.fname}
-          placeholder="กรอกชื่อจริง"
-          className={`w-full rounded border px-3 py-2 ${
-            errors.fname ? "border-red-400" : "border-gray-300"
-          }`}
-        />
-        {errors.fname && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.fname}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="mb-1 block font-medium">นามสกุล</label>
-        <input
-          type="text"
-          name="lname"
-          onChange={handleChange}
-          value={formData.lname}
-          placeholder="กรอกนามสกุล"
-          className={`w-full rounded border px-3 py-2 ${
-            errors.lname ? "border-red-400" : "border-gray-300"
-          }`}
-        />
-        {errors.lname && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.lname}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="mb-1 block font-medium">อีเมล</label>
-        <input
-          type="email"
-          name="email"
-          onChange={handleChange}
-          value={formData.email}
-          placeholder="example@email.com"
-          className={`w-full rounded border px-3 py-2 ${
-            errors.email ? "border-red-400" : "border-gray-300"
-          }`}
-        />
-        {errors.email && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.email}</p>
-        )}
-      </div>
+      <InputField
+        label="ชื่อจริง"
+        name="fname"
+        value={formData.fname}
+        error={errors.fname}
+        onChange={handleChange}
+        placeholder="กรุณากรอกชื่อจริง"
+        styles={`w-full rounded border px-3 py-2 ${
+          errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
+      />
+      <InputField
+        label="นามสกุล"
+        name="lname"
+        value={formData.lname}
+        error={errors.lname}
+        onChange={handleChange}
+        placeholder="กรุณากรอกนามสกุล"
+        styles={`w-full rounded border px-3 py-2 ${
+          errors.lname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
+      />
+      <InputField
+        label="อีเมล"
+        name="email"
+        value={formData.email}
+        error={errors.email}
+        onChange={handleChange}
+        type="email"
+        placeholder="กรุณากรอกอีเมล"
+        styles={`w-full rounded border px-3 py-2 ${
+          errors.email ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
+      />
 
       <div>
         <label className="mb-1 block font-medium">เบอร์โทรศัพท์</label>
@@ -291,8 +188,9 @@ const ComponentsAuthRegisterForm = () => {
           inputMode="numeric"
           pattern="[0-9]*"
           onChange={handleChange}
+          maxLength={10}
           value={formData.phone_number}
-          placeholder="0812345678"
+          placeholder="กรุณากรอกเบอร์โทรศัพท์"
           className={`w-full rounded border px-3 py-2 ${
             errors.phone_number ? "border-red-400" : "border-gray-300"
           }`}
@@ -301,149 +199,81 @@ const ComponentsAuthRegisterForm = () => {
           <p className="mt-1 text-[11px] text-red-500">{errors.phone_number}</p>
         )}
       </div>
-
-      <div>
-        <label className="mb-1 block font-medium">มหาวิทยาลัย</label>
-        <input
-          type="text"
-          name="university"
+      <InputField
+        label="มหาวิทยาลัย"
+        name="university"
+        value={formData.university}
+        error={errors.university}
+        onChange={handleChange}
+        placeholder="กรุณากรอกชื่อมหาวิทยาลัย"
+        styles={`w-full rounded border px-3 py-2 ${
+          errors.university ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
+      />
+      <div className="flex gap-1">
+        <InputField
+          label="วันที่เริ่มฝึกงาน"
+          name="start_date"
+          value={formData.start_date}
+          error={errors.start_date}
           onChange={handleChange}
-          value={formData.university}
-          placeholder="ชื่อมหาวิทยาลัย"
-          className={`w-full rounded border px-3 py-2 ${
-            errors.university ? "border-red-400" : "border-gray-300"
+          type="date"
+          styles={`w-full rounded border px-3 py-2 ${
+            errors.start_date
+              ? "border-red-400 bg-[#FFEBEE]"
+              : "border-gray-300"
           }`}
         />
-        {errors.university && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.university}</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1 block font-medium">วันที่เริ่มฝึกงาน</label>
-          <input
-            type="date"
-            name="start_date"
-            onChange={handleChange}
-            value={formData.start_date}
-            className={`w-full rounded border px-3 py-2 ${
-              errors.start_date ? "border-red-400" : "border-gray-300"
-            }`}
-          />
-          {errors.start_date && (
-            <p className="mt-1 text-[11px] text-red-500">{errors.start_date}</p>
-          )}
-        </div>
-        <div>
-          <label className="mb-1 block font-medium">วันที่สิ้นสุดฝึกงาน</label>
-          <input
-            type="date"
-            name="end_date"
-            onChange={handleChange}
-            value={formData.end_date}
-            className={`w-full rounded border px-3 py-2 ${
-              errors.end_date ? "border-red-400" : "border-gray-300"
-            }`}
-          />
-          {errors.end_date && (
-            <p className="mt-1 text-[11px] text-red-500">{errors.end_date}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="relative">
-        <label className="mb-1 block font-medium">รหัสผ่าน</label>
-        <input
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="อย่างน้อย 8 ตัว"
-          className={`w-full rounded border px-3 py-2 pr-16 ${
-            errors.password_hash ? "border-red-400" : "border-gray-300"
+        <InputField
+          label="วันที่สิ้นสุดฝึกงาน"
+          name="end_date"
+          value={formData.end_date}
+          error={errors.end_date}
+          onChange={handleChange}
+          type="date"
+          styles={`w-full rounded border px-3 py-2 ${
+            errors.end_date ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
           }`}
         />
-        <button
-          type="button"
-          onClick={togglePasswordVisibility}
-          className="absolute right-3 top-[35px] text-xs text-blue-600"
-        >
-          {showPassword ? "Hide" : "Show"}
-        </button>
-        {errors.password_hash && (
-          <p className="mt-1 text-[11px] text-red-500">
-            {errors.password_hash}
-          </p>
-        )}
       </div>
-
-      <div className="relative">
-        <label className="mb-1 block font-medium">ยืนยันรหัสผ่าน</label>
-        <input
-          type={showConfirmPassword ? "text" : "password"}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className={`w-full rounded border px-3 py-2 pr-16 ${
-            errors.confirmPassword ? "border-red-400" : "border-gray-300"
-          }`}
-        />
-        <button
-          type="button"
-          onClick={toggleConfirmPasswordVisibility}
-          className="absolute right-3 top-[35px] text-xs text-blue-600"
-        >
-          {showConfirmPassword ? "Hide" : "Show"}
-        </button>
-        {errors.confirmPassword && (
-          <p className="mt-1 text-[11px] text-red-500">
-            {errors.confirmPassword}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="mb-1 block font-medium">ชื่อสถานที่ฝึกงาน</label>
-        <Select
-          options={departmentOptions}
-          classNamePrefix="react-select"
-          placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={
-            departmentOptions.find(
-              (opt) => opt.value === formData.department
-            ) || null
-          }
-          onChange={(selected: { value: number; label: string } | null) =>
-            setFormData((prev) => ({
-              ...prev,
-              department: selected ? selected.value : 0,
-            }))
-          }
-          isClearable
-        />
-        {errors.department && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.department}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="mb-1 block font-medium">ชื่อพี่เลี้ยง</label>
-        <Select
-          options={mentorOptions}
-          classNamePrefix="react-select"
-          placeholder="เลือกหรือพิมพ์ค้นหา"
-          value={mentorOptions.find((opt) => opt.value === formData.mentor_id)}
-          onChange={(selected: any) =>
-            setFormData((prev) => ({
-              ...prev,
-              mentor_id: selected?.value || 0,
-            }))
-          }
-        />
-        {errors.mentor_id && (
-          <p className="mt-1 text-[11px] text-red-500">{errors.mentor_id}</p>
-        )}
-      </div>
-
+      <PasswordField
+        label="รหัสผ่าน"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="กรุณากรอกรหัสผ่าน"
+        error={errors.password}
+      />
+      <PasswordField
+        label="ยืนยันรหัสผ่าน"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="กรุณากรอกรหัสผ่านอีกครั้ง"
+        error={errors.confirmPassword}
+      />
+      <SelectField
+        label="ชื่อสถานที่ฝึกงาน"
+        options={departmentOptions}
+        placeholder="เลือกสถานที่ฝึกงาน (กอง)"
+        value={departmentOptions.find((o) => o.value === formData.department)}
+        onChange={(sel) =>
+          setFormData((f) => ({
+            ...f,
+            department: sel?.value || 0,
+            mentor_id: 0,
+          }))
+        }
+        error={errors.department}
+      />
+      <SelectField
+        label="ชื่อพี่เลี้ยง"
+        options={mentorOptions}
+        placeholder="เลือกพี่เลี้ยง"
+        value={mentorOptions.find((o) => o.value === formData.mentor_id)}
+        onChange={(sel) =>
+          setFormData((f) => ({ ...f, mentor_id: sel?.value || 0 }))
+        }
+        error={errors.mentor_id}
+      />
       <div className="mt-2 text-center md:col-span-2">
         <button
           type="submit"
