@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 
+//Route
 import userRoutes from "./modules/user/userRoutes";
 import logger from "./common/middleware/logger";
 import roleRoutes from "./modules/role/roleRoutes";
@@ -39,7 +40,7 @@ const swaggerSpec = swaggerJSDoc(options);
 
 app.use(
   cors({
-    origin: "http://localhost:10000",
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -62,6 +63,6 @@ app.use("/api", authRoutes);
 app.use("/api", departmentRoutes);
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`🚀 Server is running on http://localhost:${port}`);
   console.log(`Swagger UI available at http://localhost:${port}/api-docs`);
 });
