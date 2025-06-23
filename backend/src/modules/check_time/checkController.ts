@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import prisma from "../../common/config/prismaClient";
-import { ZodError } from "zod";
+import { number, ZodError } from "zod";
 import httpStatus from "http-status-codes";
 import * as checkModels from "./checkModels";
-import { logAction } from "../../common/utils/logger";
 
-export const check = async (req: Request, res: Response) => {
+export const checkTime = async (req: Request, res: Response) => {
   try {
     const validatedData = checkModels.checkTimeschema.parse(req.body);
 
@@ -58,6 +57,49 @@ export const check = async (req: Request, res: Response) => {
       res.status(httpStatus.BAD_REQUEST).json({
         message: "Something went wrong!",
         errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const getTimeCheck = async (req: Request, res: Response) => {
+  try {
+    const { type_check, sort = "time", order = "desc", user_id } = req.query;
+
+    const typeCheck = type_check ? String(type_check) : undefined;
+    const userID = user_id ? Number(user_id) : undefined;
+
+    const checkTime = await prisma.check_time.findMany({
+      where: {
+        type_check: typeCheck,
+        user_id: userID,
+      },
+      orderBy: {
+        [sort as string]: order === "asc" ? "asc" : "desc",
+      },
+    });
+
+    if (checkTime.length === 0) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "No check time records found.",
+      });
+      return;
+    }
+
+    res.status(httpStatus.OK).json({
+      message: "Check time data fetched successfully.",
+      data: checkTime,
+    });
+    
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
