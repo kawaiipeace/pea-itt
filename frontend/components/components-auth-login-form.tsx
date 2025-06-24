@@ -47,7 +47,7 @@ const ComponentsAuthLoginForm = () => {
 const submitForm = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!validate()) {
-    console.warn("[AUTH] Validation failed: ข้อมูลไม่ครบหรือไม่ถูกต้อง");
+    console.warn("Validation failed: ข้อมูลไม่ครบหรือไม่ถูกต้อง");
     return;
   }
 
@@ -78,7 +78,7 @@ const submitForm = async (e: React.FormEvent) => {
     });
 
     if (res.status === 200) {
-      console.log("[AUTH] Login request successful. Fetching user profile...");
+      console.log("Login request successful. Fetching user profile...");
 
       const me = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}me`, {
         withCredentials: true,
@@ -88,7 +88,7 @@ const submitForm = async (e: React.FormEvent) => {
         const userData = me.data?.data || me.data;
         actionSetUser(userData);
 
-        console.log("[AUTH] Login success:", {
+        console.log("Login success:", {
           id: userData.id,
           name: `${userData.fname} ${userData.lname}`,
           role_id: userData.role_id,
@@ -102,11 +102,11 @@ const submitForm = async (e: React.FormEvent) => {
         } else if (role === 3) {
           router.replace("/");
         } else {
-          console.warn("[AUTH] ไม่สามารถระบุสิทธิ์ของผู้ใช้งาน (role_id ไม่ถูกต้อง)");
+          console.warn("ไม่สามารถระบุสิทธิ์ของผู้ใช้งาน (role_id ไม่ถูกต้อง)");
           setErrors({ general: "ไม่สามารถระบุสิทธิ์ของผู้ใช้งานได้" });
         }
       } else {
-        console.error("[AUTH] ไม่สามารถโหลดข้อมูลผู้ใช้งานจาก /me");
+        console.error("ไม่สามารถโหลดข้อมูลผู้ใช้งานจาก /me");
         setErrors({ general: "ไม่สามารถโหลดข้อมูลผู้ใช้งานได้" });
       }
     }
@@ -114,7 +114,7 @@ const submitForm = async (e: React.FormEvent) => {
     const apiMessage = err?.response?.data?.message || "";
     const status = err?.response?.status;
 
-    console.error("[AUTH] Login error:", {
+    console.error("Login error:", {
       status,
       message: apiMessage,
     });
