@@ -5,14 +5,11 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 COPY package*.json ./
-COPY prisma ./prisma       
+COPY prisma ./prisma
 
-RUN pnpm install           
+RUN npm install
 
-COPY . .                   
-
-RUN pnpm run build
-
+COPY . .
 EXPOSE 10001
 
-CMD ["node", "dist/index.js"]
+CMD ["npm", "run", "dev"]
