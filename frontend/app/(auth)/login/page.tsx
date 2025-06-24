@@ -9,7 +9,7 @@ export default function LoginPage() {
           <img
             src="/assets/images/PEAITT-LOGO2.png"
             alt="PEA Logo"
-            className="mx-auto h-[50px] w-[20x] sm:w-[200px] mt-4"
+            className="mx-auto h-[50px] w-[30x] sm:w-[200px] mt-4"
           />
           <h1 className="text-base font-semibold text-black mt-9 ">
             PEA Internship Time Track
@@ -20,7 +20,7 @@ export default function LoginPage() {
         </div>
 
         {/* ฟอร์มจัดให้อยู่กึ่งกลางของกล่อง */}
-        <div className="flex-1 flex flex-col items-center justify-center mb-7">
+        <div className="flex-1 flex flex-col items-center justify-center mb-2">
           <ComponentsAuthLoginForm />
         </div>
       </div>

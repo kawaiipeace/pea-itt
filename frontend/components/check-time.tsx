@@ -11,35 +11,27 @@ interface checkTime {
 const CheckTime = () => {
   const [time, setTime] = useState(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
+  const [canCheckOut, setCanCheckOut] = useState(false);
   const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
     type_check: "",
     location: "",
     latitude: "",
     longitude: "",
   });
-  const [canCheckOut, setCanCheckOut] = useState(false);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
 
-  const handleCheckIn = () => {
-    setCheckTimeForm((prev) => ({
-          ...prev,
-          type_check: "in",
-          location: "",
-          latitude: userLocation?.lat.toString() || "",
-          longitude: userLocation?.lon.toString() || "",
-        }));
-    console.log(checkTimeForm);
-  };
+  const peaLat = 13.852364495404673;
+  const peaLon = 100.55824556746184;
 
-  function getDistanceFromLatLonInMeters(
+  const getDistanceFromLatLonInMeters = (
     lat1: number,
     lon1: number,
     lat2: number,
     lon2: number
-  ) {
+  ) => {
     const R = 6371000;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
@@ -51,10 +43,37 @@ const CheckTime = () => {
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-  }
+  };
 
-  const peaLat = 13.852364495404673;
-  const peaLon = 100.55824556746184;
+  const reverseGeocodeGoogle = async (lat: number, lon: number): Promise<string> => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${apiKey}&language=th`
+      );
+      const data = await response.json();
+      return data?.results?.[0]?.formatted_address || "ไม่สามารถระบุสถานที่ได้";
+    } catch (error) {
+      console.error("Reverse geocoding error:", error);
+      return "ไม่สามารถระบุสถานที่ได้";
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (!userLocation) return;
+
+    const locationName = await reverseGeocodeGoogle(userLocation.lat, userLocation.lon);
+
+    const newForm = {
+      type_check: "in",
+      location: locationName,
+      latitude: userLocation.lat.toString(),
+      longitude: userLocation.lon.toString(),
+    };
+
+    setCheckTimeForm(newForm);
+    console.log("✅ ลงเวลาเข้างาน:", newForm);
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -69,23 +88,11 @@ const CheckTime = () => {
           peaLon
         );
 
-        setCheckTimeForm((prev) => ({
-          ...prev,
-          type_check: "",
-          location: "",
-          latitude: userLocation?.lat.toString() || "",
-          longitude: userLocation?.lon.toString() || "",
-        }));
-
         const hour = now.getHours();
-        const isWithinDistance = distance <= 500;
+        const isWithin = distance <= 400;
 
-        // เช็คช่วงเวลา
-        const canCheckInNow = isWithinDistance && hour === 11;
-        const canCheckOutNow = isWithinDistance && hour === 16;
-
-        setCanCheckIn(canCheckInNow);
-        setCanCheckOut(canCheckOutNow);
+        setCanCheckIn(isWithin && hour === 8);
+        setCanCheckOut(isWithin && hour === 16);
       }
     }, 1000);
 
@@ -122,22 +129,14 @@ const CheckTime = () => {
       <div className="absolute left-4 top-4 text-xs text-gray-500 sm:text-sm">
         {canCheckIn ? (
           <div className="flex items-center gap-2">
-            <img
-              className="ml-[5px] w-[30px] flex-none"
-              src="/assets/images/LocationSuccess.png"
-              alt="logo"
-            />
-            <p> คุณอยู่ในพื้นที่และสามารถลงเวลาเข้างานได้ </p>
+            <img className="ml-[5px] w-[30px] flex-none" src="/assets/images/LocationSuccess.png" alt="logo" />
+            <p>คุณอยู่ในพื้นที่และสามารถลงเวลาเข้างานได้</p>
           </div>
         ) : canCheckOut ? (
           "คุณอยู่ในพื้นที่และสามารถลงเวลาออกงานได้ (4 โมงเย็น)"
         ) : (
           <div className="flex items-center gap-2">
-            <img
-              className="ml-[5px] w-[30px] flex-none"
-              src="/assets/images/Location.png"
-              alt="logo"
-            />
+            <img className="ml-[5px] w-[30px] flex-none" src="/assets/images/Location.png" alt="logo" />
             <p>ไม่สามารถลงเวลาได้ (อยู่นอกพื้นที่หรือไม่ใช่ช่วงเวลาที่กำหนด)</p>
           </div>
         )}
@@ -146,7 +145,6 @@ const CheckTime = () => {
       <h1 className="mb-4 text-4xl font-bold tracking-widest sm:text-6xl md:text-7xl">
         {time.toLocaleTimeString("th-TH", { hour12: false })}
       </h1>
-
       <h2 className="mb-8 text-lg sm:text-2xl">{formatThaiDate(time)}</h2>
 
       <div className="mb-6 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
@@ -172,6 +170,13 @@ const CheckTime = () => {
           ลงเวลาออกงาน
         </button>
       </div>
+
+      {/* แสดงชื่อสถานที่ */}
+      {checkTimeForm.location && (
+        <p className="text-xs text-gray-600 mt-2">
+          🗺️ สถานที่: {checkTimeForm.location}
+        </p>
+      )}
 
       <a href="#" className="mb-10 text-sm text-purple-700 underline">
         ประวัติการลงเวลา
