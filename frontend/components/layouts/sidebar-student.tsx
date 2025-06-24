@@ -98,7 +98,7 @@ const SidebarStudent = () => {
                                     <li className="menu nav-item">
                                         <button type="button" className={`${currentMenu === 'time_check' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('time_check')}>
                                             <div className="flex items-center">
-                                                <IconMenuInvoice className="shrink-0 group-hover:!text-primary" />
+                                                <img className=" w-[20px] flex-none" src="/assets/images/time.png" alt="logo" />
                                                 <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('การลงเวลาปฏิบัติงาน')}</span>
                                             </div>
 
