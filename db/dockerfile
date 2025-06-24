@@ -22,6 +22,7 @@ RUN git clone --branch main https://github.com/pgaudit/pgaudit.git /tmp/pgaudit 
 
 COPY ./PEA-iTT.sql /docker-entrypoint-initdb.d/
 
-EXPOSE 5432
+EXPOSE 10002
 
-CMD ["postgres"]
+# Override postgres to listen on port 10002
+CMD ["postgres", "-p", "10002"]
