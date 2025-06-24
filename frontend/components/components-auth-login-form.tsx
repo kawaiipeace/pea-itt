@@ -64,13 +64,13 @@ const submitForm = async (e: React.FormEvent) => {
     payload.phone_number = emailOrPhone;
   }
 
-  // // ✅ Log แบบปลอดภัย ไม่แสดงรหัสผ่าน
-  // if (process.env.NODE_ENV === "development") {
-  //   console.log("[AUTH] Sending login request with:", {
-  //     ...(isEmail ? { email: emailOrPhone } : { phone_number: emailOrPhone }),
-  //     password_hash: "[hidden]",
-  //   });
-  // }
+  // ✅ Log แบบปลอดภัย ไม่แสดงรหัสผ่าน
+  if (process.env.NODE_ENV === "development") {
+    console.log("[AUTH] Sending login request with:", {
+      ...(isEmail ? { email: emailOrPhone } : { phone_number: emailOrPhone }),
+      password_hash: "[hidden]",
+    });
+  }
 
   try {
     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}login`, payload, {
@@ -96,7 +96,7 @@ const submitForm = async (e: React.FormEvent) => {
 
         const role = userData.role_id;
         if (role === 1) {
-          router.replace("/");
+          router.replace("/")
         } else if (role === 2) {
           router.replace("/");
         } else if (role === 3) {

@@ -22,12 +22,12 @@ export async function middleware(request: NextRequest) {
     const currentPath = new URL(request.url).pathname;
 
     // เช็คและเปลี่ยนเส้นทางตามบทบาท
-    if (roleId === 1 && !currentPath.startsWith('/main')) {
-      return NextResponse.redirect(new URL('/main', request.url));
-    } else if (roleId === 2 && !currentPath.startsWith('/mentor')) {
-      return NextResponse.redirect(new URL('/mentor', request.url));
-    } else if (roleId === 3 && !currentPath.startsWith('/admin')) {
-      return NextResponse.redirect(new URL('/admin', request.url));
+    if (roleId === 1 && !currentPath.startsWith('/')) {
+      return NextResponse.redirect(new URL('/', request.url));
+    } else if (roleId === 2 && !currentPath.startsWith('/')) {
+      return NextResponse.redirect(new URL('/', request.url));
+    } else if (roleId === 3 && !currentPath.startsWith('/')) {
+      return NextResponse.redirect(new URL('/', request.url));
     }
 
     return NextResponse.next();
