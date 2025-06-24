@@ -1,17 +1,34 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import axios from 'axios';
 
 export async function middleware(request: NextRequest) {
-  const cookie = request.headers.get('cookie'); // ดึง cookie จาก request
+  const cookie = request.headers.get('cookie');
 
   try {
-    await axios.get(`${process.env.NEXT_PUBLIC_API_URL}me`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}me`, {
       headers: {
         Cookie: cookie || '',
       },
-      withCredentials: true,
+      credentials: 'include',
     });
+
+    if (!res.ok) {
+      throw new Error('Unauthorized');
+    }
+
+    const data = await res.json();
+    const roleId = data?.data?.role_id;
+
+    const currentPath = new URL(request.url).pathname;
+
+    // เช็คและเปลี่ยนเส้นทางตามบทบาท
+    if (roleId === 1 && !currentPath.startsWith('/main')) {
+      return NextResponse.redirect(new URL('/main', request.url));
+    } else if (roleId === 2 && !currentPath.startsWith('/mentor')) {
+      return NextResponse.redirect(new URL('/mentor', request.url));
+    } else if (roleId === 3 && !currentPath.startsWith('/admin')) {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
 
     return NextResponse.next();
   } catch (err) {
@@ -20,5 +37,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/main', '/mentor/:path*', '/admin/:path*'],
+  matcher: ['/main/:path*', '/mentor/:path*', '/admin/:path*'],
 };
