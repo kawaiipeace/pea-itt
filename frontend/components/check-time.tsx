@@ -1,14 +1,38 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
+interface checkTime {
+  type_check: string;
+  location: string;
+  latitude: string;
+  longitude: string;
+}
+
 const CheckTime = () => {
   const [time, setTime] = useState(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
+  const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
+    type_check: "",
+    location: "",
+    latitude: "",
+    longitude: "",
+  });
   const [canCheckOut, setCanCheckOut] = useState(false);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
+
+  const handleCheckIn = () => {
+    setCheckTimeForm((prev) => ({
+          ...prev,
+          type_check: "in",
+          location: "",
+          latitude: userLocation?.lat.toString() || "",
+          longitude: userLocation?.lon.toString() || "",
+        }));
+    console.log(checkTimeForm);
+  };
 
   function getDistanceFromLatLonInMeters(
     lat1: number,
@@ -45,11 +69,19 @@ const CheckTime = () => {
           peaLon
         );
 
-        const hour = now.getHours();
-        const isWithinDistance = distance <= 11831;
+        setCheckTimeForm((prev) => ({
+          ...prev,
+          type_check: "",
+          location: "",
+          latitude: userLocation?.lat.toString() || "",
+          longitude: userLocation?.lon.toString() || "",
+        }));
 
-        // เช็คช่วงเวลา 
-        const canCheckInNow = isWithinDistance && hour === 8;
+        const hour = now.getHours();
+        const isWithinDistance = distance <= 500;
+
+        // เช็คช่วงเวลา
+        const canCheckInNow = isWithinDistance && hour === 11;
         const canCheckOutNow = isWithinDistance && hour === 16;
 
         setCanCheckIn(canCheckInNow);
@@ -88,11 +120,27 @@ const CheckTime = () => {
   return (
     <div className="relative flex h-[calc(100vh-150px)] flex-col items-center justify-center text-center">
       <div className="absolute left-4 top-4 text-xs text-gray-500 sm:text-sm">
-        {canCheckIn
-          ? "คุณอยู่ในพื้นที่และสามารถลงเวลาเข้างานได้ (8 โมงเช้า)"
-          : canCheckOut
-          ? "คุณอยู่ในพื้นที่และสามารถลงเวลาออกงานได้ (4 โมงเย็น)"
-          : "ไม่สามารถลงเวลาได้ (อยู่นอกพื้นที่หรือไม่ใช่ช่วงเวลาที่กำหนด)"}
+        {canCheckIn ? (
+          <div className="flex items-center gap-2">
+            <img
+              className="ml-[5px] w-[30px] flex-none"
+              src="/assets/images/LocationSuccess.png"
+              alt="logo"
+            />
+            <p> คุณอยู่ในพื้นที่และสามารถลงเวลาเข้างานได้ </p>
+          </div>
+        ) : canCheckOut ? (
+          "คุณอยู่ในพื้นที่และสามารถลงเวลาออกงานได้ (4 โมงเย็น)"
+        ) : (
+          <div className="flex items-center gap-2">
+            <img
+              className="ml-[5px] w-[30px] flex-none"
+              src="/assets/images/Location.png"
+              alt="logo"
+            />
+            <p>ไม่สามารถลงเวลาได้ (อยู่นอกพื้นที่หรือไม่ใช่ช่วงเวลาที่กำหนด)</p>
+          </div>
+        )}
       </div>
 
       <h1 className="mb-4 text-4xl font-bold tracking-widest sm:text-6xl md:text-7xl">
@@ -104,6 +152,7 @@ const CheckTime = () => {
       <div className="mb-6 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
         <button
           disabled={!canCheckIn}
+          onClick={handleCheckIn}
           className={`${
             canCheckIn
               ? "bg-purple-700 text-white hover:bg-purple-800"
