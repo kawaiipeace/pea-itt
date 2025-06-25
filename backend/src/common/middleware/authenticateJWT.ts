@@ -8,7 +8,14 @@ export const authenticateJWT = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.cookies?.token;
+  const authHeader = req.headers.authorization;
+  let token;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else {
+    token = req.cookies?.token;
+  }
 
   if (!token) {
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "No token" });
