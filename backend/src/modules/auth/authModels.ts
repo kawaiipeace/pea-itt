@@ -13,7 +13,7 @@ export const RegisterStuSchema = z
     email: z.string().email("Invalid email format"),
     password_hash: z.string().min(8, "Password must be at least 8 characters"),
     picture: z.instanceof(Buffer, { message: "Input not instance of Buffer" }).optional(),
-    mentor_id: z.coerce.number().min(1, "Mentor ID is required").optional(),
+    mentor_id: z.coerce.number().optional(),
     university: z
       .string()
       .min(2, "University name must be at least 2 characters"),

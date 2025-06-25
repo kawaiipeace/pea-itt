@@ -20,18 +20,48 @@ export const checkTime = async (req: Request, res: Response) => {
       return;
     }
 
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    if (validatedData.type_check === "out") {
+      const existingCheckIn = await prisma.check_time.findFirst({
+        where: {
+          user_id: user.id,
+          type_check: "in",
+          time: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      });
+
+      if (!existingCheckIn) {
+        res.status(httpStatus.BAD_REQUEST).json({
+          message: "ยังไม่ได้เช็กอินวันนี้ จึงไม่สามารถเช็กเอาต์ได้",
+        });
+      }
+    }
+
     const checkTimeData = {
       user_id: user.id,
       type_check: validatedData.type_check,
       location: validatedData.location,
+      ip: validatedData.ip,
       note:
         validatedData.type_check === "in"
           ? `${user.fname} ${
               user.lname
-            } checked in at ${new Date().toLocaleString()}`
+            } checked in at ${new Date().toLocaleString()} from IP: ${
+              validatedData.ip
+            }`
           : `${user.fname} ${
               user.lname
-            } checked out at ${new Date().toLocaleString()}`,
+            } checked out at ${new Date().toLocaleString()} from IP: ${
+              validatedData.ip
+            }`,
       latitude: validatedData.latitude,
       longitude: validatedData.longitude,
     };
@@ -94,7 +124,6 @@ export const getTimeCheck = async (req: Request, res: Response) => {
       message: "Check time data fetched successfully.",
       data: checkTime,
     });
-    
   } catch (error) {
     if (error instanceof Error) {
       res.status(httpStatus.BAD_REQUEST).json({

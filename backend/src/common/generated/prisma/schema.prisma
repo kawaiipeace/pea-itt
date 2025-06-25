@@ -24,6 +24,7 @@ model check_time {
   time       DateTime? @default(now()) @db.Timestamp(6)
   type_check String?   @db.VarChar(30)
   location   String?   @db.VarChar(255)
+  ip         String?   @db.VarChar(255)
   note       String?
   latitude   Decimal?  @db.Decimal(10, 7)
   longitude  Decimal?  @db.Decimal(10, 7)
