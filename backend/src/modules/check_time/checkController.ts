@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import prisma from "../../common/config/prismaClient";
-import { number, ZodError } from "zod";
+import { ZodError } from "zod";
 import httpStatus from "http-status-codes";
 import * as checkModels from "./checkModels";
+import getClientIp from "../../common/utils/ipUtils";
 
 export const checkTime = async (req: Request, res: Response) => {
   try {
@@ -45,23 +46,21 @@ export const checkTime = async (req: Request, res: Response) => {
       }
     }
 
+    const ip = getClientIp(req);
+
     const checkTimeData = {
       user_id: user.id,
       type_check: validatedData.type_check,
       location: validatedData.location,
-      ip: validatedData.ip,
+      ip: ip,
       note:
         validatedData.type_check === "in"
           ? `${user.fname} ${
               user.lname
-            } checked in at ${new Date().toLocaleString()} from IP: ${
-              validatedData.ip
-            }`
+            } checked in at ${new Date().toLocaleString()} from IP: ${ip}`
           : `${user.fname} ${
               user.lname
-            } checked out at ${new Date().toLocaleString()} from IP: ${
-              validatedData.ip
-            }`,
+            } checked out at ${new Date().toLocaleString()} from IP: ${ip}`,
       latitude: validatedData.latitude,
       longitude: validatedData.longitude,
     };

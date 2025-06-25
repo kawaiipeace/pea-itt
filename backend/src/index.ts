@@ -56,7 +56,7 @@ const swaggerSpec = swaggerJSDoc(options);
 
 app.use(
   cors({
-    origin: "http://localhost:10000",
+    origin: ["http://localhost:10000","http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -68,6 +68,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(logger); // custom middleware
+app.set("trust proxy", true);
 
 // Swagger UI route
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

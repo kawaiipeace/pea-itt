@@ -6,7 +6,7 @@ export const checkTimeschema = z.object({
     invalid_type_error: "Type of check must be 'in' or 'out'",
   }),
   location: z.string().optional(),
-  ip: z.string().min(1, "IP address is required"),
+  // ip: z.string().min(1, "IP address is required"),
   latitude: z.coerce.number({
     required_error: "Latitude is required",
     invalid_type_error: "Latitude must be a number",

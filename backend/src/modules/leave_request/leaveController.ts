@@ -6,10 +6,11 @@ import httpStatus from "http-status-codes";
 
 export const createLeaveRequest = async (req: Request, res: Response) => {
   try {
-    const validatedData = leaveModels.leaveSchema.parse({
+    const validatedData = leaveModels.leaveRequestSchema.parse({
       ...req.body,
       file: req.file ? req.file.buffer : undefined,
     });
+
     if (!req.user) {
       res.status(httpStatus.BAD_REQUEST).json({
         error:
@@ -48,14 +49,58 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
   }
 };
 
-export const getLeaveRequests = async (req: Request, res: Response) => {};
+export const getLeaveRequests = async (req: Request, res: Response) => {
+  try {
+    const { user_id, sort = "leave_datetime", order = "desc" } = req.query;
+
+    const userID = user_id ? Number(user_id) : undefined;
+
+    const leaveRequests = await prisma.leave_request.findMany({
+      where: {
+        user_id: userID,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        leave_datetime: true,
+        reason: true,
+        status: true,
+      },
+      orderBy: {
+        [sort as string]: order === "asc" ? "asc" : "desc",
+      },
+    });
+
+    if (!leaveRequests || leaveRequests.length === 0) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "No leave requests found",
+      });
+      return;
+    }
+
+    res.status(httpStatus.OK).json({
+      message: "Leave requests retrieved successfully",
+      data: leaveRequests,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
 
 export const getLeaveRequestByID = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
     const leaveRequest = await prisma.leave_request.findUnique({
       where: {
-        id: parseInt(id),
+        id: parseInt(req.params.id, 10),
       },
     });
 
@@ -83,4 +128,79 @@ export const getLeaveRequestByID = async (req: Request, res: Response) => {
   }
 };
 
-export const updateLeaveRequest = async (req: Request, res: Response) => {};
+export const updateLeaveRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const validatedData = leaveModels.approvLeaveRequestSchema.parse(req.body);
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    const leaveRequest = await prisma.leave_request.update({
+      where: { id: parseInt(id, 10) },
+      data: {
+        status: validatedData.status,
+        approver: Number(req.user.id),
+        approved_at: new Date(),
+      },
+      select: {
+        id: true,
+        user_id: true,
+        leave_datetime: true,
+        reason: true,
+        status: true,
+      },
+    });
+
+    res.status(httpStatus.OK).json({
+      message: `Leave request ${validatedData.status} successfully`,
+      data: leaveRequest,
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const leaveRequestPicture = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      res.status(httpStatus.BAD_REQUEST).json({ error: "Invalid ID" });
+    }
+
+    const leaveRequest = await prisma.leave_request.findUnique({
+      where: { id },
+      select: { file: true },
+    });
+
+    if (!leaveRequest || !leaveRequest.file) {
+      res.status(httpStatus.NOT_FOUND).send("Image not found");
+    }
+    res.setHeader("Content-Type", "image/jpeg");
+    res.send(leaveRequest?.file);
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Server error" });
+  }
+};
