@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { IRootState } from "@/store";
 import axios from "axios";
+import useAuthStore from "@/store/authStore";
 import {
   toggleTheme,
   toggleSidebar,
@@ -171,6 +172,10 @@ const Header = () => {
   };
 
   const [search, setSearch] = useState(false);
+
+  const user = useAuthStore((state) => state.user);
+
+
 
   return (
     <header
@@ -352,16 +357,15 @@ const Header = () => {
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
                         <h4 className="text-base">
-                          John Doe
+                          {user?.fname} {user?.lname}
                           <span className="rounded bg-success-light px-1 text-xs text-success ltr:ml-2 rtl:ml-2">
-                            Pro
                           </span>
                         </h4>
                         <button
                           type="button"
                           className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
                         >
-                          johndoe@gmail.com
+                          {user?.email}
                         </button>
                       </div>
                     </div>

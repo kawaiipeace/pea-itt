@@ -1,12 +1,17 @@
-import { Metadata } from 'next';
-import React from 'react';
+import CheckTime from "@/components/check-time";
+import { Metadata } from "next";
+import React from "react";
 
 export const metadata: Metadata = {
-    title: 'หน้าหลัก',
+  title: "หน้าหลัก",
 };
 
 const Home = () => {
-    return <div>ครีมคนสวย เริ่มสนุกสนานกับการ Coding กันเลย (เอาให้เสร็จนะจ๊ะ...)</div>;
+  return (
+    <>
+      <CheckTime />
+    </>
+  );
 };
 
 export default Home;

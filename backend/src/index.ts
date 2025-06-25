@@ -11,6 +11,7 @@ import logger from "./common/middleware/logger";
 import roleRoutes from "./modules/role/roleRoutes";
 import departmentRoutes from "./modules/department/deptRoutes";
 import authRoutes from "./modules/auth/authRoutes";
+import checkRoutes from "./modules/check_time/checkRoutes";
 
 const app = express();
 const port = 10001;
@@ -28,6 +29,20 @@ const swaggerDefinition = {
       url: `http://localhost:${port}/api`,
     },
   ],
+  components: {
+    securitySchemes: {
+      BearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+  security: [
+    {
+      BearerAuth: [],
+    },
+  ],
 };
 
 const options = {
@@ -40,7 +55,7 @@ const swaggerSpec = swaggerJSDoc(options);
 
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:10000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -61,6 +76,7 @@ app.use("/api", userRoutes);
 app.use("/api", roleRoutes);
 app.use("/api", authRoutes);
 app.use("/api", departmentRoutes);
+app.use("/api", checkRoutes);
 
 app.listen(port, () => {
   console.log(`🚀 Server is running on http://localhost:${port}`);
