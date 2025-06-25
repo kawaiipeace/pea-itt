@@ -179,3 +179,28 @@ export const updateLeaveRequest = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const leaveRequestPicture = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      res.status(httpStatus.BAD_REQUEST).json({ error: "Invalid ID" });
+    }
+
+    const leaveRequest = await prisma.leave_request.findUnique({
+      where: { id },
+      select: { file: true },
+    });
+
+    if (!leaveRequest || !leaveRequest.file) {
+      res.status(httpStatus.NOT_FOUND).send("Image not found");
+    }
+    res.setHeader("Content-Type", "image/jpeg");
+    res.send(leaveRequest?.file);
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error: "Server error" });
+  }
+};
