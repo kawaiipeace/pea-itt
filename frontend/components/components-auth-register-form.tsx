@@ -6,6 +6,13 @@ import InputField from "./elements/InputField";
 import PasswordField from "./elements/PasswordField";
 import SelectField, { OptionType } from "./elements/SelectField";
 import { useRouter } from "next/navigation";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale } from "react-datepicker";
+import { th } from "date-fns/locale";
+registerLocale("th", th);
+import { format } from "date-fns";
+import IconCalendar from "@/components/icon/icon-calendar";
 
 interface FormDataType {
   fname: string;
@@ -23,9 +30,34 @@ interface ErrorType {
   [key: string]: string;
 }
 
-const ComponentsAuthRegisterForm = () => {
+const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
+  if (!value)
+    return (
+      <input
+        onClick={onClick}
+        // ref={ref}
+        className="w-full rounded border px-3 py-2 pr-10 text-sm"
+        placeholder="เลือกวันที่"
+      />
+    );
 
-  const router = useRouter()
+  const [day, month, year] = value.split("/");
+  const buddhistYear = String(parseInt(year) + 543);
+
+  return (
+    <input
+      onClick={onClick}
+      // ref={ref}
+      value={`${day}/${month}/${buddhistYear}`}
+      readOnly
+      className="w-full rounded border px-3 py-2 pr-10 text-sm"
+    />
+  );
+});
+CustomDateInput.displayName = "CustomDateInput";
+
+const ComponentsAuthRegisterForm = () => {
+  const router = useRouter();
 
   const [formData, setFormData] = useState<FormDataType>({
     fname: "",
@@ -46,40 +78,34 @@ const ComponentsAuthRegisterForm = () => {
   const [mentorOptions, setMentorOptions] = useState<OptionType[]>([]);
 
   useEffect(() => {
-  axios
-    .get(`${process.env.NEXT_PUBLIC_API_URL}dept`)
-    .then((res) => {
-      const departments = res.data.data;
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}dept`)
+      .then((res) => {
+        const departments = res.data.data;
+        if (!departments || departments.length === 0) {
+          Swal.fire({
+            title: "ไม่พบสถานที่ฝึกงาน",
+            text: "ขออภัย ไม่พบข้อมูลสถานที่ฝึกงานในระบบ",
+            icon: "warning",
+          });
+          return;
+        }
 
-      if (!departments || departments.length === 0) {
-        console.warn("No departments found.");
-        setDepartmentOptions([]);
+        setDepartmentOptions(
+          departments.map((d: any) => ({
+            value: d.dept_id,
+            label: d.dept_name,
+          }))
+        );
+      })
+      .catch(() => {
         Swal.fire({
-          title: "ไม่พบสถานที่ฝึกงาน",
-          text: "ขออภัย ไม่พบข้อมูลสถานที่ฝึกงานในระบบ",
-          icon: "warning",
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถโหลดข้อมูลสถานที่ฝึกงานได้",
+          icon: "error",
         });
-        return;
-      }
-
-      setDepartmentOptions(
-        departments.map((d: any) => ({
-          value: d.dept_id,
-          label: d.dept_name,
-        }))
-      );
-    })
-    .catch((err) => {
-      console.error("Failed to fetch departments:", err);
-      Swal.fire({
-        title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถโหลดข้อมูลสถานที่ฝึกงานได้",
-        icon: "error",
       });
-    });
-}, []);
-
-
+  }, []);
 
   useEffect(() => {
     if (!formData.department) return setMentorOptions([]);
@@ -118,9 +144,7 @@ const ComponentsAuthRegisterForm = () => {
       newErr.confirmPassword = "รหัสผ่านไม่ตรงกัน";
     if (!formData.department) newErr.department = "กรุณาเลือกสถานที่ฝึก";
     if (!formData.mentor_id) newErr.mentor_id = "กรุณาเลือกพี่เลี้ยง";
-    if(formData.phone_number.split("0")[0] >= formData.phone_number.split("0")[1]){
-      newErr.phone_number = "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง"
-    }
+
     setErrors(newErr);
     return Object.keys(newErr).length === 0;
   };
@@ -135,7 +159,8 @@ const ComponentsAuthRegisterForm = () => {
         department_id: Number(formData.department),
         password_hash: password,
       });
-      router.push("/login")
+
+      router.push("/login");
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
@@ -160,8 +185,6 @@ const ComponentsAuthRegisterForm = () => {
       setPassword("");
       setConfirmPassword("");
     } catch (err: any) {
-      console.log(err);
-
       Swal.fire({
         title: "ผิดพลาด",
         text: err?.message || "เกิดข้อผิดพลาด",
@@ -182,7 +205,7 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.fname}
         onChange={handleChange}
         placeholder="กรุณากรอกชื่อจริง"
-        styles={`w-full rounded border px-3 py-2 ${
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
           errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
         }`}
       />
@@ -193,7 +216,7 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.lname}
         onChange={handleChange}
         placeholder="กรุณากรอกนามสกุล"
-        styles={`w-full rounded border px-3 py-2 ${
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
           errors.lname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
         }`}
       />
@@ -205,11 +228,10 @@ const ComponentsAuthRegisterForm = () => {
         onChange={handleChange}
         type="email"
         placeholder="กรุณากรอกอีเมล"
-        styles={`w-full rounded border px-3 py-2 ${
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
           errors.email ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
         }`}
       />
-
       <div>
         <label className="mb-1 block font-medium">เบอร์โทรศัพท์</label>
         <input
@@ -221,7 +243,7 @@ const ComponentsAuthRegisterForm = () => {
           maxLength={10}
           value={formData.phone_number}
           placeholder="กรุณากรอกเบอร์โทรศัพท์"
-          className={`w-full rounded border px-3 py-2 ${
+          className={`w-full max-w-[300px] rounded border px-3 py-2 ${
             errors.phone_number ? "border-red-400" : "border-gray-300"
           }`}
         />
@@ -236,36 +258,71 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.university}
         onChange={handleChange}
         placeholder="กรุณากรอกชื่อมหาวิทยาลัย"
-        styles={`w-full rounded border px-3 py-2 ${
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
           errors.university ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
         }`}
       />
+
       <div className="flex gap-1">
-        <InputField
-          label="วันที่เริ่มฝึกงาน"
-          name="start_date"
-          value={formData.start_date}
-          error={errors.start_date}
-          onChange={handleChange}
-          type="date"
-          styles={`w-full rounded border px-3 py-2 ${
-            errors.start_date
-              ? "border-red-400 bg-[#FFEBEE]"
-              : "border-gray-300"
-          }`}
-        />
-        <InputField
-          label="วันที่สิ้นสุดฝึกงาน"
-          name="end_date"
-          value={formData.end_date}
-          error={errors.end_date}
-          onChange={handleChange}
-          type="date"
-          styles={`w-full rounded border px-3 py-2 ${
-            errors.end_date ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-          }`}
-        />
+        <div className="relative w-full max-w-[150px]">
+          <label className="mb-1 block font-medium">วันที่เริ่มฝึกงาน</label>
+          <DatePicker
+            selected={
+              formData.start_date ? new Date(formData.start_date) : null
+            }
+            onChange={(date: Date | null) =>
+              setFormData((prev) => ({
+                ...prev,
+                start_date: date ? format(date, "yyyy-MM-dd") : "",
+              }))
+            }
+            minDate={new Date()}
+            dateFormat="dd/MM/yyyy"
+            locale="th"
+            customInput={<CustomDateInput />}
+            placeholderText="เลือกวันที่เริ่ม"
+            className={`w-full rounded border px-3 py-2 pr-10 ${
+              errors.start_date
+                ? "border-red-400 bg-[#FFEBEE]"
+                : "border-gray-300"
+            }`}
+          />
+          <IconCalendar className="pointer-events-none absolute right-3 top-8 text-gray-500" />
+          {errors.start_date && (
+            <p className="mt-1 text-[11px] text-red-500">{errors.start_date}</p>
+          )}
+        </div>
+
+        <div className="relative w-full max-w-[150px]">
+          <label className="mb-1 block font-medium">วันที่สิ้นสุดฝึกงาน</label>
+          <DatePicker
+            selected={formData.end_date ? new Date(formData.end_date) : null}
+            onChange={(date: Date | null) =>
+              setFormData((prev) => ({
+                ...prev,
+                end_date: date ? format(date, "yyyy-MM-dd") : "",
+              }))
+            }
+            minDate={
+              formData.start_date ? new Date(formData.start_date) : undefined
+            } 
+            dateFormat="dd/MM/yyyy"
+            locale="th"
+            customInput={<CustomDateInput />}
+            placeholderText="เลือกวันที่สิ้นสุด"
+            className={`w-full rounded border px-3 py-2 pr-10 ${
+              errors.end_date
+                ? "border-red-400 bg-[#FFEBEE]"
+                : "border-gray-300"
+            }`}
+          />
+          <IconCalendar className="pointer-events-none absolute right-3 top-8 text-gray-500" />
+          {errors.end_date && (
+            <p className="mt-1 text-[11px] text-red-500">{errors.end_date}</p>
+          )}
+        </div>
       </div>
+
       <PasswordField
         label="รหัสผ่าน"
         value={password}
