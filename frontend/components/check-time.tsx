@@ -120,7 +120,7 @@ const CheckTime = () => {
     };
 
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true, // ✅ ส่ง cookie token ไปด้วย
+      withCredentials: true, //  ส่ง cookie token ไปด้วย
     });
 
     showSuccessSwal();
@@ -142,8 +142,8 @@ const CheckTime = () => {
         const hour = now.getHours();
         const isWithin = distance <= 500;
 
-        setCanCheckIn(isWithin && hour === 13);
-        setCanCheckOut(isWithin && hour === 13);
+        setCanCheckIn(isWithin && hour === 14);
+        setCanCheckOut(isWithin && hour === 14);
       }
     }, 1000);
 
