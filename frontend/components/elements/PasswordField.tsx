@@ -18,14 +18,14 @@ const PasswordField = ({
   const [show, setShow] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative max-w-[300px]">
       <label className="mb-1 block font-medium">{label}</label>
       <input
         type={show ? "text" : "password"}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full rounded border px-3 py-2 pr-16 ${
+        className={`w-full max-w-[300px] rounded border px-3 py-2 pr-16 ${
           error ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
         }`}
       />

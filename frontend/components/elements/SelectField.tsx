@@ -22,7 +22,7 @@ const SelectField = ({
   error,
   placeholder,
 }: SelectFieldProps) => (
-  <div>
+  <div className="relative max-w-[300px]">
     <label className="mb-1 block font-medium">{label}</label>
     <Select
       options={options}
