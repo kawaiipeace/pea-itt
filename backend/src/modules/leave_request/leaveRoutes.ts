@@ -32,7 +32,7 @@ router.get(
 router.put(
   "/leave-request/:id",
   authenticateJWT,
-  authorizeRoles( ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  authorizeRoles(ROLE_IDS.MENTOR),
   leaveController.updateLeaveRequest
 );
 
