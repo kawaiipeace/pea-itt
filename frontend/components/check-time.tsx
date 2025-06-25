@@ -14,7 +14,6 @@ const CheckTime = () => {
   const [time, setTime] = useState(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [canCheckOut, setCanCheckOut] = useState(false);
-  const [devToolsOpened, setDevToolsOpened] = useState(false);
   const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
     type_check: "",
     location: "",
@@ -26,7 +25,7 @@ const CheckTime = () => {
     lon: number;
   } | null>(null);
 
-  const peaLat = 13.852934113096264;
+  const peaLat = 13.852364495404673;
   const peaLon = 100.55824556746184;
 
   const getDistanceFromLatLonInMeters = (
@@ -63,59 +62,6 @@ const CheckTime = () => {
       console.error("Reverse geocoding error:", error);
       return "ไม่สามารถระบุสถานที่ได้";
     }
-  };
-
-  const getAccurateLocationFromGoogleAPI = async (): Promise<{
-    lat: number;
-    lon: number;
-  } | null> => {
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
-      const response = await fetch(
-        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ considerIp: true }),
-        }
-      );
-      const data = await response.json();
-      if (data && data.location) {
-        return {
-          lat: data.location.lat,
-          lon: data.location.lng,
-        };
-      } else {
-        console.warn("ไม่ได้รับพิกัดจาก Google API");
-        return null;
-      }
-    } catch (error) {
-      console.error("Geolocation API error:", error);
-      return null;
-    }
-  };
-
-  const getBrowserLocation = (): Promise<{ lat: number; lon: number } | null> => {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve(null);
-      } else {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              lat: position.coords.latitude,
-              lon: position.coords.longitude,
-            });
-          },
-          (error) => {
-            resolve(null);
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      }
-    });
   };
 
   const showSuccessSwal = () => {
@@ -186,13 +132,12 @@ const CheckTime = () => {
           peaLat,
           peaLon
         );
-        // console.log("ระยะห่างจาก PEA (เมตร):", distance.toFixed(2)); //  แสดงผลระยะทาง
 
         const hour = now.getHours();
-        const isWithin = distance <= 800;
+        const isWithin = distance <= 500;
 
-        setCanCheckIn(isWithin && hour === 15);
-        setCanCheckOut(isWithin && hour === 15);
+        setCanCheckIn(isWithin && hour === 8);
+        setCanCheckOut(isWithin && hour === 17);
       }
     }, 1000);
 
@@ -200,38 +145,21 @@ const CheckTime = () => {
   }, [userLocation]);
 
   useEffect(() => {
-    const fetchLocation = async () => {
-      let location = await getBrowserLocation();
-      if (!location) {
-        location = await getAccurateLocationFromGoogleAPI();
-      }
-      if (location) {
-        setUserLocation(location);
-      } else {
-        alert("ไม่สามารถดึงพิกัดได้");
-      }
-    };
-
-    fetchLocation();
-
-    const detectDevTools = () => {
-      const devtools = /./;
-      devtools.toString = () => {
-        setDevToolsOpened(true);
-        return "";
-      };
-    };
-
-    detectDevTools();
-    const intervalDev = setInterval(detectDevTools, 2000);
-
-    // เพิ่ม interval สำหรับ refresh location ทุก 10 วินาที
-    const intervalLoc = setInterval(fetchLocation, 10000);
-
-    return () => {
-      clearInterval(intervalDev);
-      clearInterval(intervalLoc);
-    };
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("ไม่สามารถดึงพิกัดได้:", error);
+        }
+      );
+    } else {
+      alert("เบราว์เซอร์ของคุณไม่รองรับการเข้าถึงตำแหน่ง");
+    }
   }, []);
 
   const formatThaiDate = (date: Date) => {
