@@ -6,7 +6,6 @@ import axios from "axios";
 interface checkTime {
   type_check: string;
   location: string;
-  ip: string;
   latitude: string;
   longitude: string;
 }
@@ -15,21 +14,19 @@ const CheckTime = () => {
   const [time, setTime] = useState(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [canCheckOut, setCanCheckOut] = useState(false);
-  const [userIP, setUserIP] = useState<string>();
   const [devToolsOpened, setDevToolsOpened] = useState(false);
   const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
     type_check: "",
     location: "",
     latitude: "",
     longitude: "",
-    ip: "",
   });
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
 
-  const peaLat = 13.852364495404673;
+  const peaLat = 13.852934113096264;
   const peaLon = 100.55824556746184;
 
   const getDistanceFromLatLonInMeters = (
@@ -68,6 +65,59 @@ const CheckTime = () => {
     }
   };
 
+  const getAccurateLocationFromGoogleAPI = async (): Promise<{
+    lat: number;
+    lon: number;
+  } | null> => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+      const response = await fetch(
+        `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ considerIp: true }),
+        }
+      );
+      const data = await response.json();
+      if (data && data.location) {
+        return {
+          lat: data.location.lat,
+          lon: data.location.lng,
+        };
+      } else {
+        console.warn("ไม่ได้รับพิกัดจาก Google API");
+        return null;
+      }
+    } catch (error) {
+      console.error("Geolocation API error:", error);
+      return null;
+    }
+  };
+
+  const getBrowserLocation = (): Promise<{ lat: number; lon: number } | null> => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve(null);
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+            });
+          },
+          (error) => {
+            resolve(null);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+    });
+  };
+
   const showSuccessSwal = () => {
     Swal.fire({
       title: "บันทึกข้อมูลเรียบร้อย",
@@ -93,11 +143,10 @@ const CheckTime = () => {
       location: locationName,
       latitude: userLocation.lat.toString(),
       longitude: userLocation.lon.toString(),
-      ip: userIP,
     };
 
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true, // ✅ ส่ง cookie token ไปด้วย
+      withCredentials: true,
     });
 
     showSuccessSwal();
@@ -114,13 +163,12 @@ const CheckTime = () => {
     const newForm = {
       type_check: "out",
       location: locationName,
-      ip: userIP,
       latitude: userLocation.lat.toString(),
       longitude: userLocation.lon.toString(),
     };
 
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true, // ✅ ส่ง cookie token ไปด้วย
+      withCredentials: true,
     });
 
     showSuccessSwal();
@@ -138,12 +186,13 @@ const CheckTime = () => {
           peaLat,
           peaLon
         );
+        // console.log("ระยะห่างจาก PEA (เมตร):", distance.toFixed(2)); //  แสดงผลระยะทาง
 
         const hour = now.getHours();
-        const isWithin = distance <= 500;
+        const isWithin = distance <= 800;
 
-        setCanCheckIn(isWithin && hour === 13);
-        setCanCheckOut(isWithin && hour === 13);
+        setCanCheckIn(isWithin && hour === 15);
+        setCanCheckOut(isWithin && hour === 15);
       }
     }, 1000);
 
@@ -151,31 +200,19 @@ const CheckTime = () => {
   }, [userLocation]);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("ไม่สามารถดึงพิกัดได้:", error);
-        }
-      );
-    } else {
-      alert("เบราว์เซอร์ของคุณไม่รองรับการเข้าถึงตำแหน่ง");
-    }
+    const fetchLocation = async () => {
+      let location = await getBrowserLocation();
+      if (!location) {
+        location = await getAccurateLocationFromGoogleAPI();
+      }
+      if (location) {
+        setUserLocation(location);
+      } else {
+        alert("ไม่สามารถดึงพิกัดได้");
+      }
+    };
 
-    fetch("https://api.ipify.org?format=json")
-      .then((res) => res.json())
-      .then((data) => {
-        setUserIP(data.ip);
-      })
-      .catch((error) => {
-        console.error("ไม่สามารถดึง IP ได้:", error);
-        setUserIP("ไม่สามารถดึง IP ได้");
-      });
+    fetchLocation();
 
     const detectDevTools = () => {
       const devtools = /./;
@@ -186,9 +223,15 @@ const CheckTime = () => {
     };
 
     detectDevTools();
-    const interval = setInterval(detectDevTools, 2000);
+    const intervalDev = setInterval(detectDevTools, 2000);
 
-    return () => clearInterval(interval);
+    // เพิ่ม interval สำหรับ refresh location ทุก 10 วินาที
+    const intervalLoc = setInterval(fetchLocation, 10000);
+
+    return () => {
+      clearInterval(intervalDev);
+      clearInterval(intervalLoc);
+    };
   }, []);
 
   const formatThaiDate = (date: Date) => {
