@@ -33,31 +33,29 @@ export const registerStu = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(validatedData.password_hash, salt);
 
-    const userData = {
-      role_id: 1, // role_id : 1 => นักเรียน
-      department_id: validatedData.department_id,
-      fname: validatedData.fname,
-      lname: validatedData.lname,
-      phone_number: validatedData.phone_number,
-      email: validatedData.email,
-      password_hash: hashedPassword,
-    };
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          role_id: 1,
+          department_id: validatedData.department_id,
+          fname: validatedData.fname,
+          lname: validatedData.lname,
+          phone_number: validatedData.phone_number,
+          email: validatedData.email,
+          password_hash: hashedPassword,
+        },
+      });
 
-    const user = await prisma.user.create({
-      data: userData,
-    });
-
-    const stuData = {
-      user_id: user?.id,
-      mentor_id: validatedData.mentor_id,
-      picture: validatedData.picture,
-      university: validatedData.university,
-      start_date: validatedData.start_date,
-      end_date: validatedData.end_date,
-    };
-
-    await prisma.student_profile.create({
-      data: stuData,
+      await tx.student_profile.create({
+        data: {
+          user_id: user.id,
+          mentor_id: validatedData.mentor_id,
+          picture: validatedData.picture,
+          university: validatedData.university,
+          start_date: validatedData.start_date,
+          end_date: validatedData.end_date,
+        },
+      });
     });
 
     res.status(httpStatus.CREATED).json({

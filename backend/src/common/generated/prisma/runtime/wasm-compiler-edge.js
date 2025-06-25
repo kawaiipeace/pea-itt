@@ -14,7 +14,7 @@ Learn how: https://pris.ly/d/${Oa[t]}-build`;throw console.error(n),new L(n,r)}}
 `)}u();c();p();m();d();l();var Na=_e(bs());function La({title:e,user:t="prisma",repo:r="prisma",template:n="bug_report.yml",body:i}){return(0,Na.default)({user:t,repo:r,template:n,title:e,body:i})}function Ua({version:e,binaryTarget:t,title:r,description:n,engineVersion:i,database:o,query:s}){let a=es(6e3-(s?.length??0)),f=Ma((0,Di.default)(a)),T=n?`# Description
 \`\`\`
 ${n}
-\`\`\``:"",v=(0,Di.default)(`Hi Prisma Team! My Prisma Client just crashed. This is the report:
+\`\`\``:"",v=(0,ki.default)(`Hi Prisma Team! My Prisma Client just crashed. This is the report:
 ## Versions
 
 | Name            | Version            |

@@ -1,22 +1,27 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 interface checkTime {
   type_check: string;
   location: string;
   latitude: string;
   longitude: string;
+  ip: string;
 }
 
 const CheckTime = () => {
   const [time, setTime] = useState(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [canCheckOut, setCanCheckOut] = useState(false);
+  const [userIP, setUserIP] = useState("กำลังโหลด IP...");
+  const [devToolsOpened, setDevToolsOpened] = useState(false);
   const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
     type_check: "",
     location: "",
     latitude: "",
     longitude: "",
+    ip: "",
   });
   const [userLocation, setUserLocation] = useState<{
     lat: number;
@@ -45,7 +50,10 @@ const CheckTime = () => {
     return R * c;
   };
 
-  const reverseGeocodeGoogle = async (lat: number, lon: number): Promise<string> => {
+  const reverseGeocodeGoogle = async (
+    lat: number,
+    lon: number
+  ): Promise<string> => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
       const response = await fetch(
@@ -62,17 +70,63 @@ const CheckTime = () => {
   const handleCheckIn = async () => {
     if (!userLocation) return;
 
-    const locationName = await reverseGeocodeGoogle(userLocation.lat, userLocation.lon);
+    const locationName = await reverseGeocodeGoogle(
+      userLocation.lat,
+      userLocation.lon
+    );
 
     const newForm = {
       type_check: "in",
       location: locationName,
       latitude: userLocation.lat.toString(),
       longitude: userLocation.lon.toString(),
+      ip: userIP,
     };
 
     setCheckTimeForm(newForm);
     console.log("✅ ลงเวลาเข้างาน:", newForm);
+
+    Swal.fire({
+      title: "บันทึกข้อมูลเรียบร้อย",
+      icon: "success",
+      confirmButtonText: "ตกลง",
+      width: "400px",
+      customClass: {
+        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+      },
+    });
+
+  };
+
+  const handleCheckOut = async () => {
+    if (!userLocation) return;
+
+    const locationName = await reverseGeocodeGoogle(
+      userLocation.lat,
+      userLocation.lon
+    );
+
+    const newForm = {
+      type_check: "out",
+      location: locationName,
+      latitude: userLocation.lat.toString(),
+      longitude: userLocation.lon.toString(),
+      ip: userIP,
+    };
+
+    setCheckTimeForm(newForm);
+    console.log("📤 ลงเวลาออกงาน:", newForm);
+
+    Swal.fire({
+      title: "ลงเวลาออกงานเรียบร้อย",
+      text: `สถานที่: ${locationName}\nIP: ${userIP}`,
+      icon: "success",
+      confirmButtonText: "ตกลง",
+      width: "400px",
+      customClass: {
+        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+      },
+    });
   };
 
   useEffect(() => {
@@ -89,9 +143,9 @@ const CheckTime = () => {
         );
 
         const hour = now.getHours();
-        const isWithin = distance <= 400;
+        const isWithin = distance <= 500;
 
-        setCanCheckIn(isWithin && hour === 8);
+        setCanCheckIn(isWithin && hour === 9);
         setCanCheckOut(isWithin && hour === 16);
       }
     }, 1000);
@@ -115,6 +169,32 @@ const CheckTime = () => {
     } else {
       alert("เบราว์เซอร์ของคุณไม่รองรับการเข้าถึงตำแหน่ง");
     }
+
+    // 👉 ดึง IP
+    fetch("https://api.ipify.org?format=json")
+      .then((res) => res.json())
+      .then((data) => {
+        setUserIP(data.ip);
+      })
+      .catch((error) => {
+        console.error("ไม่สามารถดึง IP ได้:", error);
+        setUserIP("ไม่สามารถดึง IP ได้");
+      });
+
+    // 👉 ตรวจ DevTools
+    const detectDevTools = () => {
+      const devtools = /./;
+      devtools.toString = () => {
+        setDevToolsOpened(true);
+        return "";
+      };
+      // console.log("%c", devtools);
+    };
+
+    detectDevTools();
+    const interval = setInterval(detectDevTools, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const formatThaiDate = (date: Date) => {
@@ -129,14 +209,22 @@ const CheckTime = () => {
       <div className="absolute left-4 top-4 text-xs text-gray-500 sm:text-sm">
         {canCheckIn ? (
           <div className="flex items-center gap-2">
-            <img className="ml-[5px] w-[30px] flex-none" src="/assets/images/LocationSuccess.png" alt="logo" />
+            <img
+              className="ml-[5px] w-[30px]"
+              src="/assets/images/LocationSuccess.png"
+              alt="logo"
+            />
             <p>คุณอยู่ในพื้นที่และสามารถลงเวลาเข้างานได้</p>
           </div>
         ) : canCheckOut ? (
           "คุณอยู่ในพื้นที่และสามารถลงเวลาออกงานได้ (4 โมงเย็น)"
         ) : (
           <div className="flex items-center gap-2">
-            <img className="ml-[5px] w-[30px] flex-none" src="/assets/images/Location.png" alt="logo" />
+            <img
+              className="ml-[5px] w-[30px]"
+              src="/assets/images/Location.png"
+              alt="logo"
+            />
             <p>ไม่สามารถลงเวลาได้ (อยู่นอกพื้นที่หรือไม่ใช่ช่วงเวลาที่กำหนด)</p>
           </div>
         )}
@@ -161,6 +249,7 @@ const CheckTime = () => {
         </button>
         <button
           disabled={!canCheckOut}
+          onClick={handleCheckOut}
           className={`${
             canCheckOut
               ? "bg-purple-700 text-white hover:bg-purple-800"
@@ -171,16 +260,22 @@ const CheckTime = () => {
         </button>
       </div>
 
-      {/* แสดงชื่อสถานที่ */}
-      {checkTimeForm.location && (
-        <p className="text-xs text-gray-600 mt-2">
+      {/* {checkTimeForm.location && (
+        <p className="mt-2 text-xs text-gray-600">
           🗺️ สถานที่: {checkTimeForm.location}
         </p>
-      )}
+      )} */}
 
-      <a href="#" className="mb-10 text-sm text-purple-700 underline">
+      <a href="#" className="mb-4 text-sm text-purple-700 underline">
         ประวัติการลงเวลา
       </a>
+
+      {/* 🎯 แสดง IP เมื่อมี DevTools */}
+      {/* {devToolsOpened && (
+        <div className="mt-2 text-xs text-red-600">
+          🖥️ IP ของคุณคือ: <strong>{userIP}</strong>
+        </div>
+      )} */}
     </div>
   );
 };
