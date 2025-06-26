@@ -6,7 +6,6 @@ import axios from "axios";
 interface checkTime {
   type_check: string;
   location: string;
-  ip: string;
   latitude: string;
   longitude: string;
 }
@@ -15,14 +14,11 @@ const CheckTime = () => {
   const [time, setTime] = useState(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [canCheckOut, setCanCheckOut] = useState(false);
-  const [userIP, setUserIP] = useState<string>();
-  const [devToolsOpened, setDevToolsOpened] = useState(false);
   const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
     type_check: "",
     location: "",
     latitude: "",
     longitude: "",
-    ip: "",
   });
   const [userLocation, setUserLocation] = useState<{
     lat: number;
@@ -93,11 +89,10 @@ const CheckTime = () => {
       location: locationName,
       latitude: userLocation.lat.toString(),
       longitude: userLocation.lon.toString(),
-      ip: userIP,
     };
 
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true, // ✅ ส่ง cookie token ไปด้วย
+      withCredentials: true,
     });
 
     showSuccessSwal();
@@ -114,13 +109,12 @@ const CheckTime = () => {
     const newForm = {
       type_check: "out",
       location: locationName,
-      ip: userIP,
       latitude: userLocation.lat.toString(),
       longitude: userLocation.lon.toString(),
     };
 
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true, // ✅ ส่ง cookie token ไปด้วย
+      withCredentials: true,
     });
 
     showSuccessSwal();
@@ -142,8 +136,8 @@ const CheckTime = () => {
         const hour = now.getHours();
         const isWithin = distance <= 500;
 
-        setCanCheckIn(isWithin && hour === 13);
-        setCanCheckOut(isWithin && hour === 13);
+        setCanCheckIn(isWithin && hour === 8);
+        setCanCheckOut(isWithin && hour === 17);
       }
     }, 1000);
 
@@ -166,29 +160,6 @@ const CheckTime = () => {
     } else {
       alert("เบราว์เซอร์ของคุณไม่รองรับการเข้าถึงตำแหน่ง");
     }
-
-    fetch("https://api.ipify.org?format=json")
-      .then((res) => res.json())
-      .then((data) => {
-        setUserIP(data.ip);
-      })
-      .catch((error) => {
-        console.error("ไม่สามารถดึง IP ได้:", error);
-        setUserIP("ไม่สามารถดึง IP ได้");
-      });
-
-    const detectDevTools = () => {
-      const devtools = /./;
-      devtools.toString = () => {
-        setDevToolsOpened(true);
-        return "";
-      };
-    };
-
-    detectDevTools();
-    const interval = setInterval(detectDevTools, 2000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const formatThaiDate = (date: Date) => {
