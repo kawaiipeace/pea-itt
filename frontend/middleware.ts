@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
     const currentPath = request.nextUrl.pathname;
 
     // 🔓 อนุญาตให้เข้าถึง /login และ /register ได้โดยไม่ต้องมี token
-    const publicPaths = ["/login", "/register"];
+    const publicPaths = ["/login", "/register","/users/historystudent"];
 
     const isPublicPath = publicPaths.some((path) =>
       currentPath.startsWith(path)
