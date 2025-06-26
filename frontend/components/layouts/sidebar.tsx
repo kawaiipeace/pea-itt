@@ -115,8 +115,8 @@ const Sidebar = () => {
                                     <li className="menu nav-item">
                                         <button type="button" className={`${currentMenu === 'time_check' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('time_check')}>
                                             <div className="flex items-center">
-                                                <IconMenuInvoice className="shrink-0 group-hover:!text-primary" />
                                                 <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('การลงเวลาปฏิบัติงาน')}</span>
+                                                <IconMenuInvoice className="shrink-0 group-hover:!text-primary" />
                                             </div>
 
                                             <div className={currentMenu !== 'time_check' ? '-rotate-90 rtl:rotate-90' : ''}>
