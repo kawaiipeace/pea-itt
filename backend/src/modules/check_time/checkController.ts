@@ -27,6 +27,27 @@ export const checkTime = async (req: Request, res: Response) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
+    const existingSameTypeCheck = await prisma.check_time.findFirst({
+      where: {
+        user_id: user.id,
+        type_check: validatedData.type_check,
+        time: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    if (existingSameTypeCheck) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message:
+          validatedData.type_check === "in"
+            ? "คุณเช็กอินไปแล้ววันนี้"
+            : "คุณเช็กเอาต์ไปแล้ววันนี้",
+      });
+      return;
+    }
+
     if (validatedData.type_check === "out") {
       const existingCheckIn = await prisma.check_time.findFirst({
         where: {
@@ -43,6 +64,7 @@ export const checkTime = async (req: Request, res: Response) => {
         res.status(httpStatus.BAD_REQUEST).json({
           message: "ยังไม่ได้เช็กอินวันนี้ จึงไม่สามารถเช็กเอาต์ได้",
         });
+        return;
       }
     }
 
