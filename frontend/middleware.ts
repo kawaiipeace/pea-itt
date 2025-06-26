@@ -28,17 +28,6 @@ export async function middleware(request: NextRequest) {
       if (roleId === 1) return NextResponse.redirect(new URL('/', request.url));
       if (roleId === 2) return NextResponse.redirect(new URL('/', request.url));
       if (roleId === 3) return NextResponse.redirect(new URL('/', request.url));
-    const currentPath = request.nextUrl.pathname;
-
-    // 🔓 อนุญาตให้เข้าถึง /login และ /register ได้โดยไม่ต้องมี token
-    const publicPaths = ["/login", "/register"];
-
-    const isPublicPath = publicPaths.some((path) =>
-      currentPath.startsWith(path)
-    );
-
-    if (!token && !isPublicPath) {
-      return NextResponse.redirect(new URL("/login", request.url));
     }
 
     if (roleId === 1 && !currentPath.startsWith('/')) {
