@@ -20,7 +20,12 @@ export const createRole = async (req: Request, res: Response) => {
     if (error instanceof ZodError) {
       res.status(httpStatus.BAD_REQUEST).json({
         message: "Validation error",
-        errors: error.errors,
+        errors: error,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
