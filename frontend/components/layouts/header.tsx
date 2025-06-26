@@ -39,6 +39,8 @@ import IconMenuPages from "@/components/icon/menu/icon-menu-pages";
 import IconMenuMore from "@/components/icon/menu/icon-menu-more";
 import { usePathname, useRouter } from "next/navigation";
 import { getTranslation } from "@/i18n";
+import Image from "next/image";
+import Logo from "../../public/assets/images/PEAITT2.png"
 
 const Header = () => {
   const pathname = usePathname();
@@ -187,9 +189,9 @@ const Header = () => {
         <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
           <div className="horizontal-logo flex items-center justify-between ltr:mr-2 rtl:ml-2 lg:hidden">
             <Link href="/" className="main-logo flex shrink-0 items-center">
-              <img
+              <Image
                 className="inline w-[132px] ltr:-ml-1 rtl:-mr-1"
-                src="/assets/images/PEAITT-LOGO2.png"
+                src={Logo}
                 alt="logo"
               />
               {/* <span className="hidden align-middle text-2xl  font-semibold  transition-all duration-300 ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light md:inline">
@@ -201,7 +203,7 @@ const Header = () => {
               className="collapse-icon flex flex-none rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary ltr:ml-2 rtl:mr-2 dark:bg-dark/40 dark:text-[#d0d2d6] dark:hover:bg-dark/60 dark:hover:text-primary lg:hidden"
               onClick={() => dispatch(toggleSidebar())}
             >
-              <IconMenu className="h-5 w-5" />
+              <IconMenu className="h-5 w-5 " />
             </button>
           </div>
 
@@ -370,21 +372,21 @@ const Header = () => {
                       </div>
                     </div>
                   </li>
-                  <li>
+                  <li className="hover:bg-[#ECB9DB] hover:bg-opacity-50 ">
                     <Link
                       href="/users/profile"
-                      className="dark:hover:text-white"
+                      className="dark:hover:text-white "
                     >
                       <IconUser className="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
                       โปรไฟล์
                     </Link>
                   </li>
-                  <li className="border-t border-white-light dark:border-white-light/10">
+                  <li className="border-t border-white-light dark:border-white-light/10 hover:bg-[#ECB9DB] hover:bg-opacity-50 ">
                     <Link onClick={haddleLogout}
                       href="/login"
                       className="!py-3 text-danger"
                     >
-                      <IconLogout className="h-4.5 w-4.5 shrink-0 rotate-90 ltr:mr-2 rtl:ml-2" />
+                      <IconLogout className="h-4.5 w-4.5 shrink-0 rotate-90 ltr:mr-2 rtl:ml-2 " />
                       ออกจากระบบ
                     </Link>
                   </li>
