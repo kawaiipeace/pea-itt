@@ -77,48 +77,68 @@ const CheckTime = () => {
   };
 
   const handleCheckIn = async () => {
-    if (!userLocation) return;
+  if (!userLocation) return;
 
-    const locationName = await reverseGeocodeGoogle(
-      userLocation.lat,
-      userLocation.lon
-    );
+  const locationName = await reverseGeocodeGoogle(
+    userLocation.lat,
+    userLocation.lon
+  );
 
-    const newForm = {
-      type_check: "in",
-      location: locationName,
-      latitude: userLocation.lat.toString(),
-      longitude: userLocation.lon.toString(),
-    };
+  const newForm = {
+    type_check: "in",
+    location: locationName,
+    latitude: userLocation.lat.toString(),
+    longitude: userLocation.lon.toString(),
+  };
 
+  try {
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
       withCredentials: true,
     });
-
     showSuccessSwal();
-  };
+  } catch (error: any) {
+    Swal.fire({
+      title: "ไม่สามารถเช็กอินได้",
+      text:
+        error.response?.data?.message ||
+        "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
+      icon: "error",
+      confirmButtonText: "ตกลง",
+    });
+  }
+};
 
   const handleCheckOut = async () => {
-    if (!userLocation) return;
+  if (!userLocation) return;
 
-    const locationName = await reverseGeocodeGoogle(
-      userLocation.lat,
-      userLocation.lon
-    );
+  const locationName = await reverseGeocodeGoogle(
+    userLocation.lat,
+    userLocation.lon
+  );
 
-    const newForm = {
-      type_check: "out",
-      location: locationName,
-      latitude: userLocation.lat.toString(),
-      longitude: userLocation.lon.toString(),
-    };
+  const newForm = {
+    type_check: "out",
+    location: locationName,
+    latitude: userLocation.lat.toString(),
+    longitude: userLocation.lon.toString(),
+  };
 
+  try {
     await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
       withCredentials: true,
     });
-
     showSuccessSwal();
-  };
+  } catch (error: any) {
+    Swal.fire({
+      title: "ไม่สามารถเช็กเอาต์ได้",
+      text:
+        error.response?.data?.message ||
+        "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
+      icon: "error",
+      confirmButtonText: "ตกลง",
+    });
+  }
+};
 
   useEffect(() => {
     const timer = setInterval(() => {

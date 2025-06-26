@@ -1,4 +1,6 @@
 import ComponentsAuthLoginForm from '@/components/components-auth-login-form';
+import Image from "next/image";
+import Logo from "../../../public/assets/images/PEAITT2.png";
 
 export default function LoginPage() {
   return (
@@ -6,8 +8,8 @@ export default function LoginPage() {
       <div className="w-full max-w-[460px] sm:h-[652px] rounded-[20px] bg-white px-6  py-10 shadow-2xl border border-[#e5e7eb] flex flex-col">
         {/* โลโก้และหัวข้อ */}
         <div className="text-center mb-4">
-          <img
-            src="/assets/images/PEAITT-LOGO2.png"
+          <Image
+            src={Logo}
             alt="PEA Logo"
             className="mx-auto h-[50px] w-[30x] sm:w-[200px] mt-4"
           />
