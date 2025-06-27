@@ -156,7 +156,7 @@ const CheckTime = () => {
         const hour = now.getHours();
         const isWithin = distance <= 500;
 
-        setCanCheckIn(isWithin && hour === 8);
+        setCanCheckIn(isWithin && hour === 9);
         setCanCheckOut(isWithin && hour === 17);
       }
     }, 1000);
