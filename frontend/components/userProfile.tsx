@@ -5,8 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import { th } from "date-fns/locale";
 import { format } from "date-fns";
-import IconCalendar from "@/components/icon/icon-calendar";
-import useAuthStore from "@/store/authStore";
+import IconCalendar from "../components/icon/icon-calendar";
+import useAuthStore from "../store/authStore";
 
 registerLocale("th", th);
 
