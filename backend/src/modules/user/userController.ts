@@ -111,14 +111,16 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const getMentors = async (req: Request, res: Response) => {
   try {
-    const { department_id } = req.query;
+    const { department_id, user_id  } = req.query;
 
     const departmentId = department_id ? Number(department_id) : undefined;
+    const userId = user_id ? Number(user_id) : undefined;
 
     const mentors = await prisma.user.findMany({
       where: {
         role_id: 2, // MENTOR role
-        department_id: departmentId,
+        ...(departmentId !== undefined && { department_id: departmentId }),
+        ...(userId !== undefined && { id: userId }),
       },
       select: {
         id: true,
