@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import prisma from "../../common/config/prismaClient";
 import httpStatus from "http-status-codes";
+import { ZodError } from "zod";
+import * as usersModels from "./userModels";
+import { logAction } from "../../common/utils/logger";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -181,5 +184,287 @@ export const getStuPicture = async (req: Request, res: Response) => {
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ error: "Server error" });
+  }
+};
+
+export const updateUsers = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = parseInt(id);
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    if (userId !== req.user.id) {
+      res.status(httpStatus.FORBIDDEN).json({
+        message: "เฉพาะเจ้าของบัญชี (ตัวเอง) เท่านั้นที่มีสิทธิ์อัปเดตข้อมูล",
+      });
+      return;
+    }
+
+    const validatedData = usersModels.updateUserSchema.parse({
+      ...req.body,
+      picture: req.file?.buffer,
+    });
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { student_profile: true },
+    });
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "User not found",
+      });
+    }
+
+    // ตรวจสอบอีเมลซ้ำ
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email: validatedData.email,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingEmail) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Email already exists",
+      });
+    }
+
+    // ตรวจสอบเบอร์โทรซ้ำ
+    const existingPhone = await prisma.user.findFirst({
+      where: {
+        phone_number: validatedData.phone_number,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingPhone) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Phone number already exists",
+      });
+    }
+
+    const updatedData = await prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: {
+          fname: validatedData.fname,
+          lname: validatedData.lname,
+          email: validatedData.email,
+          phone_number: validatedData.phone_number,
+        },
+        select: {
+          fname: true,
+          lname: true,
+          email: true,
+          phone_number: true,
+          department_id: true,
+        },
+      });
+
+      const updatedStudentProfile = await tx.student_profile.update({
+        where: { user_id: userId },
+        data: {
+          university: validatedData.university,
+          start_date: validatedData.start_date,
+          end_date: validatedData.end_date,
+          picture: validatedData.picture,
+        },
+        select: {
+          university: true,
+          mentor_id: true,
+          start_date: true,
+          end_date: true,
+        },
+      });
+
+      const data = {
+        ...updatedUser,
+        ...updatedStudentProfile,
+      };
+
+      return data;
+    });
+
+    res.status(httpStatus.OK).json({
+      message: "User and student profile updated successfully",
+      data: updatedData,
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error.errors,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const updateDeptMent = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = parseInt(id);
+
+    const validatedData = usersModels.updateDeptMentSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        student_profile: true,
+      },
+    });
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "User not found",
+      });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        department_id: validatedData.department_id,
+      },
+    });
+
+    if (validatedData.mentor_id && user?.student_profile) {
+      await prisma.student_profile.update({
+        where: {
+          user_id: userId,
+        },
+        data: {
+          mentor_id: validatedData.mentor_id,
+        },
+      });
+    }
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    await logAction({
+      admin_id: req.user.id,
+      action: `Updated department and/or mentor for user ID ${userId}`,
+    });
+
+    res.status(httpStatus.OK).json({
+      message: "User department and/or mentor updated successfully",
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error.errors,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = parseInt(id);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        student_profile: true,
+        mentor_profile: {
+          include: {
+            student_profile: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "User not found",
+      });
+      return;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (user.student_profile) {
+        await tx.student_profile.delete({
+          where: { user_id: userId },
+        });
+      }
+
+      if (user.mentor_profile) {
+        await tx.student_profile.updateMany({
+          where: { mentor_id: user.mentor_profile.id },
+          data: { mentor_id: null },
+        });
+
+        await tx.mentor_profile.delete({
+          where: { user_id: userId },
+        });
+      }
+
+      await tx.user.delete({
+        where: { id: userId },
+      });
+    });
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    await logAction({
+      admin_id: req.user.id,
+      action: `Deleted user: ${user.fname ?? ""} ${user.lname ?? ""} (email: ${
+        user.email ?? "N/A"
+      })`,
+    });
+
+    res.status(httpStatus.OK).json({
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
   }
 };

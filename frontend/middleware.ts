@@ -25,6 +25,10 @@ export async function middleware(request: NextRequest) {
 
     if (!token && !isPublicPath) {
       return NextResponse.redirect(new URL("/login", request.url));
+    if (isPublic) {
+      if (roleId === 1) return NextResponse.redirect(new URL('/', request.url));
+      if (roleId === 2) return NextResponse.redirect(new URL('/', request.url));
+      if (roleId === 3) return NextResponse.redirect(new URL('/', request.url));
     }
 
     //const data = await res.json();

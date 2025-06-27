@@ -1,117 +1,112 @@
-'use client';
+"use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const AttendanceTable = () => {
-  const allData = [
-    { date: "09/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "10/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "11/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "12/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "13/06/2025", inTime: "-", outTime: "-", status: "ไม่มา", reason: "-", approved: "-" },
-    { date: "14/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "15/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "16/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "17/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "18/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "19/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-    { date: "20/06/2025", inTime: "08:30", outTime: "16:30", status: "มา", reason: "-", approved: "-" },
-  ];
-
+  const [attendanceData, setAttendanceData] = useState<any[]>([]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalPages = Math.ceil(allData.length / itemsPerPage);
+  // ✅ แปลงวันที่จาก YYYY-MM-DD เป็น dd/mm/yyyy
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const day = d.getDate().toString().padStart(2, "0");
+    const month = (d.getMonth() + 1).toString().padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // ✅ โหลดข้อมูลเมื่อ component ถูก mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}check-time`, {
+          withCredentials: true,
+        });
+
+        // ✅ แก้ตรงนี้! ดึง array จาก res.data.data
+        setAttendanceData(res.data?.data || []);
+        setError(null);
+      } catch (err) {
+        console.error("❌ ดึงข้อมูลไม่สำเร็จ", err);
+        setError("ไม่สามารถโหลดข้อมูลได้");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const totalPages = Math.ceil(attendanceData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = allData.slice(startIndex, startIndex + itemsPerPage);
+  const currentData = attendanceData.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="p-4">
-      {/* ส่วนหัวบน มีปุ่ม < กับคำว่า "ย้อนกลับ" */}
-      <div className="mb-4 flex items-center">
-        <button
-          onClick={() => {
-            if (currentPage > 1) setCurrentPage(currentPage - 1);
-          }}
-          className="mr-2 rounded-full border px-3 py-1 text-gray-700 hover:bg-gray-200"
-          disabled={currentPage === 1}
-        >
-          {"<"}
-        </button>
-        <h2 className="text-lg font-semibold">ย้อนกลับ</h2>
-      </div>
+      <h1 className="text-xl font-bold mb-4">ประวัติการลงเวลา</h1>
 
-      {/* ตาราง */}
-      <div className="overflow-x-auto rounded-md border">
-        {/* หัวตาราง */}
-        <div className="m-2 rounded-md bg-[#EEEEEE]">
-          <div className="grid grid-cols-6 text-sm font-semibold text-gray-800">
-            <div className="p-3">วันที่</div>
-            <div className="p-3">เวลาเข้างาน</div>
-            <div className="p-3">เวลาออกงาน</div>
-            <div className="p-3">สถานะ</div>
-            <div className="p-3">หมายเหตุ</div>
-            <div className="p-3">อนุมัติการลา</div>
-          </div>
-        </div>
+      {loading && <p>กำลังโหลดข้อมูล...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      {!loading && attendanceData.length === 0 && <p className="text-gray-500">ไม่มีข้อมูล</p>}
 
-        {/* ข้อมูลแต่ละแถว พร้อม divide-y และ padding ซ้าย-ขวา */}
-        <div className="px-4 divide-y">
-          {currentData.map((row, index) => (
-            <div key={index} className="grid grid-cols-6 text-sm">
-              <div className="p-3">{row.date}</div>
-              <div className="p-3">{row.inTime}</div>
-              <div className="p-3">{row.outTime}</div>
-              <div className="p-3">{row.status}</div>
-              <div className="p-3">{row.reason}</div>
-              <div className="p-3">{row.approved}</div>
+      {!loading && attendanceData.length > 0 && (
+        <>
+          <div className="overflow-x-auto rounded-md border">
+            <div className="m-2 rounded-md bg-[#EEEEEE]">
+              <div className="grid grid-cols-5 text-sm font-semibold text-gray-800">
+                <div className="p-3">วันที่</div>
+                <div className="p-3">เวลา</div>
+                <div className="p-3">ประเภท</div>
+                <div className="p-3">สถานที่</div>
+                <div className="p-3">หมายเหตุ</div>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Pagination ด้านล่าง */}
-      <div className="mt-4 flex items-center justify-between text-sm">
-        <div>
-          แสดงรายการ {startIndex + 1} ถึง{" "}
-          {Math.min(startIndex + itemsPerPage, allData.length)} จาก{" "}
-          {allData.length} รายการ
-        </div>
-        <div className="flex items-center gap-4">
-          {/* หมายเลขหน้า */}
-          {[...Array(totalPages)].map((_, i) => {
-            const pageNum = i + 1;
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`rounded-full border px-3 py-1 ${
-                  currentPage === pageNum
-                    ? "bg-purple-600 text-white"
-                    : "text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
+            <div className="px-4 divide-y">
+              {currentData.map((row, index) => {
+                const d = new Date(row.time);
+                const time = d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 
-          {/* ปุ่ม > */}
-          <button
-            onClick={() => {
-              if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-            }}
-            disabled={currentPage === totalPages}
-            className={`rounded-full border px-3 py-1 ${
-              currentPage === totalPages
-                ? "cursor-not-allowed text-gray-400"
-                : "text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
+                return (
+                  <div key={index} className="grid grid-cols-5 text-sm">
+                    <div className="p-3">{formatDate(row.time)}</div>
+                    <div className="p-3">{time}</div>
+                    <div className="p-3">{row.type_check === "in" ? "เข้างาน" : "ออกงาน"}</div>
+                    <div className="p-3">{row.location || "-"}</div>
+                    <div className="p-3">{row.note || "-"}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <div>
+              แสดง {startIndex + 1} - {Math.min(startIndex + itemsPerPage, attendanceData.length)} จาก {attendanceData.length} รายการ
+            </div>
+            <div className="flex items-center gap-4">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`rounded-full border px-3 py-1 ${
+                    currentPage === i + 1
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
