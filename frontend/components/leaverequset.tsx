@@ -1,15 +1,20 @@
 "use client";
+
 import React, { useState, useRef } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const Leaverequest = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const newUrl = URL.createObjectURL(file);
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const newUrl = URL.createObjectURL(selectedFile);
       setImageURL(newUrl);
     }
   };
@@ -18,20 +23,49 @@ const Leaverequest = () => {
     fileInputRef.current?.click();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert("ยืนยันการลาแล้ว");
+  const handleSubmit = async () => {
+    if (!reason.trim()) {
+      Swal.fire("กรุณากรอกหมายเหตุการลา", "", "warning");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("reason", reason);
+      if (file) {
+        formData.append("file", file);
+      }
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}leave-request`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      Swal.fire("ส่งคำขอลาสำเร็จ", "", "success");
+      setReason("");
+      setFile(null);
+      setImageURL(null);
+    } catch (error) {
+      console.error(error);
+      Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถส่งคำขอลาได้", "error");
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-[#F9F9F9] px-4 py-6 min-h-screen">
+    <div className="flex flex-col items-center justify-center bg-[#F9F9F9] px-1 py-2 text-sm">
       <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-4xl rounded-lg border bg-white p-6 sm:p-8 shadow"
+        className="w-full max-w-[750px] rounded-md border mb-6 bg-white p-2 shadow-sm sm:p-4 md:p-6"
+        onSubmit={(e) => e.preventDefault()}
       >
-        {/* หมายเหตุการลา */}
-        <div className="mb-6">
-          <label className="mb-2 block font-semibold text-base sm:text-lg">
+        
+        <div className="mb-5">
+          <label className="mb-2 block text-sm font-semibold sm:text-base">
             หมายเหตุการลา
           </label>
           <input
@@ -39,29 +73,28 @@ const Leaverequest = () => {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="กรุณากรอกหมายเหตุ"
-            className="w-full bg-[#F1F2F3] rounded-md border border-[#E0E6ED] px-4 py-2 text-sm sm:text-base focus:outline-none"
+            className="w-full rounded-md border border-[#E0E6ED] bg-[#F1F2F3] px-3 py-2 text-sm focus:outline-none sm:px-4 sm:py-2 sm:text-base"
           />
         </div>
 
-        {/* แนบหลักฐานการลา */}
+        
         <div className="mb-6">
-          <label className="mb-2 block font-semibold text-base sm:text-lg">
+          <label className="mb-2 block text-sm font-semibold sm:text-base">
             แนบหลักฐานการลา
           </label>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <input
               type="text"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="กรุณากรอกหมายเหตุ"
-              className="flex-1 rounded-md bg-[#F1F2F3] border border-[#E0E6ED] px-4 py-2 text-sm sm:text-base"
+              value={file?.name || ""}
+              readOnly
+              placeholder="ยังไม่ได้เลือกไฟล์"
+              className="flex-1 rounded-md border border-[#E0E6ED] bg-[#F1F2F3] px-3 py-2 text-sm sm:text-base"
             />
-
             <button
               type="button"
               onClick={handleChooseClick}
-              className="w-[108px] h-[37px] rounded-md bg-[#D90080]/30 font-semibold text-[#74045F] text-sm sm:text-base"
+              className="w-full rounded-md bg-[#D90080]/30 py-2 text-sm font-semibold text-[#74045F] sm:h-[37px] sm:w-[108px]"
             >
               Choose
             </button>
@@ -75,34 +108,32 @@ const Leaverequest = () => {
             className="hidden"
           />
 
-          {/* แสดงรูป */}
-          <div className="flex w-full flex-col items-center space-y-4 mt-4">
+          
+          <div className="mt-4 flex w-full flex-col items-center space-y-4">
             {imageURL ? (
               <img
                 src={imageURL}
                 alt="preview"
-                className="h-64 w-64 sm:h-80 sm:w-80 rounded-md border object-cover"
+                className="h-28 w-28 rounded-md border object-contain sm:h-40 sm:w-40 md:h-56 md:w-56"
               />
             ) : (
-              <img
-                src="/file-preview.svg"
-                alt="default preview"
-                className="h-64 w-64 sm:h-80 sm:w-80 rounded-md border object-cover"
-              />
+              <div className="h-28 w-28 sm:h-40 sm:w-40 md:h-56 md:w-56 flex items-center justify-center rounded border border-dashed bg-gray-100 text-gray-500 text-sm">
+                ไม่มีรูป
+              </div>
             )}
           </div>
         </div>
-
-        {/* ปุ่มยืนยัน */}
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            className="h-12 w-48 rounded-md bg-[#74045F] text-lg text-white transition hover:bg-[#B10073]"
-          >
-            ยืนยันการลา
-          </button>
-        </div>
       </form>
+
+      
+      <div className="w-full max-w-3xl px-4 sm:px-0">
+        <button
+          onClick={handleSubmit}
+          className="w-full rounded-md bg-[#74045F] py-3 text-base text-white transition hover:bg-[#B10073] sm:w-48 sm:text-lg mx-auto block"
+        >
+          ยืนยันการลา
+        </button>
+      </div>
     </div>
   );
 };
