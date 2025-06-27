@@ -12,7 +12,7 @@ import { registerLocale } from "react-datepicker";
 import { th } from "date-fns/locale";
 registerLocale("th", th);
 import { format } from "date-fns";
-import IconCalendar from "@/components/icon/icon-calendar";
+import IconCalendar from "../components/icon/icon-calendar";
 
 
 
