@@ -1,15 +1,16 @@
 import React from 'react'
 import { Metadata } from "next";
-import UserProfile from "@/components/userProfile";
+import Historyform  from "../../../../components/history-form";
 
 export const metadata: Metadata = {
-  title: "หน้าโปรไฟล์",
+  title: "หน้าประวัติ",
 };
 
-const profile = () => {
+const profile:React.FC = () => {
   return (
-    
-    <UserProfile />
+    <>
+    <Historyform  />
+    </>
 
   );
 }

@@ -14,6 +14,8 @@ registerLocale("th", th);
 import { format } from "date-fns";
 import IconCalendar from "@/components/icon/icon-calendar";
 
+
+
 interface FormDataType {
   fname: string;
   lname: string;
@@ -35,7 +37,6 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
     return (
       <input
         onClick={onClick}
-        // ref={ref}
         className="w-full rounded border px-3 py-2 pr-10 text-sm"
         placeholder="เลือกวันที่"
       />
@@ -47,7 +48,6 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
   return (
     <input
       onClick={onClick}
-      // ref={ref}
       value={`${day}/${month}/${buddhistYear}`}
       readOnly
       className="w-full rounded border px-3 py-2 pr-10 text-sm"

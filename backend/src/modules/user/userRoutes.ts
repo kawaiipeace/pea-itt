@@ -1,5 +1,6 @@
 import express from "express";
 import * as userController from "../user/userController";
+import { upload } from "../../common/middleware/upload";
 import { authenticateJWT } from "../../common/middleware/authenticateJWT";
 import {
   authorizeRoles,
@@ -200,9 +201,245 @@ router.get(
  *       500:
  *         description: Internal server error
  */
-router.get(
-  "/user/mentor",
-  userController.getMentors
+router.get("/user/mentor", userController.getMentors);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update user and student profile (only by the user themselves)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the user to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fname
+ *               - lname
+ *               - email
+ *               - phone_number
+ *               - department_id
+ *               - mentor_id
+ *               - university
+ *               - start_date
+ *               - end_date
+ *             properties:
+ *               fname:
+ *                 type: string
+ *                 example: John
+ *               lname:
+ *                 type: string
+ *                 example: Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john.doe@example.com
+ *               phone_number:
+ *                 type: string
+ *                 example: "0812345678"
+ *               department_id:
+ *                 type: integer
+ *                 example: 1
+ *               mentor_id:
+ *                 type: integer
+ *                 example: 2
+ *               university:
+ *                 type: string
+ *                 example: Chulalongkorn University
+ *               start_date:
+ *                 type: string
+ *                 format: date
+ *                 example: 2025-06-01
+ *               end_date:
+ *                 type: string
+ *                 format: date
+ *                 example: 2025-10-01
+ *               picture:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: User and student profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User and student profile updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     fname:
+ *                       type: string
+ *                     lname:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     phone_number:
+ *                       type: string
+ *                     department_id:
+ *                       type: integer
+ *                     university:
+ *                       type: string
+ *                     mentor_id:
+ *                       type: integer
+ *                     start_date:
+ *                       type: string
+ *                       format: date
+ *                     end_date:
+ *                       type: string
+ *                       format: date
+ *       400:
+ *         description: Invalid request (e.g. validation failed)
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       403:
+ *         description: You are not authorized to update this user
+ *       404:
+ *         description: User not found
+ *       409:
+ *         description: Email or phone number already exists
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/users/:id",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.STUDENT),
+  upload.single("picture"),
+  userController.updateUsers
+);
+
+/**
+ * @swagger
+ * /users/admin/{id}:
+ *   put:
+ *     summary: Update user's department and/or mentor (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Numeric ID of the user to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - department_id
+ *             properties:
+ *               department_id:
+ *                 type: integer
+ *                 minimum: 1
+ *                 example: 2
+ *               mentor_id:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 5
+ *     responses:
+ *       200:
+ *         description: User department and/or mentor updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User department and/or mentor updated successfully
+ *       400:
+ *         description: Validation error or bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Validation error
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       403:
+ *         description: Forbidden - user is not admin
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/users/admin/:id",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.ADMIN),
+  userController.updateDeptMent
+);
+
+/**
+ * @swagger
+ * /users/admin/{id}:
+ *   delete:
+ *     summary: Delete a user by ID (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Numeric ID of the user to delete
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       403:
+ *         description: Forbidden - user is not admin
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete(
+  "/users/admin/:id",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.ADMIN),
+  userController.deleteUser
 );
 
 export default router;
