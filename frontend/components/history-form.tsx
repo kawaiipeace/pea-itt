@@ -13,26 +13,27 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowLeft from "../components/icon/icon-arrow-left";
 import useAuthStore from "../store/authStore";
+import { set } from "lodash";
 
 // ──────────────────────── Types ────────────────────────────
 interface CheckRow {
   id: number;
   user_id: number;
-  time: string;              // ISO 8601
+  time: string; // ISO 8601
   type_check: "in" | "out";
-  note?: string;             // ไม่ใช้กับ in/out (backend ใส่ "-" ได้)
+  note?: string; // ไม่ใช้กับ in/out (backend ใส่ "-" ได้)
 }
 
 interface LeaveRow {
   id: number;
   user_id: number;
-  leave_datetime: string;    // ISO 8601 (สมมติใช้ชื่อนี้)
+  leave_datetime: string; // ISO 8601 (สมมติใช้ชื่อนี้)
   reason: string;
   status: "approved" | "declined" | "pending";
 }
 
 interface ViewRow {
-  dateKey: string;           // YYYY-MM-DD
+  dateKey: string; // YYYY-MM-DD
   dateTH: string;
   inTime: string | "-";
   outTime: string | "-";
@@ -63,15 +64,21 @@ const Badge = ({ value }: { value?: string }) => {
   switch (value) {
     case "approved":
       return (
-        <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">อนุมัติ</span>
+        <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">
+          อนุมัติ
+        </span>
       );
     case "declined":
       return (
-        <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">ไม่อนุมัติ</span>
+        <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">
+          ไม่อนุมัติ
+        </span>
       );
     default:
       return (
-        <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">รออนุมัติ</span>
+        <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">
+          รออนุมัติ
+        </span>
       );
   }
 };
@@ -79,7 +86,9 @@ const Badge = ({ value }: { value?: string }) => {
 // ─────────────────────── Component ─────────────────────────
 const HistoryForm: React.FC = () => {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+
+  // console.log(user);
 
   const [checks, setChecks] = useState<CheckRow[]>([]);
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
@@ -88,26 +97,47 @@ const HistoryForm: React.FC = () => {
   const [page, setPage] = useState(1);
 
   // ───────────── fetch both endpoints ─────────────
+
   useEffect(() => {
     if (!user) return;
-
-    const isStudent = user.role_id === 1;
-    const params = isStudent ? {} : { user_id: user.id };
+    console.log(user);
 
     setLoading(true);
-    Promise.all([
-      axios.get(`${process.env.NEXT_PUBLIC_API_URL}check-time`, {
-        params,
-        withCredentials: true,
-      }),
-      axios.get(`${process.env.NEXT_PUBLIC_API_URL}leave-request`, {
-        params,
-        withCredentials: true,
-      }),
-    ])
+
+    const checkTimePromise = axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}check-time`,
+      { withCredentials: true }
+    );
+
+    const leaveRequestPromise = axios
+      .get(
+        `${process.env.NEXT_PUBLIC_API_URL}leave-request/${user.student_profile.id}`,
+        { withCredentials: true }
+      )
+      .catch((err) => {
+        // ถ้าใบลา error ไม่ต้องแสดง error และ return ค่าเป็น []
+        console.warn(
+          "[LEAVE-REQUEST]",
+          err?.response?.data?.message || err.message
+        );
+        return { data: { data: [] } }; // ป้องกัน Promise.all ล้มเหลว
+      });
+
+    Promise.all([checkTimePromise, leaveRequestPromise])
       .then(([cRes, lRes]) => {
+        // set checks
         setChecks(cRes.data?.data || []);
-        setLeaves(lRes.data?.data || []);
+
+        // handle leaves safely
+        const leaveData = lRes.data?.data;
+        if (Array.isArray(leaveData)) {
+          setLeaves(leaveData);
+        } else if (leaveData) {
+          setLeaves([leaveData]); // ถ้าเป็น object เดียว
+        } else {
+          setLeaves([]); // ถ้าไม่พบข้อมูล
+        }
+
         setError(null);
       })
       .catch((err) => {
@@ -115,7 +145,7 @@ const HistoryForm: React.FC = () => {
         const msg = err?.response?.data?.message || "ไม่สามารถโหลดข้อมูลได้";
         setError(msg);
       })
-      .finally(() => setLoading(false));8
+      .finally(() => setLoading(false));
   }, [user]);
 
   // ───────────── transform to ViewRow ─────────────
@@ -154,7 +184,9 @@ const HistoryForm: React.FC = () => {
       });
     });
 
-    return Array.from(map.values()).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
+    return Array.from(map.values()).sort((a, b) =>
+      b.dateKey.localeCompare(a.dateKey)
+    );
   }, [checks, leaves]);
 
   // ───────────── pagination ─────────────
@@ -173,7 +205,14 @@ const HistoryForm: React.FC = () => {
 
       <div className="overflow-auto rounded-lg border border-gray-200 bg-white">
         <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800">
-          {["วันที่", "เวลาเข้างาน", "เวลาออกงาน", "สถานะ", "หมายเหตุ", "อนุมัติการลา"].map((h) => (
+          {[
+            "วันที่",
+            "เวลาเข้างาน",
+            "เวลาออกงาน",
+            "สถานะ",
+            "หมายเหตุ",
+            "อนุมัติการลา",
+          ].map((h) => (
             <div key={h} className="p-3">
               {h}
             </div>
@@ -196,7 +235,9 @@ const HistoryForm: React.FC = () => {
                 <div className="p-3">{r.outTime}</div>
                 <div className="p-3">{r.status}</div>
                 <div className="p-3">{r.note}</div>
-                <div className="p-3">{r.status === "ลา" ? <Badge value={r.approval} /> : "-"}</div>
+                <div className="p-3">
+                  {r.status === "ลา" ? <Badge value={r.approval} /> : "-"}
+                </div>
               </div>
             ))}
         </div>
@@ -210,7 +251,9 @@ const HistoryForm: React.FC = () => {
             disabled={page === 1}
             className={clsx(
               "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-              page === 1 ? "cursor-not-allowed text-gray-300" : "hover:bg-gray-200"
+              page === 1
+                ? "cursor-not-allowed text-gray-300"
+                : "hover:bg-gray-200"
             )}
           >
             &lt;
@@ -224,7 +267,9 @@ const HistoryForm: React.FC = () => {
                 onClick={() => setPage(p)}
                 className={clsx(
                   "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-                  page === p ? "bg-[#B10073] text-white" : "text-gray-700 hover:bg-gray-200"
+                  page === p
+                    ? "bg-[#B10073] text-white"
+                    : "text-gray-700 hover:bg-gray-200"
                 )}
               >
                 {p}
@@ -237,7 +282,9 @@ const HistoryForm: React.FC = () => {
             disabled={page === pages}
             className={clsx(
               "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-              page === pages ? "cursor-not-allowed text-gray-300" : "hover:bg-gray-200"
+              page === pages
+                ? "cursor-not-allowed text-gray-300"
+                : "hover:bg-gray-200"
             )}
           >
             &gt;
@@ -247,7 +294,8 @@ const HistoryForm: React.FC = () => {
 
       {!loading && !error && viewRows.length > 0 && (
         <p className="mt-2 text-xs text-gray-500">
-          แสดง {(page - 1) * ITEMS + 1}-{Math.min(page * ITEMS, viewRows.length)} จาก {viewRows.length} รายการ
+          แสดง {(page - 1) * ITEMS + 1}-
+          {Math.min(page * ITEMS, viewRows.length)} จาก {viewRows.length} รายการ
         </p>
       )}
     </section>
