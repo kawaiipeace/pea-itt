@@ -245,7 +245,7 @@ const CheckTime = () => {
         </button>
       </div>
 
-      <a href="#" className="mb-4 text-sm text-purple-700 underline">
+      <a href="/users/historystudent" className="mb-4 text-sm text-purple-700 underline">
         ประวัติการลงเวลา
       </a>
     </div>
