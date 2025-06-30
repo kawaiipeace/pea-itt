@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
@@ -7,6 +7,7 @@ import { th } from "date-fns/locale";
 import { format } from "date-fns";
 import IconCalendar from "../components/icon/icon-calendar";
 import useAuthStore from "../store/authStore";
+import axios from "axios";
 
 registerLocale("th", th);
 
@@ -55,6 +56,28 @@ const UserProfile = () => {
       reader.readAsDataURL(file);
     }
   }
+
+  useEffect(() => {
+    const fetchMentorProfile = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?user_id=${user?.student_profile.mentor_id}`
+        );
+
+        console.log("Mentor profile response:", response.data.data);
+
+        // if (response.data) {
+        //   setFormData((prevData) => ({
+        //     ...prevData,
+        //     mentor_id: response.data.name,
+        //   }));
+        // }
+      } catch (error) {
+        console.error("Error fetching mentor profile:", error);
+      }
+    };
+    fetchMentorProfile();
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4">
