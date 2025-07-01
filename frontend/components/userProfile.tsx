@@ -11,9 +11,21 @@ import axios from "axios";
 
 registerLocale("th", th);
 
+interface EditProfile {
+  name: string;
+  surname: string;
+  email: string;
+  university: string;
+  phone: string;
+  start_date: string;
+  end_date: string;
+}
+
 const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
   const [day, month, year] = value?.split("/") || ["", "", ""];
   const buddhistYear = year ? String(parseInt(year) + 543) : "";
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.actionSetUser);
 
   return (
     <input
@@ -64,20 +76,71 @@ const UserProfile = () => {
           `${process.env.NEXT_PUBLIC_API_URL}user/mentor?user_id=${user?.student_profile.mentor_id}`
         );
 
-        console.log("Mentor profile response:", response.data.data);
+        const dept = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}dept/${user?.department_id}`
+        );
 
-        // if (response.data) {
-        //   setFormData((prevData) => ({
-        //     ...prevData,
-        //     mentor_id: response.data.name,
-        //   }));
-        // }
+        const deptName = dept.data.data.dept_name;
+
+        const mentor = response.data.data[0];
+        if (mentor) {
+          const fullName = `${mentor.fname} ${mentor.lname}`;
+
+          setFormData((prevData) => ({
+            ...prevData,
+            mentor_id: fullName,
+            department: deptName,
+          }));
+        }
       } catch (error) {
         console.error("Error fetching mentor profile:", error);
       }
     };
+
     fetchMentorProfile();
   }, []);
+
+  const setUser = useAuthStore((state) => state.actionSetUser);
+
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    if (!user) {
+      alert("กรุณาเข้าสู่ระบบก่อน");
+      return;
+    }
+
+    try {
+      const form = new FormData();
+      form.append("fname", formData.name);
+      form.append("lname", formData.surname);
+      form.append("email", formData.email);
+      form.append("phone_number", formData.phone);
+      form.append("university", formData.university);
+      form.append("start_date", formData.start_date);
+      form.append("end_date", formData.end_date);
+
+      // ส่งเป็นหมายเลขจริง (ไม่ใช่ชื่อกองหรือชื่อพี่เลี้ยง)
+      form.append("department_id", String(user?.department_id));
+      form.append("mentor_id", String(user?.student_profile.mentor_id));
+
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}users/${user.id}`,
+        form,
+        {
+          withCredentials: true,
+        }
+      );
+
+      const res =response.data.data;
+
+
+      alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาด:", error);
+      alert("ไม่สามารถบันทึกข้อมูลได้");
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4">
@@ -273,6 +336,9 @@ const UserProfile = () => {
             <div className="mt-4 md:col-span-2">
               <button
                 type="submit"
+                onClick={(e) => {
+                  handleClick(e);
+                }}
                 className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
               >
                 บันทึก
