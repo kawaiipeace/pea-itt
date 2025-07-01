@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowLeft from "../components/icon/icon-arrow-left";
 import useAuthStore from "../store/authStore";
+import { log } from "util";
 
 interface CheckRow {
   id: number;
@@ -81,6 +82,10 @@ const HistoryForm: React.FC = () => {
     if (!user || !user.student_profile?.id) return;
     setLoading(true);
 
+    console.log("Fetching data for user:", user.id, "Profile ID:", user.student_profile.id);
+    console.log(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${user.id}`);
+    console.log(`${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`);
+
     const fetchData = async () => {
       try {
         const [checkRes, leaveRes] = await Promise.all([
@@ -89,7 +94,7 @@ const HistoryForm: React.FC = () => {
             .then((res) => (Array.isArray(res.data?.data) ? res.data.data : []))
             .catch(() => []),
           axios
-            .get(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${user.student_profile.id}`, { withCredentials: true })
+            .get(`${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${user.id}`, { withCredentials: true })
             .then((res) => (Array.isArray(res.data?.data) ? res.data.data : res.data?.data ? [res.data.data] : []))
             .catch(() => []),
         ]);

@@ -1,9 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
-import { th } from "date-fns/locale";
+import { fr, th } from "date-fns/locale";
 import { format } from "date-fns";
 import IconCalendar from "../components/icon/icon-calendar";
 import useAuthStore from "../store/authStore";
@@ -69,10 +69,12 @@ const UserProfile = () => {
   }
 
   useEffect(() => {
+    console.log("User data:", user);
+
     const fetchMentorProfile = async () => {
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?user_id=${user?.student_profile.mentor_id}`
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user?.student_profile.mentor_id}`
         );
 
         const dept = await axios.get(
@@ -99,6 +101,28 @@ const UserProfile = () => {
     fetchMentorProfile();
   }, []);
 
+  useEffect(() => {
+    const setImage = async () => {
+      if (user?.student_profile.image) {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}users/${user.student_profile.id}/picture`,
+            {
+              responseType: "blob",
+              withCredentials: true,
+            }
+          );
+          const blob = new Blob([response.data], { type: "image/jpeg" });
+          const image = URL.createObjectURL(blob);
+          setImageSrc(image);
+        } catch (error) {
+          console.error("Error fetching user image:", error);
+        }
+      }
+    };
+    setImage()
+  }, [user]);
+
   const setUser = useAuthStore((state) => state.actionSetUser);
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -118,10 +142,9 @@ const UserProfile = () => {
       form.append("university", formData.university);
       form.append("start_date", formData.start_date);
       form.append("end_date", formData.end_date);
-
-      // ส่งเป็นหมายเลขจริง (ไม่ใช่ชื่อกองหรือชื่อพี่เลี้ยง)
       form.append("department_id", String(user?.department_id));
       form.append("mentor_id", String(user?.student_profile.mentor_id));
+      form.append("image", imageSrc);
 
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}users/${user.id}`,
@@ -131,7 +154,7 @@ const UserProfile = () => {
         }
       );
 
-      const res =response.data.data;
+      const res = response.data.data;
 
 
       alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
