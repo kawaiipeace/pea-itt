@@ -11,7 +11,7 @@ interface checkTime {
 }
 
 const CheckTime = () => {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date>(new Date());
   const [canCheckIn, setCanCheckIn] = useState(false);
   const [canCheckOut, setCanCheckOut] = useState(false);
   const [checkTimeForm, setCheckTimeForm] = useState<checkTime>({
@@ -77,74 +77,86 @@ const CheckTime = () => {
   };
 
   const handleCheckIn = async () => {
-  if (!userLocation) return;
+    if (!userLocation) return;
 
-  const locationName = await reverseGeocodeGoogle(
-    userLocation.lat,
-    userLocation.lon
-  );
+    const locationName = await reverseGeocodeGoogle(
+      userLocation.lat,
+      userLocation.lon
+    );
 
-  const newForm = {
-    type_check: "in",
-    location: locationName,
-    latitude: userLocation.lat.toString(),
-    longitude: userLocation.lon.toString(),
+    const newForm = {
+      type_check: "in",
+      location: locationName,
+      latitude: userLocation.lat.toString(),
+      longitude: userLocation.lon.toString(),
+    };
+
+    try {
+      const checkTime = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}check-time`,
+        newForm,
+        {
+          withCredentials: true,
+        }
+      );
+      const serverTime = new Date(checkTime.data.data.time);
+      setTime(serverTime);
+
+      showSuccessSwal();
+    } catch (error: any) {
+      Swal.fire({
+        title: "ไม่สามารถเช็กอินได้",
+        text:
+          error.response?.data?.message ||
+          "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
+    }
   };
-
-  try {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true,
-    });
-    showSuccessSwal();
-  } catch (error: any) {
-    Swal.fire({
-      title: "ไม่สามารถเช็กอินได้",
-      text:
-        error.response?.data?.message ||
-        "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
-      icon: "error",
-      confirmButtonText: "ตกลง",
-    });
-  }
-};
 
   const handleCheckOut = async () => {
-  if (!userLocation) return;
+    if (!userLocation) return;
 
-  const locationName = await reverseGeocodeGoogle(
-    userLocation.lat,
-    userLocation.lon
-  );
+    const locationName = await reverseGeocodeGoogle(
+      userLocation.lat,
+      userLocation.lon
+    );
 
-  const newForm = {
-    type_check: "out",
-    location: locationName,
-    latitude: userLocation.lat.toString(),
-    longitude: userLocation.lon.toString(),
+    const newForm = {
+      type_check: "out",
+      location: locationName,
+      latitude: userLocation.lat.toString(),
+      longitude: userLocation.lon.toString(),
+    };
+
+    try {
+      const checkTime = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}check-time`,
+        newForm,
+        {
+          withCredentials: true,
+        }
+      );
+      const serverTime = new Date(checkTime.data.data.time);
+      setTime(serverTime);
+
+      showSuccessSwal();
+    } catch (error: any) {
+      Swal.fire({
+        title: "ไม่สามารถเช็กเอาต์ได้",
+        text:
+          error.response?.data?.message ||
+          "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
+    }
   };
-
-  try {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}check-time`, newForm, {
-      withCredentials: true,
-    });
-    showSuccessSwal();
-  } catch (error: any) {
-    Swal.fire({
-      title: "ไม่สามารถเช็กเอาต์ได้",
-      text:
-        error.response?.data?.message ||
-        "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
-      icon: "error",
-      confirmButtonText: "ตกลง",
-    });
-  }
-};
 
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
-      setTime(now);
-
       if (userLocation) {
         const distance = getDistanceFromLatLonInMeters(
           userLocation.lat,
@@ -152,15 +164,13 @@ const CheckTime = () => {
           peaLat,
           peaLon
         );
-
         const hour = now.getHours();
         const isWithin = distance <= 500;
 
-        setCanCheckIn(isWithin && hour === 9);
+        setCanCheckIn(isWithin && hour >= 8 && hour <= 16);
         setCanCheckOut(isWithin && hour === 17);
       }
     }, 1000);
-
     return () => clearInterval(timer);
   }, [userLocation]);
 
@@ -215,9 +225,15 @@ const CheckTime = () => {
         )}
       </div>
 
-      <h1 className="mb-4 text-4xl font-bold tracking-widest sm:text-6xl md:text-7xl">
-        {time.toLocaleTimeString("th-TH", { hour12: false })}
-      </h1>
+      {/*เช็กว่า time เป็น Date ก่อนแสดง */}
+      {time instanceof Date && !isNaN(time.getTime()) ? (
+        <h1 className="mb-4 text-4xl font-bold tracking-widest sm:text-6xl md:text-7xl">
+          {time.toLocaleTimeString("th-TH", { hour12: false })}
+        </h1>
+      ) : (
+        <h1 className="mb-4 text-4xl text-red-500">กำลังโหลดเวลา...</h1>
+      )}
+
       <h2 className="mb-8 text-lg sm:text-2xl">{formatThaiDate(time)}</h2>
 
       <div className="mb-6 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
@@ -245,7 +261,7 @@ const CheckTime = () => {
         </button>
       </div>
 
-      <a href="#" className="mb-4 text-sm text-purple-700 underline">
+      <a href="/users/historystudent" className="mb-4 text-sm text-purple-700 underline">
         ประวัติการลงเวลา
       </a>
     </div>

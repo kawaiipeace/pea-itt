@@ -70,7 +70,7 @@ export const registerStu = async (req: Request, res: Response) => {
     } else if (error instanceof Error) {
       res.status(httpStatus.BAD_REQUEST).json({
         message: "Something went wrong!",
-        errors: error,
+        errors: error.message,
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({

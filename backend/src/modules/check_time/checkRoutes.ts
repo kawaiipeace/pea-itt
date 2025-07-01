@@ -140,7 +140,7 @@ router.post(
 router.get(
   "/check-time",
   authenticateJWT,
-  authorizeRoles(ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  authorizeRoles(ROLE_IDS.STUDENT,ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
   chackController.getTimeCheck
 );
 

@@ -77,12 +77,10 @@ export const checkTime = async (req: Request, res: Response) => {
       ip: ip,
       note:
         validatedData.type_check === "in"
-          ? `${user.fname} ${
-              user.lname
-            } checked in at ${new Date().toLocaleString()} from IP: ${ip}`
-          : `${user.fname} ${
-              user.lname
-            } checked out at ${new Date().toLocaleString()} from IP: ${ip}`,
+          ? `${user.fname} ${user.lname
+          } checked in at ${new Date().toLocaleString()} from IP: ${ip}`
+          : `${user.fname} ${user.lname
+          } checked out at ${new Date().toLocaleString()} from IP: ${ip}`,
       latitude: validatedData.latitude,
       longitude: validatedData.longitude,
     };
@@ -119,7 +117,8 @@ export const checkTime = async (req: Request, res: Response) => {
 
 export const getTimeCheck = async (req: Request, res: Response) => {
   try {
-    const { type_check, sort = "time", order = "desc", user_id } = req.query;
+    const { type_check, sort = "time", order = "desc", user_id, page = "1",
+      limit = "10", } = req.query;
 
     const typeCheck = type_check ? String(type_check) : undefined;
     const userID = user_id ? Number(user_id) : undefined;
@@ -132,6 +131,8 @@ export const getTimeCheck = async (req: Request, res: Response) => {
       orderBy: {
         [sort as string]: order === "asc" ? "asc" : "desc",
       },
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
     });
 
     if (checkTime.length === 0) {

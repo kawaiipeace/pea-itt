@@ -3,9 +3,9 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import useAuthStore from "@/store/authStore";
-import IconLockDots from "@/components/icon/icon-lock-dots";
-import IconAccount from "@/components/icon/icon-user";
+import useAuthStore from "../store/authStore";
+import IconLockDots from "../components/icon/icon-lock-dots";
+import IconAccount from "../components/icon/icon-user";
 
 const ComponentsAuthLoginForm = () => {
   const router = useRouter();
