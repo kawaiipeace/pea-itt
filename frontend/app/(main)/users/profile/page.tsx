@@ -1,7 +1,6 @@
 import React from 'react'
 import { Metadata } from "next";
-import Historyform  from "../../../../components/history-form";
-
+import UserProfile from "../../../../components/userProfile";
 export const metadata: Metadata = {
   title: "หน้าประวัติ",
 };
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 const profile:React.FC = () => {
   return (
     <>
-    <Historyform  />
+    <UserProfile  />
     </>
 
   );
