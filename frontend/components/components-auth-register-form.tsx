@@ -158,7 +158,7 @@ const ComponentsAuthRegisterForm = () => {
         password_hash: password,
       });
 
-      router.push("/login");
+      
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
@@ -168,7 +168,7 @@ const ComponentsAuthRegisterForm = () => {
           confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
         },
       });
-
+      router.push("/login");
       setFormData({
         fname: "",
         lname: "",

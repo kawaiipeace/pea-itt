@@ -105,7 +105,7 @@ const HistoryForm: React.FC = () => {
     setLoading(true);
 
     const checkTimePromise = axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}check-time`,
+      `${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`,
       { withCredentials: true }
     );
 
@@ -127,6 +127,8 @@ const HistoryForm: React.FC = () => {
       .then(([cRes, lRes]) => {
         // set checks
         setChecks(cRes.data?.data || []);
+        console.log(cRes.data);
+        
 
         // handle leaves safely
         const leaveData = lRes.data?.data;
