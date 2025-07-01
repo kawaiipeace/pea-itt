@@ -4,7 +4,8 @@ import Header from '@/components/layouts/header';
 import MainContainer from '@/components/layouts/main-container';
 import Overlay from '@/components/layouts/overlay';
 import ScrollToTop from '@/components/layouts/scroll-to-top';
-import SidebarStudent from '@/components/layouts/sidebar-student'
+import SidebarMentor from '@/components/layouts/sidebar-mentor'
+// import SidebarStudent from '@/components/layouts/sidebar-student'
 import Portals from '@/components/portals';
 
 export default function DefaultLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
 
                 <MainContainer>
                     {/* BEGIN SIDEBAR */}
-                    <SidebarStudent />
+                    <SidebarMentor />
                     {/* END SIDEBAR */}
                     <div className="main-content flex min-h-screen flex-col">
                         {/* BEGIN TOP NAVBAR */}
