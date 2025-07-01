@@ -25,7 +25,6 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
   const [day, month, year] = value?.split("/") || ["", "", ""];
   const buddhistYear = year ? String(parseInt(year) + 543) : "";
   const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.actionSetUser);
 
   return (
     <input
