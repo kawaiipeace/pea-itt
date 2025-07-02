@@ -63,9 +63,11 @@ const SidebarMentor = () => {
                   
                   <li className="menu nav-item">
                     <Link
-                      href="/"
+                      href="mentor-student"
                       className={`nav-link group w-full ${
-                        pathname === "/" ? "active" : ""
+                        pathname.startsWith("/mentor-student")
+                          ? "active"
+                          : ""
                       }`}
                     >
                       <div className="flex items-center">
@@ -85,9 +87,9 @@ const SidebarMentor = () => {
                   
                   <li className="nav-item">
                     <Link
-                      href="/users/leaverequest"
+                      href="approver"
                       className={`nav-link group w-full ${
-                        pathname.startsWith("/users/leaverequest")
+                        pathname.startsWith("/approver")
                           ? "active"
                           : ""
                       }`}
