@@ -44,17 +44,18 @@ const ComponentsAuthLoginForm = () => {
 
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setErrors({}); // ล้าง error เก่าก่อน
+
     if (!validate()) {
       console.warn("Validation failed: ข้อมูลไม่ครบหรือไม่ถูกต้อง");
       return;
     }
 
     setLoading(true);
-    const isEmail = emailOrPhone.includes("@");
 
-    const payload: any = {
-      password_hash: password,
-    };
+    const isEmail = emailOrPhone.includes("@");
+    const payload: any = { password_hash: password };
 
     if (isEmail) {
       payload.email = emailOrPhone;
@@ -62,42 +63,28 @@ const ComponentsAuthLoginForm = () => {
       payload.phone_number = emailOrPhone;
     }
 
-
     try {
-      await actionLogin(payload).then(() => {
-        const me = async () => {
-          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}me`, {
-            withCredentials: true
-          })
-          const myinfo = res.data.data
-          actionSetUser(myinfo)
-        }
-        me().then(() => {
-          if (user?.role_id === 3) {
-            router.push("/admin/student")
-          } else if (user?.role_id === 2) {
-            router.push("/mentor/mentor-student")
-          } else {
-            router.push("/")
-          }
-        }).catch((err) => {
-          console.log(err);
-        })
-      }).catch((err) => {
-        Swal.fire({
-          title: "เกิดข้อผิดพลาด",
-          text: err.message,
-          icon: "error",
-        });
+      await actionLogin(payload);
+
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}me`, {
+        withCredentials: true,
       });
+      const myinfo = res.data.data;
+      actionSetUser(myinfo);
+
+      // ใช้ myinfo แทน user เพราะ actionSetUser อาจยังไม่อัปเดต user state
+      if (myinfo.role_id === 3) {
+        router.push("/admin/student");
+      } else if (myinfo.role_id === 2) {
+        router.push("/mentor/mentor-student");
+      } else {
+        router.push("/");
+      }
     } catch (err: any) {
       const apiMessage = err?.response?.data?.message || "";
       const status = err?.response?.status;
 
-      console.error("Login error:", {
-        status,
-        message: apiMessage,
-      });
+      console.error("Login error:", { status, message: apiMessage });
 
       if (status === 404) {
         if (apiMessage.includes("อีเมล")) {
@@ -114,10 +101,17 @@ const ComponentsAuthLoginForm = () => {
       } else {
         setErrors({ general: "เกิดข้อผิดพลาดจากระบบ กรุณาลองใหม่ภายหลัง" });
       }
+
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: apiMessage || "เกิดข้อผิดพลาดจากระบบ",
+        icon: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
+
 
 
   // -------------------------------------------------- UI
