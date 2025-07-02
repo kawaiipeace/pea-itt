@@ -1,11 +1,17 @@
-import React from 'react'
+import Student from "../../../../components/mentors/student"
+import { Metadata } from "next";
+import React from "react";
 
-const page = () => {
+export const metadata: Metadata = {
+  title: "mentor",
+};
+
+const Mentor = () => {
   return (
-    <div>
-      
-    </div>
-  )
-}
+    <>
+      <Student />
+    </>
+  );
+};
 
-export default page
+export default Mentor;
