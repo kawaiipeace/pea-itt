@@ -25,7 +25,6 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
   const [day, month, year] = value?.split("/") || ["", "", ""];
   const buddhistYear = year ? String(parseInt(year) + 543) : "";
   const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.actionSetUser);
 
   return (
     <input
@@ -33,7 +32,7 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
       value={value ? `${day}/${month}/${buddhistYear}` : ""}
       readOnly
       placeholder="เลือกวันที่"
-      className="w-full rounded border px-3 py-2 pr-10 text-sm"
+      className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
     />
   );
 });
@@ -166,13 +165,13 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-4">
-      <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 text-black shadow-md md:flex-row">
+    <div className="mx-auto w-full max-w-6xl p-4 dark:bg-black-dark-light/5 dark:rounded-lg">
+      <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 text-black shadow-md md:flex-row dark:bg-gray-900 dark:border-gray-900  dark:text-[#506690]">
         {/* Profile Picture Section */}
-        <div className="flex flex-col items-center md:w-1/5 md:items-start">
+        <div className="flex flex-col items-center md:w-1/5 md:items-start ">
           <h1 className="mb-4 text-xl font-bold">โปรไฟล์</h1>
           <div className="relative mb-4 h-[160px] w-[160px]">
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border bg-gray-100">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border bg-gray-100 dark:bg-gray-900  dark:border-gray-500">
               {imageSrc ? (
                 <img
                   src={imageSrc}
@@ -181,7 +180,7 @@ const UserProfile = () => {
                 />
               ) : (
                 <svg
-                  className="h-full w-full text-gray-300"
+                  className="h-full w-full text-gray-300 dark:text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={2}
@@ -196,9 +195,9 @@ const UserProfile = () => {
                 </svg>
               )}
             </div>
-            <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-[#9B006C] bg-[#F7E3F0] shadow">
+            <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-[#9B006C] bg-[#F7E3F0] shadow dark:bg-gray-900  dark:border-gray-500">
               <svg
-                className="h-4 w-4 text-[#9B006C]"
+                className="h-4 w-4 text-[#9B006C] dark:text-gray-500"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -220,16 +219,16 @@ const UserProfile = () => {
 
         {/* Form Section */}
         <div className="mt-2 w-full md:flex-1">
-          <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+          <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 ">
             <div>
-              <label className="block text-sm font-medium">ชื่อจริง</label>
+              <label className="block text-sm font-medium ">ชื่อจริง</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full rounded border border-gray-300 p-2"
+                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
               />
             </div>
             <div>
@@ -240,7 +239,7 @@ const UserProfile = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, surname: e.target.value })
                 }
-                className="w-full rounded border border-gray-300 p-2"
+                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
               />
             </div>
             <div>
@@ -251,7 +250,7 @@ const UserProfile = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full rounded border border-gray-300 p-2"
+                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 "
               />
             </div>
             <div>
@@ -262,7 +261,7 @@ const UserProfile = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                className="w-full rounded border border-gray-300 p-2"
+                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
               />
             </div>
 
@@ -278,15 +277,15 @@ const UserProfile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, university: e.target.value })
                     }
-                    className="w-full rounded border border-gray-300 p-2"
+                    className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
                   />
                 </div>
-                <div className="flex w-full flex-col gap-4 md:w-1/2 md:flex-row">
-                  <div className="w-full md:w-1/2">
-                    <label className="block text-sm font-medium">
+                <div className="flex w-full flex-col gap-4 md:w-1/2 md:flex-row  ">
+                  <div className="w-full md:w-1/2 ">
+                    <label className="block text-sm font-medium ">
                       วันที่เริ่มฝึกงาน
                     </label>
-                    <div className="relative">
+                    <div className="relative ">
                       <DatePicker
                         selected={
                           formData.start_date
@@ -303,10 +302,10 @@ const UserProfile = () => {
                         locale="th"
                         customInput={<CustomDateInput />}
                       />
-                      <IconCalendar className="absolute right-3 top-2 text-gray-500" />
+                      <IconCalendar className="absolute right-3 top-2 text-gray-500  dark:border-[#506690]" />
                     </div>
                   </div>
-                  <div className="w-full md:w-1/2">
+                  <div className="w-full md:w-1/2 ">
                     <label className="block text-sm font-medium">
                       วันที่สิ้นสุดฝึกงาน
                     </label>
@@ -330,7 +329,7 @@ const UserProfile = () => {
                         locale="th"
                         customInput={<CustomDateInput />}
                       />
-                      <IconCalendar className="absolute right-3 top-2 text-gray-500" />
+                      <IconCalendar className="absolute right-3 top-2 text-gray-500 dark:border-[#506690]" />
                     </div>
                   </div>
                 </div>
@@ -343,7 +342,7 @@ const UserProfile = () => {
                 type="text"
                 value={formData.department}
                 readOnly
-                className="w-full rounded border border-gray-300 bg-gray-100 p-2"
+                className="w-full rounded border border-gray-300 bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
               />
             </div>
             <div>
@@ -352,7 +351,7 @@ const UserProfile = () => {
                 type="text"
                 value={formData.mentor_id}
                 readOnly
-                className="w-full rounded border border-gray-300 bg-gray-100 p-2"
+                className="w-full rounded border border-gray-300 bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
               />
             </div>
 
@@ -362,7 +361,7 @@ const UserProfile = () => {
                 onClick={(e) => {
                   handleClick(e);
                 }}
-                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
+                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073] "
               >
                 บันทึก
               </button>
