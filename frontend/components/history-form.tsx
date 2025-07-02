@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowLeft from "../components/icon/icon-arrow-left";
 import useAuthStore from "../store/authStore";
-import { log } from "util";
 
 interface CheckRow {
   id: number;
@@ -55,15 +54,21 @@ const Badge = ({ value }: { value?: string }) => {
   switch (value) {
     case "approved":
       return (
-        <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">อนุมัติ</span>
+        <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800 dark:bg-green-900 dark:text-green-200">
+          อนุมัติ
+        </span>
       );
     case "declined":
       return (
-        <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">ไม่อนุมัติ</span>
+        <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800 dark:bg-red-900 dark:text-red-200">
+          ไม่อนุมัติ
+        </span>
       );
     default:
       return (
-        <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">รออนุมัติ</span>
+        <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+          รออนุมัติ
+        </span>
       );
   }
 };
@@ -81,10 +86,6 @@ const HistoryForm: React.FC = () => {
   useEffect(() => {
     if (!user || !user.student_profile?.id) return;
     setLoading(true);
-
-    console.log("Fetching data for user:", user.id, "Profile ID:", user.student_profile.id);
-    console.log(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${user.id}`);
-    console.log(`${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`);
 
     const fetchData = async () => {
       try {
@@ -154,21 +155,26 @@ const HistoryForm: React.FC = () => {
 
   return (
     <section className="flex h-full flex-col px-6 py-4">
-      <button onClick={() => router.back()} className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary">
+      <button
+        onClick={() => router.back()}
+        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:bg-black-dark-light/5 dark:border-[#506690] dark:text-[#506690]"
+      >
         <IconArrowLeft className="h-4 w-4" /> ย้อนกลับ
       </button>
 
-      <div className="overflow-auto rounded-lg border border-gray-200 bg-white">
-        <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800">
+      <div className="overflow-auto rounded-lg border border-gray-200 bg-white dark:bg-black-dark-light/5 dark:border-gray-900 dark:text-[#506690]">
+        <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:bg-black-dark-light/90 dark:border-[#506690] dark:text-[#506690]">
           {["วันที่", "เวลาเข้างาน", "เวลาออกงาน", "สถานะ", "หมายเหตุ", "อนุมัติการลา"].map((h) => (
             <div key={h} className="p-3">{h}</div>
           ))}
         </div>
 
         <div className="divide-y text-center text-sm">
-          {loading && <p className="p-6 text-gray-500">กำลังโหลดข้อมูล...</p>}
-          {error && <p className="p-6 text-red-500">{error}</p>}
-          {!loading && !error && viewRows.length === 0 && <p className="p-6 text-gray-500">ไม่มีข้อมูล</p>}
+          {loading && <p className="p-6 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</p>}
+          {error && <p className="p-6 text-red-500 dark:text-red-400">{error}</p>}
+          {!loading && !error && viewRows.length === 0 && (
+            <p className="p-6 text-gray-500 dark:text-gray-400">ไม่มีข้อมูล</p>
+          )}
 
           {!loading && !error && slice.map((r) => (
             <div key={r.dateKey} className="grid min-w-[820px] grid-cols-6">
@@ -185,21 +191,54 @@ const HistoryForm: React.FC = () => {
 
       {!loading && !error && viewRows.length > 0 && (
         <div className="mt-4 flex items-center justify-end gap-2">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className={clsx("flex h-8 w-8 items-center justify-center rounded-full border text-sm", page === 1 ? "cursor-not-allowed text-gray-300" : "hover:bg-gray-200")}> &lt; </button>
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className={clsx(
+              "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
+              page === 1
+                ? "cursor-not-allowed text-gray-300 dark:text-gray-600"
+                : "hover:bg-gray-200 dark:hover:bg-gray-700"
+            )}
+          >
+            &lt;
+          </button>
 
           {Array.from({ length: pages }).map((_, i) => {
             const p = i + 1;
             return (
-              <button key={p} onClick={() => setPage(p)} className={clsx("flex h-8 w-8 items-center justify-center rounded-full border text-sm", page === p ? "bg-[#B10073] text-white" : "text-gray-700 hover:bg-gray-200")}>{p}</button>
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={clsx(
+                  "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
+                  page === p
+                    ? "bg-[#B10073] text-white"
+                    : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
+                )}
+              >
+                {p}
+              </button>
             );
           })}
 
-          <button onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page === pages} className={clsx("flex h-8 w-8 items-center justify-center rounded-full border text-sm", page === pages ? "cursor-not-allowed text-gray-300" : "hover:bg-gray-200")}> &gt; </button>
+          <button
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            disabled={page === pages}
+            className={clsx(
+              "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
+              page === pages
+                ? "cursor-not-allowed text-gray-300 dark:text-gray-600"
+                : "hover:bg-gray-200 dark:hover:bg-gray-700"
+            )}
+          >
+            &gt;
+          </button>
         </div>
       )}
 
       {!loading && !error && viewRows.length > 0 && (
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           แสดง {(page - 1) * ITEMS + 1}-{Math.min(page * ITEMS, viewRows.length)} จาก {viewRows.length} รายการ
         </p>
       )}
