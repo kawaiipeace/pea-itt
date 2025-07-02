@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
+import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
 
 interface PageProps {
   params: { info: string };
@@ -130,9 +131,16 @@ const InfoPage = ({ params }: PageProps) => {
   const slice = attendance.slice((page - 1) * ITEMS, page * ITEMS);
 
   return (
-    <div className="space-y-6 p-4">
+    <section className="space-y-6 p-4">
+        <button
+        onClick={() => router.back()}
+        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:bg-black-dark-light/5 dark:border-[#506690] dark:text-[#506690]"
+      >
+        <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
+      </button>
       {/* ข้อมูลส่วนตัว */}
       <div className="flex items-center justify-center px-4">
+        
         <div className="grid w-full max-w-4xl grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
           <div className="flex justify-center">
             <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-100 text-6xl text-gray-400">
@@ -245,7 +253,8 @@ const InfoPage = ({ params }: PageProps) => {
           &gt;
         </button>
       </div>
-    </div>
+      
+    </section>
   );
 };
 
