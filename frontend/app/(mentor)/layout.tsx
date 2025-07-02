@@ -1,6 +1,6 @@
 import ContentAnimation from '@/components/layouts/content-animation';
 import Footer from '@/components/layouts/footer';
-import Header from '@/components/layouts/header';
+import Headermentor from '@/components/layouts/header-mentor';
 import MainContainer from '@/components/layouts/main-container';
 import Overlay from '@/components/layouts/overlay';
 import ScrollToTop from '@/components/layouts/scroll-to-top';
@@ -22,7 +22,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
                     {/* END SIDEBAR */}
                     <div className="main-content flex min-h-screen flex-col">
                         {/* BEGIN TOP NAVBAR */}
-                        <Header />
+                        <Headermentor />
                         {/* END TOP NAVBAR */}
 
                         {/* BEGIN CONTENT AREA */}

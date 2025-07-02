@@ -104,11 +104,6 @@ const Sidebar = () => {
                     </div>
                     <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
                         <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-
-                            
-
-                            
-
                             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                                 <IconMinus className="hidden h-5 w-4 flex-none" />
                                 <span>{t('Administrator')}</span>
@@ -128,6 +123,15 @@ const Sidebar = () => {
                                     <div className="flex items-center">
                                         <IconMenuTables className="shrink-0 group-hover:!text-primary" />
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('จัดการข้อมูลพี่เลี้ยง')}</span>
+                                    </div>
+                                </Link>
+                            </li>
+
+                            <li className="menu nav-item">
+                                <Link href="#" className="group">
+                                    <div className="flex items-center">
+                                        <IconMenuTables className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('จัดการข้อมูลกอง')}</span>
                                     </div>
                                 </Link>
                             </li>
