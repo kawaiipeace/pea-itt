@@ -41,6 +41,7 @@ interface AuthStore {
   actionLogin: (form: formLogin) => Promise<any>;
   actionLogout: () => Promise<any>;
   actionSetUser: (user: userSchema) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const authStore: StateCreator<AuthStore> = (set) => ({
@@ -75,6 +76,18 @@ const authStore: StateCreator<AuthStore> = (set) => ({
     }
 
     return res;
+  },
+  refreshUser: async () => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}me`, {
+        withCredentials: true,
+      });
+      const myinfo = res.data.data;
+      set({ user: myinfo });
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
+      set({ user: null });
+    }
   },
 });
 

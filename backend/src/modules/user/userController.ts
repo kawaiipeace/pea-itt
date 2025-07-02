@@ -314,6 +314,111 @@ export const updateUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const updateMentor = async (req: Request, res: Response) => {
+  try {
+
+    const validateData = usersModels.updateMentorSchema.parse(req.body);
+    const { id } = req.params;
+    const userId = parseInt(id);
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    if (userId !== req.user.id) {
+      res.status(httpStatus.FORBIDDEN).json({
+        message: "เฉพาะเจ้าของบัญชี (ตัวเอง) เท่านั้นที่มีสิทธิ์อัปเดตข้อมูล",
+      });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { mentor_profile: true },
+    });
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "User not found",
+      });
+      return;
+    }
+
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email: validateData.email,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingEmail) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Email already exists",
+      });
+      return;
+    }
+
+    const existingPhone = await prisma.user.findFirst({
+      where: {
+        phone_number: validateData.phone_number,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingPhone) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Phone number already exists",
+      });
+      return;
+    }
+    
+    const updatedData = await prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: {
+          fname: validateData.fname,
+          lname: validateData.lname,
+          email: validateData.email,
+          phone_number: validateData.phone_number,
+        },
+        select: {
+          fname: true,
+          lname: true,
+          email: true,
+          phone_number: true,
+        },
+      });
+    });
+
+    res.status(httpStatus.OK).json({
+      message: "User and mentor profile updated successfully",
+      data: updatedData,
+    });
+
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error.errors,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+    
+  }
+}
+
 export const updateDeptMent = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

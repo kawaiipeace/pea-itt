@@ -1,76 +1,50 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import useAuthStore from "@/store/authStore";
+import Swal from "sweetalert2";
 
-interface UserType {
-  id: number;
-  fname: string;
-  lname: string;
-  email: string;
-  phone_number: string;
-}
-
-interface FormData {
-  name: string;
-  surname: string;
-  email: string;
-  phone: string;
-}
 
 const MentorProfileForm = () => {
-  const [user, setUser] = useState<UserType | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    surname: "",
-    email: "",
-    phone: "",
+  const user = useAuthStore((state) => state.user);
+  const refreshUser = useAuthStore((state) => state.refreshUser);
+  const [formData, setFormData] = useState({
+    fname: user?.fname || "",
+    lname: user?.lname || "",
+    email: user?.email || "",
+    phone_number: user?.phone_number || "",
   });
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=1`, 
-          { withCredentials: true }
-        );
-        const userData = response.data.data;
-        setUser(userData);
-        setFormData({
-          name: userData.fname || "",
-          surname: userData.lname || "",
-          email: userData.email || "",
-          phone: userData.phone_number || "",
-        });
-      } catch (error) {
-        console.error("โหลดข้อมูลผู้ใช้ล้มเหลว:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    if (!user) {
-      alert("ยังไม่มีข้อมูลผู้ใช้");
-      return;
-    }
-
     try {
       const form = new FormData();
-      form.append("fname", formData.name);
-      form.append("lname", formData.surname);
+      form.append("fname", formData.fname);
+      form.append("lname", formData.lname);
       form.append("email", formData.email);
-      form.append("phone_number", formData.phone);
+      form.append("phone_number", formData.phone_number);
+
+      if (!user || !user.id) {
+        console.error("User ID is not available");
+        alert("ไม่สามารถบันทึกข้อมูลได้ เนื่องจากไม่มีข้อมูลผู้ใช้");
+        return;
+      }
 
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}users/${user.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}users/mentor/${user.id}`,
         form,
         { withCredentials: true }
       );
 
-      alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+      Swal.fire({
+        title: "สำเร็จ",
+        text: "บันทึกข้อมูลโปรไฟล์สำเร็จ",
+        icon: "success",
+        confirmButtonText: "ตกลง",
+      }).then(() => {
+        refreshUser(); 
+      });
     } catch (error) {
       console.error("เกิดข้อผิดพลาด:", error);
       alert("ไม่สามารถบันทึกข้อมูลได้");
@@ -86,8 +60,8 @@ const MentorProfileForm = () => {
             <label className="block text-sm font-medium mb-1">ชื่อจริง</label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.fname}
+              onChange={(e) => setFormData({ ...formData, fname: e.target.value })}
               className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
             />
           </div>
@@ -95,8 +69,8 @@ const MentorProfileForm = () => {
             <label className="block text-sm font-medium mb-1">นามสกุล</label>
             <input
               type="text"
-              value={formData.surname}
-              onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+              value={formData.lname}
+              onChange={(e) => setFormData({ ...formData, lname: e.target.value })}
               className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
             />
           </div>
@@ -113,8 +87,8 @@ const MentorProfileForm = () => {
             <label className="block text-sm font-medium mb-1">เบอร์โทรศัพท์</label>
             <input
               type="text"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              value={formData.phone_number}
+              onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
               className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
             />
           </div>
