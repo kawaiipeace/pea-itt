@@ -7,28 +7,17 @@ import { logAction } from "../../common/utils/logger";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
+    const { department_id, mentor_id } = req.query;
+
+    const departmentId = department_id ? Number(department_id) : undefined;
+    const mentorId = mentor_id ? Number(mentor_id) : undefined;
+
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        role_id: true,
-        department_id: true,
-        fname: true,
-        lname: true,
-        email: true,
-        phone_number: true,
-        created_at: true,
-        department: {
-          select: {
-            dept_id: true,
-            dept_name: true,
-          },
+      where: {
+        student_profile: {
+          ...(mentorId ? { mentor_id: mentorId } : {}),
         },
-        role: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        ...(departmentId ? { department_id: departmentId } : {}),
       },
       orderBy: {
         fname: "asc",
@@ -111,7 +100,7 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const getMentors = async (req: Request, res: Response) => {
   try {
-    const { department_id, user_id , mentor_id  } = req.query;
+    const { department_id, user_id, mentor_id } = req.query;
 
 
     const departmentId = department_id ? Number(department_id) : undefined;
@@ -456,9 +445,8 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     await logAction({
       admin_id: req.user.id,
-      action: `Deleted user: ${user.fname ?? ""} ${user.lname ?? ""} (email: ${
-        user.email ?? "N/A"
-      })`,
+      action: `Deleted user: ${user.fname ?? ""} ${user.lname ?? ""} (email: ${user.email ?? "N/A"
+        })`,
     });
 
     res.status(httpStatus.OK).json({

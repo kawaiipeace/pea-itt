@@ -268,6 +268,12 @@ export const me = async (req: Request, res: Response) => {
             end_date: true,
           },
         },
+        mentor_profile: {
+          select: {
+            id: true,
+            user_id: true,
+          }
+        }
       },
     });
 
