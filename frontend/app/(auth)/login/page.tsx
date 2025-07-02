@@ -6,7 +6,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fafafa] px-4 font-nunito">
       <div className="w-full max-w-[460px] sm:h-[652px] rounded-[20px] bg-white px-6  py-10 shadow-2xl border border-[#e5e7eb] flex flex-col">
-        {/* โลโก้และหัวข้อ */}
         <div className="text-center mb-4">
           <Image
             src={Logo}
