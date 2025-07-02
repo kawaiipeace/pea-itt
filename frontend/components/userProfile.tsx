@@ -9,7 +9,6 @@ import IconCalendar from "../components/icon/icon-calendar";
 import useAuthStore from "../store/authStore";
 import axios from "axios";
 import Swal from "sweetalert2";
-
 registerLocale("th", th);
 
 const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
@@ -47,7 +46,7 @@ const UserProfile = () => {
   });
 
 
-  const [imageSrc, setImageSrc] = useState<string>("");
+  const [imageSrc, setImageSrc] = useState<string>(`${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -142,7 +141,7 @@ const UserProfile = () => {
       form.append("mentor_id", String(user?.student_profile?.mentor_id));
 
       if (imageFile) {
-        form.append("image", imageFile);
+        form.append("picture", imageFile);
       }
 
       const response = await axios.put(
@@ -164,7 +163,7 @@ const UserProfile = () => {
       });
     } catch (error) {
       console.error("เกิดข้อผิดพลาด:", error);
-      alert("ไม่สามารถบันทึกข้อมูลได้");
+      alert(error || "เกิดข้อผิดพลาดในการบันทึกข้อมูลโปรไฟล์");
     }
   };
 

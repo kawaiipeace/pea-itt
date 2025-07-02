@@ -47,7 +47,34 @@ const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { t, i18n } = getTranslation();
+  const user = useAuthStore((state) => state.user)
+  const [myimg, setMyimg] = useState<string | null>(null)
 
+  useEffect(() => {
+    let imgUrl: string
+
+    const heyimg = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`, {
+          responseType: 'blob', withCredentials: true,
+        }
+        )
+        imgUrl = URL.createObjectURL(res.data)
+        setMyimg(imgUrl)
+      } catch (error) {
+        console.error("โหลดรูปไม่สำเร็จ", error)
+      }
+    }
+
+    if (user?.student_profile?.id) {
+      heyimg()
+    }
+
+    return () => {
+      if (imgUrl) URL.revokeObjectURL(imgUrl)
+    }
+  }, [user])
   useEffect(() => {
     const selector = document.querySelector(
       'ul.horizontal-menu a[href="' + window.location.pathname + '"]'
@@ -175,15 +202,13 @@ const Header = () => {
 
   const [search, setSearch] = useState(false);
 
-  const user = useAuthStore((state) => state.user);
 
 
 
   return (
     <header
-      className={`z-40 ${
-        themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
-      }`}
+      className={`z-40 ${themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
+        }`}
     >
       <div className="shadow-sm">
         <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
@@ -212,10 +237,9 @@ const Header = () => {
             <div>
               {themeConfig.theme === "light" ? (
                 <button
-                  className={`${
-                    themeConfig.theme === "light" &&
+                  className={`${themeConfig.theme === "light" &&
                     "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                  }`}
+                    }`}
                   onClick={() => dispatch(toggleTheme("dark"))}
                 >
                   <IconSun />
@@ -225,10 +249,9 @@ const Header = () => {
               )}
               {themeConfig.theme === "dark" && (
                 <button
-                  className={`${
-                    themeConfig.theme === "dark" &&
+                  className={`${themeConfig.theme === "dark" &&
                     "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                  }`}
+                    }`}
                   onClick={() => dispatch(toggleTheme("light"))}
                 >
                   <IconMoon />
@@ -344,7 +367,7 @@ const Header = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src="/assets/images/user-profile.jpeg"
+                    src={myimg ? myimg : "../../public/assets/images/profile-34.jpeg"}
                     alt="userProfile"
                   />
                 }
@@ -354,14 +377,12 @@ const Header = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src="/assets/images/user-profile.jpeg"
+                        src={myimg ? myimg : "../../public/assets/images/profile-34.jpeg"}
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
                         <h4 className="text-base">
                           {user?.fname} {user?.lname}
-                          <span className="rounded bg-success-light px-1 text-xs text-success ltr:ml-2 rtl:ml-2">
-                          </span>
                         </h4>
                         <button
                           type="button"
