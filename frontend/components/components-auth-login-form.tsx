@@ -72,7 +72,7 @@ const ComponentsAuthLoginForm = () => {
           const myinfo = res.data.data
           actionSetUser(myinfo)
         }
-        me().then((res) => {
+        me().then(() => {
           if (user?.role_id == 3) {
             router.push("/admin/student")
           } else if (user?.role_id == 2) {
@@ -82,7 +82,6 @@ const ComponentsAuthLoginForm = () => {
           }
         }).catch((err) => {
           console.log(err);
-
         })
       }).catch((err) => {
         Swal.fire({
