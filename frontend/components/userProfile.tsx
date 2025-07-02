@@ -3,28 +3,18 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
-import { fr, th } from "date-fns/locale";
+import { th } from "date-fns/locale";
 import { format } from "date-fns";
 import IconCalendar from "../components/icon/icon-calendar";
 import useAuthStore from "../store/authStore";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 registerLocale("th", th);
-
-interface EditProfile {
-  name: string;
-  surname: string;
-  email: string;
-  university: string;
-  phone: string;
-  start_date: string;
-  end_date: string;
-}
 
 const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
   const [day, month, year] = value?.split("/") || ["", "", ""];
   const buddhistYear = year ? String(parseInt(year) + 543) : "";
-  const user = useAuthStore((state) => state.user);
 
   return (
     <input
@@ -38,25 +28,32 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
 });
 CustomDateInput.displayName = "CustomDateInput";
 
+
+
 const UserProfile = () => {
   const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.actionSetUser);
+  const refreshUser = useAuthStore((state) => state.refreshUser);
   const [formData, setFormData] = useState({
     name: user?.fname || "",
     surname: user?.lname || "",
     email: user?.email || "",
-    university: user?.student_profile.university || "",
+    university: user?.student_profile?.university || "",
     phone: user?.phone_number || "",
-    start_date: user?.student_profile.start_date || "",
-    end_date: user?.student_profile.end_date || "",
-    mentor_id: user?.student_profile.mentor_id || "",
+    start_date: user?.student_profile?.start_date || "",
+    end_date: user?.student_profile?.end_date || "",
+    mentor_id: user?.student_profile?.mentor_id || "",
     department: user?.department_id || "",
   });
 
+
   const [imageSrc, setImageSrc] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (event: ProgressEvent<FileReader>) => {
         const result = event.target?.result;
@@ -69,24 +66,25 @@ const UserProfile = () => {
   }
 
   useEffect(() => {
-    console.log("User data:", user);
-
     const fetchMentorProfile = async () => {
       try {
+        if (!user) {
+          return
+        } else if (!user.student_profile) {
+          return
+        }
+
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user?.student_profile.mentor_id}`
         );
-
         const dept = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}dept/${user?.department_id}`
         );
-
         const deptName = dept.data.data.dept_name;
-
         const mentor = response.data.data[0];
+
         if (mentor) {
           const fullName = `${mentor.fname} ${mentor.lname}`;
-
           setFormData((prevData) => ({
             ...prevData,
             mentor_id: fullName,
@@ -94,7 +92,7 @@ const UserProfile = () => {
           }));
         }
       } catch (error) {
-        console.error("Error fetching mentor profile:", error);
+        console.error("Error fetching mentor/dept profile:", error);
       }
     };
 
@@ -103,7 +101,7 @@ const UserProfile = () => {
 
   useEffect(() => {
     const setImage = async () => {
-      if (user?.student_profile.image) {
+      if (user?.student_profile) {
         try {
           const response = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}users/${user.student_profile.id}/picture`,
@@ -120,10 +118,8 @@ const UserProfile = () => {
         }
       }
     };
-    setImage()
+    setImage();
   }, [user]);
-
-  const setUser = useAuthStore((state) => state.actionSetUser);
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -143,8 +139,11 @@ const UserProfile = () => {
       form.append("start_date", formData.start_date);
       form.append("end_date", formData.end_date);
       form.append("department_id", String(user?.department_id));
-      form.append("mentor_id", String(user?.student_profile.mentor_id));
-      form.append("image", imageSrc);
+      form.append("mentor_id", String(user?.student_profile?.mentor_id));
+
+      if (imageFile) {
+        form.append("image", imageFile);
+      }
 
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}users/${user.id}`,
@@ -154,10 +153,15 @@ const UserProfile = () => {
         }
       );
 
-      const res = response.data.data;
-
-
-      alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+      Swal.fire({
+        title: "สำเร็จ",
+        text: "บันทึกข้อมูลโปรไฟล์สำเร็จ",
+        icon: "success",
+        confirmButtonText: "ตกลง",
+      }).then(() => {
+        setUser(response.data.data);
+        refreshUser(); // Refresh user data after successful update
+      });
     } catch (error) {
       console.error("เกิดข้อผิดพลาด:", error);
       alert("ไม่สามารถบันทึกข้อมูลได้");
@@ -166,12 +170,11 @@ const UserProfile = () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4 dark:bg-black-dark-light/5 dark:rounded-lg">
-      <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 text-black shadow-md md:flex-row dark:bg-gray-900 dark:border-gray-900  dark:text-[#506690]">
-        {/* Profile Picture Section */}
-        <div className="flex flex-col items-center md:w-1/5 md:items-start ">
+      <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 shadow-md dark:bg-gray-900 dark:border-gray-900 dark:text-[#506690] md:flex-row">
+        <div className="flex flex-col items-center md:w-1/5 md:items-start">
           <h1 className="mb-4 text-xl font-bold">โปรไฟล์</h1>
           <div className="relative mb-4 h-[160px] w-[160px]">
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border bg-gray-100 dark:bg-gray-900  dark:border-gray-500">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border bg-gray-100 dark:bg-gray-900 dark:border-gray-500">
               {imageSrc ? (
                 <img
                   src={imageSrc}
@@ -195,7 +198,7 @@ const UserProfile = () => {
                 </svg>
               )}
             </div>
-            <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-[#9B006C] bg-[#F7E3F0] shadow dark:bg-gray-900  dark:border-gray-500">
+            <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-[#9B006C] bg-[#F7E3F0] shadow dark:bg-gray-900 dark:border-gray-500">
               <svg
                 className="h-4 w-4 text-[#9B006C] dark:text-gray-500"
                 fill="currentColor"
@@ -217,56 +220,31 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* Form Section */}
         <div className="mt-2 w-full md:flex-1">
-          <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 ">
-            <div>
-              <label className="block text-sm font-medium ">ชื่อจริง</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">นามสกุล</label>
-              <input
-                type="text"
-                value={formData.surname}
-                onChange={(e) =>
-                  setFormData({ ...formData, surname: e.target.value })
-                }
-                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">อีเมล</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 "
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">เบอร์โทรศัพท์</label>
-              <input
-                type="text"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
-              />
-            </div>
+          <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+            {/* ชื่อจริง นามสกุล อีเมล โทร */}
+            {[
+              { label: "ชื่อจริง", field: "name" },
+              { label: "นามสกุล", field: "surname" },
+              { label: "อีเมล", field: "email", type: "email" },
+              { label: "เบอร์โทรศัพท์", field: "phone" },
+            ].map(({ label, field, type }) => (
+              <div key={field}>
+                <label className="block text-sm font-medium">{label}</label>
+                <input
+                  type={type || "text"}
+                  value={(formData as any)[field]}
+                  onChange={(e) =>
+                    setFormData({ ...formData, [field]: e.target.value })
+                  }
+                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                />
+              </div>
+            ))}
 
+            {/* มหาวิทยาลัยและวันที่ */}
             <div className="w-full md:col-span-2">
-              <div className="flex w-full flex-col gap-4 md:flex-row md:gap-x-4">
+              <div className="flex w-full flex-col gap-4 md:flex-row">
                 <div className="w-full md:w-1/2">
                   <label className="block text-sm font-medium">
                     มหาวิทยาลัยที่ศึกษาอยู่
@@ -277,91 +255,66 @@ const UserProfile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, university: e.target.value })
                     }
-                    className="w-full rounded border border-gray-300 p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                    className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
                   />
                 </div>
-                <div className="flex w-full flex-col gap-4 md:w-1/2 md:flex-row  ">
-                  <div className="w-full md:w-1/2 ">
-                    <label className="block text-sm font-medium ">
-                      วันที่เริ่มฝึกงาน
+
+                {/* วันที่เริ่ม - สิ้นสุดฝึกงาน */}
+                {["start_date", "end_date"].map((field, index) => (
+                  <div className="w-full md:w-1/2" key={field}>
+                    <label className="block text-sm font-medium">
+                      {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
                     </label>
-                    <div className="relative ">
+                    <div className="relative">
                       <DatePicker
                         selected={
-                          formData.start_date
-                            ? new Date(formData.start_date)
+                          formData[field]
+                            ? new Date(formData[field])
                             : null
                         }
                         onChange={(date: Date | null) =>
                           setFormData({
                             ...formData,
-                            start_date: date ? format(date, "yyyy-MM-dd") : "",
+                            [field]: date ? format(date, "yyyy-MM-dd") : "",
                           })
                         }
                         dateFormat="dd/MM/yyyy"
                         locale="th"
-                        customInput={<CustomDateInput />}
-                      />
-                      <IconCalendar className="absolute right-3 top-2 text-gray-500  dark:border-[#506690]" />
-                    </div>
-                  </div>
-                  <div className="w-full md:w-1/2 ">
-                    <label className="block text-sm font-medium">
-                      วันที่สิ้นสุดฝึกงาน
-                    </label>
-                    <div className="relative">
-                      <DatePicker
-                        selected={
-                          formData.end_date ? new Date(formData.end_date) : null
-                        }
-                        onChange={(date: Date | null) =>
-                          setFormData({
-                            ...formData,
-                            end_date: date ? format(date, "yyyy-MM-dd") : "",
-                          })
-                        }
                         minDate={
-                          formData.start_date
+                          field === "end_date" && formData.start_date
                             ? new Date(formData.start_date)
                             : undefined
                         }
-                        dateFormat="dd/MM/yyyy"
-                        locale="th"
                         customInput={<CustomDateInput />}
                       />
                       <IconCalendar className="absolute right-3 top-2 text-gray-500 dark:border-[#506690]" />
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium">กองที่สังกัด</label>
-              <input
-                type="text"
-                value={formData.department}
-                readOnly
-                className="w-full rounded border border-gray-300 bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">ชื่อพี่เลี้ยง</label>
-              <input
-                type="text"
-                value={formData.mentor_id}
-                readOnly
-                className="w-full rounded border border-gray-300 bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
-              />
-            </div>
+            {/* ข้อมูลแสดงผลเท่านั้น */}
+            {[
+              { label: "กองที่สังกัด", value: formData.department },
+              { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <label className="block text-sm font-medium">{label}</label>
+                <input
+                  type="text"
+                  value={value}
+                  readOnly
+                  className="w-full rounded border bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
+                />
+              </div>
+            ))}
 
             <div className="mt-4 md:col-span-2">
               <button
                 type="submit"
-                onClick={(e) => {
-                  handleClick(e);
-                }}
-                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073] "
+                onClick={handleClick}
+                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
               >
                 บันทึก
               </button>
