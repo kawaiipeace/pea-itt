@@ -1,22 +1,26 @@
-import React from "react";
-import useAuthStore from "@/store/authStore";
+"use client";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import IconUsers from "@/components/icon/icon-users";
 
 const Card = ({ student }: any) => {
-  const user = useAuthStore((s) => s.user);
+  const router = useRouter();
+  const clickme = (id: string) => {
+    router.push(`/mentor/mentor-student/detail/${id}`);
+  };
   return (
     <div
+      onClick={() => clickme(student.id)}
       key={student.id}
-      className="flex flex-col items-center rounded-2xl bg-white p-4 text-center shadow transition hover:shadow-md"
+      className="flex h-[270px] flex-col items-center rounded-2xl border border-transparent bg-white p-4
+        text-center shadow transition-colors hover:border-[#B10073] hover:bg-[#F7E3F0]
+        hover:shadow-md dark:border-gray-900 dark:bg-gray-900 dark:text-[#506690]
+        dark:hover:border-white dark:hover:bg-gray-900"
     >
-      <div
-        className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100"
-        // style={{
-        //   backgroundImage: `url('${process.env.NEXT_PUBLIC_API_URL}user/${user?.student_profile.id}/picture')`,
-        //   backgroundSize: "cover",
-        //   backgroundPosition: "center",
-        // }}
-      ></div>
-      <div className="mt-3 text-base font-semibold md:text-lg">
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
+        <IconUsers className="shrink-0 group-hover:!text-primary" />
+      </div>
+      <div className="mb-6 mt-3 text-base font-semibold md:text-lg">
         {student.name}
       </div>
       <div className="mt-1 text-sm text-gray-500">
