@@ -1,7 +1,10 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
 import Card from "../card";
 import axios from "axios";
+import useAuthStore from "@/store/authStore";
+
+
 const mockStudents = [
   {
     id: 1,
@@ -47,13 +50,19 @@ const mockStudents = [
   },
 ];
 
+interface mystuData{
+  
+}
+
 const Student = () => {
+  const user = useAuthStore((state)=>state.user)
+  const[mystu,setMystu]=useState()
   useEffect(() => {
     const hey = async () => {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user?.mentor_profile?.id}`, {
         withCredentials: true,
       });
-      console.log(res.data);
+      console.log(res.data.data);
       
     };
     hey();
