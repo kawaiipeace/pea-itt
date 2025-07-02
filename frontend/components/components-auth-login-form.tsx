@@ -73,9 +73,9 @@ const ComponentsAuthLoginForm = () => {
           actionSetUser(myinfo)
         }
         me().then(() => {
-          if (user?.role_id == 3) {
+          if (user?.role_id === 3) {
             router.push("/admin/student")
-          } else if (user?.role_id == 2) {
+          } else if (user?.role_id === 2) {
             router.push("/mentor/mentor-student")
           } else {
             router.push("/")
