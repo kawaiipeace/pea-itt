@@ -271,7 +271,6 @@ export const me = async (req: Request, res: Response) => {
         mentor_profile: {
           select: {
             id: true,
-            user_id: true,
           }
         }
       },
