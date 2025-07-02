@@ -9,6 +9,17 @@ interface PageProps {
   params: { info: string };
 }
 
+interface detailStu {
+  fname: string;
+  lname: string;
+  email: string;
+  phone_number: string;
+  university: string;
+  start_date: string;
+  end_date: string;
+  
+}
+
 const InfoPage = ({ params }: PageProps) => {
   const router = useRouter();
   const [page, setPage] = useState(1);
@@ -132,15 +143,14 @@ const InfoPage = ({ params }: PageProps) => {
 
   return (
     <section className="space-y-6 p-4">
-        <button
+      <button
         onClick={() => router.back()}
-        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:bg-black-dark-light/5 dark:border-[#506690] dark:text-[#506690]"
+        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
       >
         <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
       </button>
       {/* ข้อมูลส่วนตัว */}
       <div className="flex items-center justify-center px-4">
-        
         <div className="grid w-full max-w-4xl grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
           <div className="flex justify-center">
             <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-100 text-6xl text-gray-400">
@@ -173,10 +183,9 @@ const InfoPage = ({ params }: PageProps) => {
 
       {/* ตารางเวลาเข้างาน */}
       <div className="flex items-center justify-center">
-
-      <div className="overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690] w-[1220px] ">
-        <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 dark:bg-gray-900 dark:text-[#506690]  text-center text-sm font-semibold text-gray-800 ">
-          {[
+        <div className="w-[1220px] overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690] ">
+          <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm  font-semibold text-gray-800 dark:bg-gray-900 dark:text-[#506690] ">
+            {[
               "วันที่",
               "เวลาเข้างาน",
               "เวลาออกงาน",
@@ -184,28 +193,28 @@ const InfoPage = ({ params }: PageProps) => {
               "หมายเหตุ",
               "อนุมัติการลา",
             ].map((h) => (
-                <div key={h} className="p-3">
-              {h}
-            </div>
-          ))}
-        </div>
-
-        <div className="divide-y text-center text-sm">
-          {slice.map((entry, idx) => (
-              <div key={idx} className="grid min-w-[820px] grid-cols-6">
-              <div className="p-3">{entry.date}</div>
-              <div className="p-3">{entry.checkIn}</div>
-              <div className="p-3">{entry.checkOut}</div>
-              <div className="p-3">{entry.status}</div>
-              <div className="p-3">{entry.note}</div>
-              <div className="p-3">
-                {entry.status === "ลา" ? renderBadge(entry.approved) : "-"}
+              <div key={h} className="p-3">
+                {h}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div className="divide-y text-center text-sm">
+            {slice.map((entry, idx) => (
+              <div key={idx} className="grid min-w-[820px] grid-cols-6">
+                <div className="p-3">{entry.date}</div>
+                <div className="p-3">{entry.checkIn}</div>
+                <div className="p-3">{entry.checkOut}</div>
+                <div className="p-3">{entry.status}</div>
+                <div className="p-3">{entry.note}</div>
+                <div className="p-3">
+                  {entry.status === "ลา" ? renderBadge(entry.approved) : "-"}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-          </div>
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-end gap-2">
@@ -253,7 +262,6 @@ const InfoPage = ({ params }: PageProps) => {
           &gt;
         </button>
       </div>
-      
     </section>
   );
 };
