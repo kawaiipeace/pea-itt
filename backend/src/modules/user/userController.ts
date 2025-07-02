@@ -71,10 +71,26 @@ export const getUserById = async (req: Request, res: Response) => {
             dept_name: true,
           },
         },
-        role: {
+        student_profile: {
           select: {
             id: true,
-            name: true,
+            university: true,
+            start_date: true,
+            end_date: true,
+            picture: true,
+            mentor_id: true,
+          },
+        },
+        mentor_profile: {
+          select: {
+            id: true,
+            user_id: true,
+            student_profile:
+            {
+              select: {
+                id: true,
+              },
+            },
           },
         },
       },
