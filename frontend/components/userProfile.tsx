@@ -20,7 +20,6 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
     <div className="relative w-full">
       <input
         onClick={onClick}
-        ref={ref}
         value={value ? `${day}/${month}/${buddhistYear}` : ""}
         readOnly
         placeholder="เลือกวันที่"
