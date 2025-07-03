@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import Card from "../card";
 import axios from "axios";
@@ -9,30 +10,58 @@ interface mystuData {
   fname: string;
   lname: string;
   university: string;
-  picture:string;
+  picture: string;
   start_date: string;
   end_date: string;
   student_profile: any;
-
+  picture_url?: string | null; // ✅ เพิ่มตรงนี้
 }
 
 const Student = () => {
   const user = useAuthStore((state) => state.user);
   const [mystu, setMystu] = useState<mystuData[]>([]);
-  useEffect(() => {
-    const hey = async () => {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user?.mentor_profile?.id}`,
-        {
-          withCredentials: true,
-        }
-      );
-      setMystu(res.data.data);
-    };
-    hey();
-  }, [user]);
 
-  console.log(mystu);
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user?.mentor_profile?.id}`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        const students = res.data.data;
+
+        const studentsWithPicture = await Promise.all(
+          students.map(async (student: mystuData) => {
+            try {
+              const imageRes = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}users/${student.student_profile.id}/picture`,
+                {
+                  withCredentials: true,
+                  responseType: "blob",
+                }
+              );
+              const imageUrl = URL.createObjectURL(imageRes.data);
+              return { ...student, picture_url: imageUrl };
+            } catch (error: any) {
+              console.error("โหลดรูปไม่ได้:", student.id, error);
+              return { ...student, picture_url: null };
+            }
+          })
+        );
+
+        setMystu(studentsWithPicture);
+      } catch (err) {
+        console.error("โหลดรายชื่อนักศึกษาไม่สำเร็จ:", err);
+      }
+    };
+
+    if (user?.mentor_profile?.id) {
+      fetchStudents();
+    }
+  }, [user]);
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -41,7 +70,7 @@ const Student = () => {
       </h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {mystu.map((student) => (
-          <Card student={student} />
+          <Card key={student.id} student={student} /> 
         ))}
       </div>
     </div>
