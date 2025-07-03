@@ -2,52 +2,90 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { th } from "date-fns/locale";
-import { format } from "date-fns";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 
 registerLocale("th", th);
 
+const CustomDateButton = forwardRef<HTMLButtonElement, any>(
+  ({ value, onClick }, ref) => (
+    <button
+      onClick={onClick}
+      ref={ref}
+      className="flex items-center gap-2 text-xl font-bold text-gray-900 hover:underline dark:text-[#506690]"
+    >
+      {value}
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </button>
+  )
+);
+CustomDateButton.displayName = "CustomDateButton";
+
 interface LeaveItem {
   id: number;
-  name: string;
-  evidence: string;
+  leave_datetime: string | null;
   reason: string;
-  status?: "approved" | "rejected";
+  status?: "approved" | "rejected" | "pending";
+  user_id: number;
 }
 
-const CustomDateButton = forwardRef<HTMLButtonElement, any>(({ value, onClick }, ref) => (
-  <button
-    onClick={onClick}
-    ref={ref}
-    className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-[#506690] hover:underline"
-  >
-    {value}
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
-));
-CustomDateButton.displayName = "CustomDateButton";
+interface UserData {
+  id: number;
+  fname: string;
+  lname: string;
+}
 
 const ApproveForm = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [leaveData, setLeaveData] = useState<LeaveItem[]>([]);
+  const [leaveData, setLeaveData] = useState<
+    (LeaveItem & { user?: UserData })[]
+  >([]);
   const [loading, setLoading] = useState(false);
-
-  const formatDateThai = (date: Date | null) => {
-    if (!date) return "";
-    const thaiYear = date.getFullYear() + 543;
-    const formatted = format(date, "d MMMM", { locale: th });
-    return `${formatted} ${thaiYear}`;
-  };
 
   const fetchLeaveRequests = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=6`, );
-      console.log("Fetched leave requests:", response.data);
-     // setLeaveData(response.data.data); // ปรับตาม structure ของ response จริง
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}leave-request`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      const requests: LeaveItem[] = response.data.data;
+
+      const withUserData = await Promise.all(
+        requests.map(async (leave) => {
+          try {
+            const userResponse = await axios.get(
+              `${process.env.NEXT_PUBLIC_API_URL}users/${leave.user_id}`,
+              {
+                withCredentials: true,
+              }
+            );
+            return { ...leave, user: userResponse.data.data };
+          } catch (err) {
+            console.error(`Error fetching user ${leave.user_id}`, err);
+            return { ...leave }; // fallback ถ้าโหลด user ไม่ได้
+          }
+        })
+      );
+
+      setLeaveData(withUserData);
     } catch (error) {
       console.error("Error fetching leave requests:", error);
     } finally {
@@ -55,9 +93,21 @@ const ApproveForm = () => {
     }
   };
 
-  const updateLeaveStatus = async (id: number, status: "approved" | "rejected") => {
+  const updateLeaveStatus = async (
+    id: number,
+    status: "approved" | "rejected"
+  ) => {
     try {
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`, { status });
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setLeaveData((prev) =>
         prev.map((item) => (item.id === id ? { ...item, status } : item))
       );
@@ -68,11 +118,22 @@ const ApproveForm = () => {
 
   useEffect(() => {
     fetchLeaveRequests();
-  }, []);
+  }, [selectedDate]);
+
+  const isSameDay = (date1: Date, date2: Date) =>
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
+
+  const filteredLeaveData = leaveData.filter((item) => {
+    if (!item.leave_datetime || !selectedDate) return false;
+    const leaveDate = new Date(item.leave_datetime);
+    return isSameDay(leaveDate, selectedDate);
+  });
 
   return (
-    <div className="p-4 max-w-6xl mx-auto text-gray-900 dark:text-[#506690]">
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+    <div className="mx-auto max-w-6xl p-4 text-gray-900 dark:text-[#506690]">
+      <div className="mb-6 flex flex-wrap items-center gap-4">
         <DatePicker
           selected={selectedDate}
           onChange={(date) => setSelectedDate(date)}
@@ -83,46 +144,62 @@ const ApproveForm = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-6 text-gray-500 dark:text-[#506690]">กำลังโหลดข้อมูล...</div>
-      ) : leaveData.length === 0 ? (
-        <div className="text-center py-6 text-gray-500 dark:text-[#506690]">ไม่พบข้อมูลการลา</div>
+        <div className="py-6 text-center text-gray-500 dark:text-[#506690]">
+          กำลังโหลดข้อมูล...
+        </div>
+      ) : filteredLeaveData.length === 0 ? (
+        <div className="py-6 text-center text-gray-500 dark:text-[#506690]">
+          ไม่พบข้อมูลการลาในวันที่เลือก
+        </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm w-full dark:bg-black-dark-light/5 dark:border-gray-900">
-          <div className="rounded-t-lg sm:grid grid-cols-4 font-semibold text-base text-gray-700 bg-gray-100 dark:bg-gray-900 dark:text-[#506690] px-6 py-3">
+        <div className="w-full rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-900 dark:bg-black-dark-light/5">
+          <div className="grid-cols-4 rounded-t-lg bg-gray-100 px-6 py-3 text-base font-semibold text-gray-700 dark:bg-gray-900 dark:text-[#506690] sm:grid">
             <div>ชื่อ-นามสกุล</div>
             <div>หลักฐาน</div>
             <div>เหตุผล</div>
             <div>การอนุมัติ</div>
           </div>
-          {leaveData.map((item) => (
+          {filteredLeaveData.map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-1 sm:grid-cols-4 gap-y-2 items-start border-t border-gray-200 dark:border-gray-600 px-6 py-4 text-base text-gray-800 dark:text-[#506690]"
+              className="grid grid-cols-1 items-start gap-y-2 border-t border-gray-200 px-6 py-4 text-base text-gray-800 dark:border-gray-600 dark:text-[#506690] sm:grid-cols-4"
             >
               <div>
-                <div className="sm:hidden text-sm text-gray-500">ชื่อ-นามสกุล</div>
-                <div>{item.name}</div>
+                <div className="text-sm text-gray-500 sm:hidden">
+                  ชื่อ-นามสกุล
+                </div>
+                <div>
+                  {item.user
+                    ? `${item.user.fname} ${item.user.lname}`
+                    : "ไม่พบชื่อ"}
+                </div>
               </div>
               <div>
-                <div className="sm:hidden text-sm text-gray-500">หลักฐาน</div>
-                <div className="text-pink-600 underline cursor-pointer">{item.evidence}</div>
+                <div className="text-sm text-gray-500 sm:hidden">หลักฐาน</div>
+                <div className="cursor-pointer text-pink-600 underline">
+                  หลักฐาน
+                </div>
               </div>
               <div>
-                <div className="sm:hidden text-sm text-gray-500">เหตุผล</div>
+                <div className="text-sm text-gray-500 sm:hidden">เหตุผล</div>
                 <div>{item.reason}</div>
               </div>
               <div className="space-x-2">
                 <button
-                  className={`px-3 py-1 rounded text-white ${
-                    item.status === "approved" ? "bg-green-700" : "bg-green-500 hover:bg-green-600"
+                  className={`rounded px-3 py-1 text-white ${
+                    item.status === "approved"
+                      ? "bg-green-700"
+                      : "bg-green-500 hover:bg-green-600"
                   }`}
                   onClick={() => updateLeaveStatus(item.id, "approved")}
                 >
                   อนุมัติ
                 </button>
                 <button
-                  className={`px-3 py-1 rounded text-white ${
-                    item.status === "rejected" ? "bg-red-700" : "bg-red-500 hover:bg-red-600"
+                  className={`rounded px-3 py-1 text-white ${
+                    item.status === "rejected"
+                      ? "bg-red-700"
+                      : "bg-red-500 hover:bg-red-600"
                   }`}
                   onClick={() => updateLeaveStatus(item.id, "rejected")}
                 >
