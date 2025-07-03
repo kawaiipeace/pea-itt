@@ -37,6 +37,7 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
       res.status(httpStatus.CONFLICT).json({
         message: "You have already submitted a leave request today.",
       });
+      return;
     }
 
     const leaveRequest = await prisma.leave_request.create({
