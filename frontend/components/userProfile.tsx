@@ -9,6 +9,7 @@ import IconCalendar from "../components/icon/icon-calendar";
 import useAuthStore from "../store/authStore";
 import axios from "axios";
 import Swal from "sweetalert2";
+
 registerLocale("th", th);
 
 const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
@@ -16,23 +17,25 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
   const buddhistYear = year ? String(parseInt(year) + 543) : "";
 
   return (
-    <input
-      onClick={onClick}
-      value={value ? `${day}/${month}/${buddhistYear}` : ""}
-      readOnly
-      placeholder="เลือกวันที่"
-      className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
-    />
+    <div className="relative w-full">
+      <input
+        onClick={onClick}
+        value={value ? `${day}/${month}/${buddhistYear}` : ""}
+        readOnly
+        placeholder="เลือกวันที่"
+        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+      />
+      <IconCalendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+    </div>
   );
 });
 CustomDateInput.displayName = "CustomDateInput";
-
-
 
 const UserProfile = () => {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.actionSetUser);
   const refreshUser = useAuthStore((state) => state.refreshUser);
+
   const [formData, setFormData] = useState({
     name: user?.fname || "",
     surname: user?.lname || "",
@@ -45,8 +48,9 @@ const UserProfile = () => {
     department: user?.department_id || "",
   });
 
-
-  const [imageSrc, setImageSrc] = useState<string>(`${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`);
+  const [imageSrc, setImageSrc] = useState<string>(
+    `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -67,17 +71,13 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchMentorProfile = async () => {
       try {
-        if (!user) {
-          return
-        } else if (!user.student_profile) {
-          return
-        }
+        if (!user || !user.student_profile) return;
 
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user?.student_profile.mentor_id}`
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user.student_profile.mentor_id}`
         );
         const dept = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}dept/${user?.department_id}`
+          `${process.env.NEXT_PUBLIC_API_URL}dept/${user.department_id}`
         );
         const deptName = dept.data.data.dept_name;
         const mentor = response.data.data[0];
@@ -122,7 +122,6 @@ const UserProfile = () => {
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
     if (!user) {
       alert("กรุณาเข้าสู่ระบบก่อน");
       return;
@@ -137,19 +136,14 @@ const UserProfile = () => {
       form.append("university", formData.university);
       form.append("start_date", formData.start_date);
       form.append("end_date", formData.end_date);
-      form.append("department_id", String(user?.department_id));
-      form.append("mentor_id", String(user?.student_profile?.mentor_id));
-
-      if (imageFile) {
-        form.append("picture", imageFile);
-      }
+      form.append("department_id", String(user.department_id));
+      form.append("mentor_id", String(user.student_profile?.mentor_id));
+      if (imageFile) form.append("picture", imageFile);
 
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}users/${user.id}`,
         form,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       Swal.fire({
@@ -159,11 +153,11 @@ const UserProfile = () => {
         confirmButtonText: "ตกลง",
       }).then(() => {
         setUser(response.data.data);
-        refreshUser(); // Refresh user data after successful update
+        refreshUser();
       });
     } catch (error) {
       console.error("เกิดข้อผิดพลาด:", error);
-      alert(error || "เกิดข้อผิดพลาดในการบันทึกข้อมูลโปรไฟล์");
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลโปรไฟล์");
     }
   };
 
@@ -221,7 +215,7 @@ const UserProfile = () => {
 
         <div className="mt-2 w-full md:flex-1">
           <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-            {/* ชื่อจริง นามสกุล อีเมล โทร */}
+            {/* ช่องกรอกทั่วไป */}
             {[
               { label: "ชื่อจริง", field: "name" },
               { label: "นามสกุล", field: "surname" },
@@ -241,63 +235,50 @@ const UserProfile = () => {
               </div>
             ))}
 
-            {/* มหาวิทยาลัยและวันที่ */}
-            <div className="w-full md:col-span-2">
-              <div className="flex w-full flex-col gap-4 md:flex-row">
-                <div className="w-full md:w-1/2">
+            {/* มหาวิทยาลัย + วันที่ฝึกงาน */}
+            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row">
+              <div className="w-full md:w-[50%]">
+                <label className="block text-sm font-medium">
+                  มหาวิทยาลัยที่ศึกษาอยู่
+                </label>
+                <input
+                  type="text"
+                  value={formData.university}
+                  onChange={(e) =>
+                    setFormData({ ...formData, university: e.target.value })
+                  }
+                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                />
+              </div>
+
+              {["start_date", "end_date"].map((field, index) => (
+                <div className="w-full md:w-[25%]" key={field}>
                   <label className="block text-sm font-medium">
-                    มหาวิทยาลัยที่ศึกษาอยู่
+                    {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
                   </label>
-                  <input
-                    type="text"
-                    value={formData.university}
-                    onChange={(e) =>
-                      setFormData({ ...formData, university: e.target.value })
+                  <DatePicker
+                    selected={formData[field] ? new Date(formData[field]) : null}
+                    onChange={(date: Date | null) =>
+                      setFormData({
+                        ...formData,
+                        [field]: date ? format(date, "yyyy-MM-dd") : "",
+                      })
                     }
-                    className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                    dateFormat="dd/MM/yyyy"
+                    locale="th"
+                    minDate={
+                      field === "end_date" && formData.start_date
+                        ? new Date(formData.start_date)
+                        : undefined
+                    }
+                    customInput={<CustomDateInput />}
                   />
                 </div>
-
-                {/* วันที่เริ่ม - สิ้นสุดฝึกงาน */}
-                {["start_date", "end_date"].map((field, index) => (
-                  <div className="w-full md:w-1/2" key={field}>
-                    <label className="block text-sm font-medium">
-                      {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
-                    </label>
-                    <div className="relative">
-                      <DatePicker
-                        selected={
-                          formData[field]
-                            ? new Date(formData[field])
-                            : null
-                        }
-                        onChange={(date: Date | null) =>
-                          setFormData({
-                            ...formData,
-                            [field]: date ? format(date, "yyyy-MM-dd") : "",
-                          })
-                        }
-                        dateFormat="dd/MM/yyyy"
-                        locale="th"
-                        minDate={
-                          field === "end_date" && formData.start_date
-                            ? new Date(formData.start_date)
-                            : undefined
-                        }
-                        customInput={<CustomDateInput />}
-                      />
-                      <IconCalendar className="absolute right-3 top-2 text-gray-500 dark:border-[#506690]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
 
-            {/* ข้อมูลแสดงผลเท่านั้น */}
-            {[
-              { label: "กองที่สังกัด", value: formData.department },
-              { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id },
-            ].map(({ label, value }) => (
+            {/* แสดงผลเฉย ๆ */}
+            {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
               <div key={label}>
                 <label className="block text-sm font-medium">{label}</label>
                 <input
