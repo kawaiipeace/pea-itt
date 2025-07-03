@@ -58,9 +58,9 @@ const Leaverequest = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-[#F9F9F9] px-1 py-2 text-sm">
+    <div className="flex flex-col items-center justify-center bg-[#F9F9F9] px-1 py-2 text-sm dark:bg-black-dark-light/5 dark:border-gray-900  dark:text-[#506690]">
       <form
-        className="w-full max-w-[750px] rounded-md border mb-6 bg-white p-2 shadow-sm sm:p-4 md:p-6"
+        className="w-full max-w-[750px] rounded-md border mb-6 bg-white p-2 shadow-sm sm:p-4 md:p-6 dark:bg-gray-900 dark:border-gray-900"
         onSubmit={(e) => e.preventDefault()}
       >
         
@@ -73,7 +73,7 @@ const Leaverequest = () => {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="กรุณากรอกหมายเหตุ"
-            className="w-full rounded-md border border-[#E0E6ED] bg-[#F1F2F3] px-3 py-2 text-sm focus:outline-none sm:px-4 sm:py-2 sm:text-base"
+            className="w-full rounded-md border border-[#E0E6ED] bg-[#F1F2F3] px-3 py-2 text-sm focus:outline-none sm:px-4 sm:py-2 sm:text-base dark:bg-gray-900  dark:border-gray-500"
           />
         </div>
 
@@ -89,12 +89,12 @@ const Leaverequest = () => {
               value={file?.name || ""}
               readOnly
               placeholder="ยังไม่ได้เลือกไฟล์"
-              className="flex-1 rounded-md border border-[#E0E6ED] bg-[#F1F2F3] px-3 py-2 text-sm sm:text-base"
+              className="flex-1 rounded-md border border-[#E0E6ED] bg-[#F1F2F3] px-3 py-2 text-sm sm:text-base dark:bg-gray-900  dark:border-gray-500" 
             />
             <button
               type="button"
               onClick={handleChooseClick}
-              className="w-full rounded-md bg-[#D90080]/30 py-2 text-sm font-semibold text-[#74045F] sm:h-[37px] sm:w-[108px]"
+              className="w-full rounded-md bg-[#D90080]/30 py-2 text-sm font-semibold text-[#74045F] sm:h-[37px] sm:w-[108px] dark:text-[#a4aeb8] sm:text-base hover:bg-[#D90080]/50 transition-colors"
             >
               Choose
             </button>
@@ -117,7 +117,7 @@ const Leaverequest = () => {
                 className="h-28 w-28 rounded-md border object-contain sm:h-40 sm:w-40 md:h-56 md:w-56"
               />
             ) : (
-              <div className="h-28 w-28 sm:h-40 sm:w-40 md:h-56 md:w-56 flex items-center justify-center rounded border border-dashed bg-gray-100 text-gray-500 text-sm">
+              <div className="h-28 w-28 sm:h-40 sm:w-40 md:h-56 md:w-56 flex items-center justify-center rounded border border-dashed bg-gray-100 text-gray-500 text-sm dark:bg-gray-900  dark:border-gray-500">
                 ไม่มีรูป
               </div>
             )}
@@ -129,7 +129,7 @@ const Leaverequest = () => {
       <div className="w-full max-w-3xl px-4 sm:px-0">
         <button
           onClick={handleSubmit}
-          className="w-full rounded-md bg-[#74045F] py-3 text-base text-white transition hover:bg-[#B10073] sm:w-48 sm:text-lg mx-auto block"
+          className="w-full rounded-md  bg-[#74045F] py-3 text-base text-white transition hover:bg-[#B10073] sm:w-48 sm:text-lg mx-auto block dark:text-[#a4aeb8] hover:bg-[#D90080]/50 "
         >
           ยืนยันการลา
         </button>
