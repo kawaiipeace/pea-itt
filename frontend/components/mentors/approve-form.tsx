@@ -4,6 +4,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { th } from "date-fns/locale";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
+import useAuthStore from "@/store/authStore";
 
 registerLocale("th", th);
 
@@ -53,12 +54,13 @@ const ApproveForm = () => {
     (LeaveItem & { user?: UserData })[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
   const fetchLeaveRequests = async () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}leave-request`,
+        `${process.env.NEXT_PUBLIC_API_URL}leave-request?mentor_id=${user?.id}&status=pending`,
         { withCredentials: true }
       );
 
