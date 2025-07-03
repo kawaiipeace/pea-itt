@@ -14,7 +14,7 @@ interface mystuData {
   start_date: string;
   end_date: string;
   student_profile: any;
-  picture_url?: string | null; // ✅ เพิ่มตรงนี้
+  picture_url?: string | null;
 }
 
 const Student = () => {
@@ -46,7 +46,10 @@ const Student = () => {
               const imageUrl = URL.createObjectURL(imageRes.data);
               return { ...student, picture_url: imageUrl };
             } catch (error: any) {
-              console.error("โหลดรูปไม่ได้:", student.id, error);
+              // ถ้าไม่ใช่ 404 จึง log error
+              if (error?.response?.status !== 404) {
+                console.error("เกิดข้อผิดพลาดในการโหลดรูป:", student.id, error);
+              }
               return { ...student, picture_url: null };
             }
           })
@@ -70,7 +73,7 @@ const Student = () => {
       </h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {mystu.map((student) => (
-          <Card key={student.id} student={student} /> 
+          <Card key={student.id} student={student} />
         ))}
       </div>
     </div>

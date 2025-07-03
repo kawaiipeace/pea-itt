@@ -1,12 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
+import axios from "axios";
+import IconUsers from "@/components/icon/icon-users";
 
 interface PageProps {
   params: { info: string };
+}
+
+interface stuPro {
+  id: number;
+  university: string;
+  start_date: string;
+  end_date: string;
 }
 
 interface detailStu {
@@ -14,25 +23,67 @@ interface detailStu {
   lname: string;
   email: string;
   phone_number: string;
-  university: string;
-  start_date: string;
-  end_date: string;
-  
+  student_profile: stuPro;
+  picture_url?: string | null;
 }
+
+const formatThaiDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("th-TH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    calendar: "buddhist",
+  }).format(date);
+};
+
+const formatThaiDateFromDMY = (dateStr: string) => {
+  const [day, month, year] = dateStr.split("/").map(Number);
+  const isoString = `${year}-${month.toString().padStart(2, "0")}-${day
+    .toString()
+    .padStart(2, "0")}`;
+  return formatThaiDate(isoString);
+};
 
 const InfoPage = ({ params }: PageProps) => {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const ITEMS = 10;
 
-  const personalInfo = {
-    name: "เธียรพงษ์ โฆษณาย",
-    phone: "094030xxxx",
-    email: "tt@gmail.com",
-    university: "มหาวิทยาลัยธุรกิจบัณฑิตย์",
-    startDate: "9 มิถุนายน 2568",
-    endDate: "31 กรกฎาคม 2568",
-  };
+  const [personalInfo, setPersonalInfo] = useState<detailStu>();
+
+  useEffect(() => {
+    const fetchPersonalInfo = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users/${params.info}`,
+          {
+            withCredentials: true,
+          }
+        );
+        const student = res.data.data;
+
+        try {
+          const imageRes = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}users/${student.student_profile.id}/picture`,
+            {
+              withCredentials: true,
+              responseType: "blob",
+            }
+          );
+          const imageUrl = URL.createObjectURL(imageRes.data);
+          setPersonalInfo({ ...student, picture_url: imageUrl });
+        } catch (err: any) {
+          // ถ้ารูปไม่มี (404) หรือ error อื่น
+          setPersonalInfo({ ...student, picture_url: null });
+        }
+      } catch (error) {
+        console.error("โหลดข้อมูลผิดพลาด:", error);
+      }
+    };
+
+    fetchPersonalInfo();
+  }, []);
 
   const attendance = [
     {
@@ -149,33 +200,47 @@ const InfoPage = ({ params }: PageProps) => {
       >
         <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
       </button>
+
       {/* ข้อมูลส่วนตัว */}
       <div className="flex items-center justify-center px-4">
         <div className="grid w-full max-w-4xl grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
           <div className="flex justify-center">
-            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-100 text-6xl text-gray-400">
-              👤
+            <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+              {personalInfo?.picture_url ? (
+                <img
+                  src={personalInfo?.picture_url}
+                  alt="student-profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <IconUsers className="shrink-0 text-gray-400 group-hover:!text-primary" />
+              )}
             </div>
           </div>
           <div className="grid gap-2 md:col-span-2">
             <p>
-              <strong>ชื่อจริง-นามสกุล:</strong> {personalInfo.name}
+              <strong>ชื่อจริง-นามสกุล:</strong> {personalInfo?.fname}{" "}
+              {personalInfo?.lname}
             </p>
             <p>
-              <strong>เบอร์โทรศัพท์:</strong> {personalInfo.phone}
+              <strong>เบอร์โทรศัพท์:</strong> {personalInfo?.phone_number}
             </p>
             <p>
-              <strong>อีเมล:</strong> {personalInfo.email}
+              <strong>อีเมล:</strong> {personalInfo?.email}
             </p>
             <p>
               <strong>มหาวิทยาลัยที่ศึกษาอยู่:</strong>{" "}
-              {personalInfo.university}
+              {personalInfo?.student_profile.university}
             </p>
             <p>
-              <strong>วันที่เริ่มฝึกงาน:</strong> {personalInfo.startDate}
+              <strong>วันที่เริ่มฝึกงาน:</strong>{" "}
+              {personalInfo?.student_profile.start_date &&
+                formatThaiDate(personalInfo.student_profile.start_date)}
             </p>
             <p>
-              <strong>วันที่สิ้นสุดฝึกงาน:</strong> {personalInfo.endDate}
+              <strong>วันที่สิ้นสุดฝึกงาน:</strong>{" "}
+              {personalInfo?.student_profile.end_date &&
+                formatThaiDate(personalInfo.student_profile.end_date)}
             </p>
           </div>
         </div>
@@ -184,7 +249,7 @@ const InfoPage = ({ params }: PageProps) => {
       {/* ตารางเวลาเข้างาน */}
       <div className="flex items-center justify-center">
         <div className="w-[1220px] overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690] ">
-          <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm  font-semibold text-gray-800 dark:bg-gray-900 dark:text-[#506690] ">
+          <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:bg-gray-900 dark:text-[#506690] ">
             {[
               "วันที่",
               "เวลาเข้างาน",
@@ -202,7 +267,7 @@ const InfoPage = ({ params }: PageProps) => {
           <div className="divide-y text-center text-sm">
             {slice.map((entry, idx) => (
               <div key={idx} className="grid min-w-[820px] grid-cols-6">
-                <div className="p-3">{entry.date}</div>
+                <div className="p-3">{formatThaiDateFromDMY(entry.date)}</div>
                 <div className="p-3">{entry.checkIn}</div>
                 <div className="p-3">{entry.checkOut}</div>
                 <div className="p-3">{entry.status}</div>
