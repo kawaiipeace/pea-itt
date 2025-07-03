@@ -11,7 +11,7 @@ export default function LoginPage() {
           <Image
             src={Logo}
             alt="PEA Logo"
-            className="mx-auto h-[50px] w-[30x] sm:w-[200px] mt-4"
+            className="mx-auto mt-6  w-34 sm:w-42 md:w-48  max-w-[220px] md:max-w-[240px] lg:max-w-[260px]  h-auto  object-contain select-none"
           />
           <h1 className="text-base font-semibold text-black mt-9 ">
             PEA Internship Time Track
