@@ -92,13 +92,11 @@ const ApproveForm = () => {
     status: "approved" | "rejected"
   ) => {
     try {
-      const token = localStorage.getItem("token");
       await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
         { status },
         {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+          withCredentials: true,}
       );
       setLeaveData((prev) =>
         prev.map((item) =>
