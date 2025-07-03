@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
+import axios from "axios";
 
 interface PageProps {
   params: { info: string };
@@ -17,7 +18,6 @@ interface detailStu {
   university: string;
   start_date: string;
   end_date: string;
-  
 }
 
 const InfoPage = ({ params }: PageProps) => {
@@ -25,14 +25,23 @@ const InfoPage = ({ params }: PageProps) => {
   const [page, setPage] = useState(1);
   const ITEMS = 10;
 
-  const personalInfo = {
-    name: "เธียรพงษ์ โฆษณาย",
-    phone: "094030xxxx",
-    email: "tt@gmail.com",
-    university: "มหาวิทยาลัยธุรกิจบัณฑิตย์",
-    startDate: "9 มิถุนายน 2568",
-    endDate: "31 กรกฎาคม 2568",
-  };
+  const [personalInfo, setPersonalInfo] = useState<detailStu>();
+  useEffect(() => {
+    const fetchPersonalInfo = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users/${params.info}`,
+          {
+            withCredentials: true,
+          }
+        );
+        console.log(res.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchPersonalInfo();
+  }, []);
 
   const attendance = [
     {
@@ -159,23 +168,24 @@ const InfoPage = ({ params }: PageProps) => {
           </div>
           <div className="grid gap-2 md:col-span-2">
             <p>
-              <strong>ชื่อจริง-นามสกุล:</strong> {personalInfo.name}
+              <strong>ชื่อจริง-นามสกุล:</strong> {personalInfo?.fname}{" "}
+              {personalInfo?.lname}
             </p>
             <p>
-              <strong>เบอร์โทรศัพท์:</strong> {personalInfo.phone}
+              <strong>เบอร์โทรศัพท์:</strong> {personalInfo?.phone_number}
             </p>
             <p>
-              <strong>อีเมล:</strong> {personalInfo.email}
+              <strong>อีเมล:</strong> {personalInfo?.email}
             </p>
             <p>
               <strong>มหาวิทยาลัยที่ศึกษาอยู่:</strong>{" "}
-              {personalInfo.university}
+              {personalInfo?.university}
             </p>
             <p>
-              <strong>วันที่เริ่มฝึกงาน:</strong> {personalInfo.startDate}
+              <strong>วันที่เริ่มฝึกงาน:</strong> {personalInfo?.start_date}
             </p>
             <p>
-              <strong>วันที่สิ้นสุดฝึกงาน:</strong> {personalInfo.endDate}
+              <strong>วันที่สิ้นสุดฝึกงาน:</strong> {personalInfo?.end_date}
             </p>
           </div>
         </div>
