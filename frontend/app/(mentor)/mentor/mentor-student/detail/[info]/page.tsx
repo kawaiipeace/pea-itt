@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
@@ -27,6 +27,16 @@ interface detailStu {
   picture_url?: string | null;
 }
 
+interface ViewRow {
+  dateKey: string;
+  dateTH: string;
+  inTime: string | "-";
+  outTime: string | "-";
+  status: "มา" | "ลา";
+  note: string | "-";
+  approval?: "approved" | "declined" | "pending";
+}
+
 const formatThaiDate = (dateString: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("th-TH", {
@@ -37,32 +47,27 @@ const formatThaiDate = (dateString: string) => {
   }).format(date);
 };
 
-const formatThaiDateFromDMY = (dateStr: string) => {
-  const [day, month, year] = dateStr.split("/").map(Number);
-  const isoString = `${year}-${month.toString().padStart(2, "0")}-${day
-    .toString()
-    .padStart(2, "0")}`;
-  return formatThaiDate(isoString);
-};
-
 const InfoPage = ({ params }: PageProps) => {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const ITEMS = 10;
 
   const [personalInfo, setPersonalInfo] = useState<detailStu>();
+  const [viewRows, setViewRows] = useState<ViewRow[]>([]);
 
   useEffect(() => {
-    const fetchPersonalInfo = async () => {
+    const fetchData = async () => {
       try {
+        // โหลดข้อมูลนักศึกษา
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}users/${params.info}`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         const student = res.data.data;
 
+        let picture_url: string | null = null;
+
+        // โหลดรูปภาพ (ถ้ามี)
         try {
           const imageRes = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}users/${student.student_profile.id}/picture`,
@@ -71,126 +76,120 @@ const InfoPage = ({ params }: PageProps) => {
               responseType: "blob",
             }
           );
-          const imageUrl = URL.createObjectURL(imageRes.data);
-          setPersonalInfo({ ...student, picture_url: imageUrl });
+          picture_url = URL.createObjectURL(imageRes.data);
         } catch (err: any) {
-          // ถ้ารูปไม่มี (404) หรือ error อื่น
-          setPersonalInfo({ ...student, picture_url: null });
+          if (err?.response?.status !== 404) {
+            console.error("โหลดรูปผิดพลาด:", err);
+          }
+          picture_url = null;
         }
+
+        setPersonalInfo({ ...student, picture_url });
+
+        // โหลด check-in/out และ ใบลา แบบ Promise.all (แต่ดัก error แยกกัน)
+        let checkRes: any[] = [];
+        let leaveRes: any[] = [];
+
+        try {
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${params.info}`,
+            { withCredentials: true }
+          );
+          checkRes = res.data.data || [];
+        } catch (err) {
+          console.warn("ไม่มีข้อมูลเข้างาน");
+        }
+
+        try {
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${params.info}`,
+            { withCredentials: true }
+          );
+          leaveRes = res.data.data || [];
+        } catch (err) {
+          console.warn("ไม่มีข้อมูลใบลา");
+        }
+
+        // รวมข้อมูลเข้างาน + ลา
+        const map = new Map<string, ViewRow>();
+
+        // ข้อมูลเข้างาน
+        checkRes.forEach((r: any) => {
+          const key = r.time.split("T")[0];
+          if (!map.has(key)) {
+            map.set(key, {
+              dateKey: key,
+              dateTH: formatThaiDate(r.time),
+              inTime: "-",
+              outTime: "-",
+              status: "มา",
+              note: "-",
+            });
+          }
+          const row = map.get(key)!;
+          const time = new Date(r.time).toLocaleTimeString("th-TH", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+          if (r.type_check === "in") row.inTime = time;
+          if (r.type_check === "out") row.outTime = time;
+        });
+
+        // ข้อมูลใบลา
+        leaveRes.forEach((lv: any) => {
+          const dateTime = lv.leave_datetime ?? new Date().toISOString();
+          const key = dateTime.split("T")[0];
+          map.set(key, {
+            dateKey: key,
+            dateTH: formatThaiDate(dateTime),
+            inTime: "-",
+            outTime: "-",
+            status: "ลา",
+            note: lv.reason || "-",
+            approval: lv.status,
+          });
+        });
+
+        const rows = Array.from(map.values()).sort((a, b) =>
+          b.dateKey.localeCompare(a.dateKey)
+        );
+
+        setViewRows(rows);
       } catch (error) {
-        console.error("โหลดข้อมูลผิดพลาด:", error);
+        console.error("โหลดข้อมูลผิดพลาดทั้งหมด:", error);
       }
     };
 
-    fetchPersonalInfo();
+    fetchData();
   }, []);
 
-  const attendance = [
-    {
-      date: "09/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "10/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "11/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "12/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "13/06/2025",
-      checkIn: "-",
-      checkOut: "-",
-      status: "ไม่มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "14/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "15/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "16/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "17/06/2025",
-      checkIn: "08:30",
-      checkOut: "16:30",
-      status: "มา",
-      note: "-",
-      approved: "-",
-    },
-    {
-      date: "18/06/2025",
-      checkIn: "-",
-      checkOut: "-",
-      status: "ลา",
-      note: "พบแพทย์",
-      approved: "รอการอนุมัติ",
-    },
-  ];
+  const pages = Math.ceil(viewRows.length / ITEMS);
+  const slice = viewRows.slice((page - 1) * ITEMS, page * ITEMS);
 
   const renderBadge = (value?: string) => {
-    if (!value || value === "-") return <>-</>;
-    if (value === "อนุมัติ")
-      return (
-        <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">
-          อนุมัติ
-        </span>
-      );
-    if (value === "ไม่อนุมัติ")
-      return (
-        <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">
-          ไม่อนุมัติ
-        </span>
-      );
-    return (
-      <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">
-        รออนุมัติ
-      </span>
-    );
+    if (!value) return <>-</>;
+    switch (value) {
+      case "approved":
+        return (
+          <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">
+            อนุมัติ
+          </span>
+        );
+      case "declined":
+        return (
+          <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">
+            ไม่อนุมัติ
+          </span>
+        );
+      default:
+        return (
+          <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">
+            รออนุมัติ
+          </span>
+        );
+    }
   };
-
-  const pages = Math.ceil(attendance.length / ITEMS);
-  const slice = attendance.slice((page - 1) * ITEMS, page * ITEMS);
 
   return (
     <section className="space-y-6 p-4">
@@ -208,7 +207,7 @@ const InfoPage = ({ params }: PageProps) => {
             <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-gray-100">
               {personalInfo?.picture_url ? (
                 <img
-                  src={personalInfo?.picture_url}
+                  src={personalInfo.picture_url}
                   alt="student-profile"
                   className="h-full w-full object-cover"
                 />
@@ -248,8 +247,8 @@ const InfoPage = ({ params }: PageProps) => {
 
       {/* ตารางเวลาเข้างาน */}
       <div className="flex items-center justify-center">
-        <div className="w-[1220px] overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690] ">
-          <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:bg-gray-900 dark:text-[#506690] ">
+        <div className="w-[1220px] overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690]">
+          <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:bg-gray-900 dark:text-[#506690]">
             {[
               "วันที่",
               "เวลาเข้างาน",
@@ -267,13 +266,13 @@ const InfoPage = ({ params }: PageProps) => {
           <div className="divide-y text-center text-sm">
             {slice.map((entry, idx) => (
               <div key={idx} className="grid min-w-[820px] grid-cols-6">
-                <div className="p-3">{formatThaiDateFromDMY(entry.date)}</div>
-                <div className="p-3">{entry.checkIn}</div>
-                <div className="p-3">{entry.checkOut}</div>
+                <div className="p-3">{entry.dateTH}</div>
+                <div className="p-3">{entry.inTime}</div>
+                <div className="p-3">{entry.outTime}</div>
                 <div className="p-3">{entry.status}</div>
                 <div className="p-3">{entry.note}</div>
                 <div className="p-3">
-                  {entry.status === "ลา" ? renderBadge(entry.approved) : "-"}
+                  {entry.status === "ลา" ? renderBadge(entry.approval) : "-"}
                 </div>
               </div>
             ))}
@@ -296,23 +295,20 @@ const InfoPage = ({ params }: PageProps) => {
           &lt;
         </button>
 
-        {Array.from({ length: pages }).map((_, i) => {
-          const p = i + 1;
-          return (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={clsx(
-                "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-                page === p
-                  ? "bg-[#B10073] text-white"
-                  : "text-gray-700 hover:bg-gray-200"
-              )}
-            >
-              {p}
-            </button>
-          );
-        })}
+        {Array.from({ length: pages }).map((_, i) => (
+          <button
+            key={i + 1}
+            onClick={() => setPage(i + 1)}
+            className={clsx(
+              "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
+              page === i + 1
+                ? "bg-[#B10073] text-white"
+                : "text-gray-700 hover:bg-gray-200"
+            )}
+          >
+            {i + 1}
+          </button>
+        ))}
 
         <button
           onClick={() => setPage((p) => Math.min(pages, p + 1))}
