@@ -24,7 +24,7 @@ const Card = ({ student }: any) => {
   return (
     <div
       onClick={() => clickme(student.id)}
-      className="flex h-[300px] flex-col items-center rounded-2xl border border-transparent bg-white p-4
+      className="cursor-pointer flex h-[300px] flex-col items-center rounded-2xl border border-transparent bg-white p-4
         text-center shadow transition-colors hover:border-[#B10073] hover:bg-[#F7E3F0]
         hover:shadow-md dark:border-gray-900 dark:bg-gray-900 dark:text-[#506690]
         dark:hover:border-white dark:hover:bg-gray-900"
