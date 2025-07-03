@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import prisma from "../../common/config/prismaClient";
 import { ZodError } from "zod";
 import httpStatus from "http-status-codes";
+import { startOfDay, endOfDay } from "date-fns";
+
 
 export const createLeaveRequest = async (req: Request, res: Response) => {
   try {
@@ -13,10 +15,28 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
 
     if (!req.user) {
       res.status(httpStatus.BAD_REQUEST).json({
-        error:
-          "Oops! We couldn't find your user info. Please log in again to continue.",
+        error: "Oops! We couldn't find your user info. Please log in again to continue.",
       });
-      return;
+    }
+
+    const now = new Date();
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
+
+    const existingRequest = await prisma.leave_request.findFirst({
+      where: {
+        user_id: req.user.id,
+        leave_datetime: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
+    });
+
+    if (existingRequest) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "You have already submitted a leave request today.",
+      });
     }
 
     const leaveRequest = await prisma.leave_request.create({
@@ -34,12 +54,12 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
     if (error instanceof ZodError) {
       res.status(httpStatus.BAD_REQUEST).json({
         message: "Validation error",
-        errors: error,
+        errors: error.errors,
       });
     } else if (error instanceof Error) {
       res.status(httpStatus.BAD_REQUEST).json({
         message: "Something went wrong!",
-        errors: error,
+        errors: error.message,
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -48,6 +68,7 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const getLeaveRequests = async (req: Request, res: Response) => {
   try {
@@ -128,8 +149,6 @@ export const getLeaveRequests = async (req: Request, res: Response) => {
     }
   }
 };
-
-
 
 export const getLeaveRequestByID = async (req: Request, res: Response) => {
   try {
