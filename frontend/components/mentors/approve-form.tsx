@@ -189,7 +189,7 @@ const ApproveForm = () => {
                   className="rounded px-3 py-1 text-white bg-green-500 hover:bg-green-600"
                   onClick={() => {
                     Swal.fire({
-                      title: "บันทึกข้อมูลเรียบร้อย",
+                      title: "บันทึกข้อมูลการอนุมัติ",
                       icon: "success",
                       confirmButtonText: "ตกลง",
                       width: "400px",
@@ -207,8 +207,8 @@ const ApproveForm = () => {
                   className="rounded px-3 py-1 text-white bg-red-500 hover:bg-red-600"
                   onClick={() => {
                     Swal.fire({
-                      title: "ไม่อนุมัติเรียบร้อย",
-                      icon: "warning",
+                      title: "บันทึกข้อมูลการอนุมัติ",
+                      icon: "success",
                       confirmButtonText: "ตกลง",
                       width: "400px",
                       customClass: {
