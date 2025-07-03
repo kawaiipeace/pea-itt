@@ -19,6 +19,10 @@ export const getAllUsers = async (req: Request, res: Response) => {
         },
         ...(departmentId ? { department_id: departmentId } : {}),
       },
+      include: {
+        student_profile: true,
+        mentor_profile: true,
+      },
       orderBy: {
         fname: "asc",
       },
@@ -375,7 +379,7 @@ export const updateMentor = async (req: Request, res: Response) => {
       });
       return;
     }
-    
+
     const updatedData = await prisma.$transaction(async (tx) => {
       const updatedUser = await tx.user.update({
         where: { id: userId },
@@ -415,7 +419,7 @@ export const updateMentor = async (req: Request, res: Response) => {
         message: "Internal server error",
       });
     }
-    
+
   }
 }
 
