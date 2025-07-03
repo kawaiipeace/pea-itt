@@ -25,7 +25,7 @@ const Student = () => {
     const fetchStudents = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user?.mentor_profile?.id}&show_ended=false`,
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user?.mentor_profile?.id}&show_ended=true`,
           {
             withCredentials: true,
           }
