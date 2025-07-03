@@ -176,9 +176,14 @@ const ApproveForm = () => {
               </div>
               <div>
                 <div className="text-sm text-gray-500 sm:hidden">หลักฐาน</div>
-                <div className="cursor-pointer text-pink-600 underline">
-                  หลักฐาน
-                </div>
+                <a
+                  href={`${process.env.NEXT_PUBLIC_API_URL}leave-request/picture/${item.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pink-600 underline"
+                >
+                  เปิดหลักฐาน
+                </a>
               </div>
               <div>
                 <div className="text-sm text-gray-500 sm:hidden">เหตุผล</div>
