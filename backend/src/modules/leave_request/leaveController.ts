@@ -51,42 +51,74 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
 
 export const getLeaveRequests = async (req: Request, res: Response) => {
   try {
-    const { user_id, sort = "leave_datetime", order = "desc" } = req.query;
+    const { mentor_id, status, sort = "leave_datetime", order = "desc" } = req.query;
 
-    const userID = user_id ? Number(user_id) : undefined;
+    const Status = status ? String(status) : undefined;
+
+    // ถ้ามี mentor_id (mentor) ให้ดึง student ที่ mentor ดูแล
+    let studentUserIds: number[] | undefined = undefined;
+    if (mentor_id) {
+      const mentorUserId = Number(mentor_id);
+      if (isNaN(mentorUserId)) {
+        res.status(httpStatus.BAD_REQUEST).json({
+          message: "mentor_id must be a valid number",
+        });
+      }
+
+      const mentor = await prisma.mentor_profile.findUnique({
+        where: { user_id: mentorUserId },
+        include: {
+          student_profile: {
+            select: { user_id: true },
+          },
+        },
+      });
+
+      if (!mentor || mentor.student_profile.length === 0) {
+        res.status(httpStatus.NOT_FOUND).json({
+          message: "No students found for this mentor",
+        });
+        return;
+      }
+
+      studentUserIds = mentor.student_profile.map((sp) => sp.user_id);
+    }
+
+    const whereCondition = {
+      ...(studentUserIds ? { user_id: { in: studentUserIds } } : {}),
+      ...(Status ? { status: Status } : {}),
+    };
 
     const leaveRequests = await prisma.leave_request.findMany({
-      where: {
-        user_id: userID,
-      },
+      where: whereCondition,
       select: {
         id: true,
         user_id: true,
         leave_datetime: true,
         reason: true,
         status: true,
+        user_leave_request_user_idTouser: {
+          select: {
+            fname: true,
+            lname: true,
+          },
+        },
       },
       orderBy: {
         [sort as string]: order === "asc" ? "asc" : "desc",
       },
     });
 
-    if (!leaveRequests || leaveRequests.length === 0) {
-      res.status(httpStatus.NOT_FOUND).json({
-        message: "No leave requests found",
-      });
-      return;
-    }
-
     res.status(httpStatus.OK).json({
       message: "Leave requests retrieved successfully",
       data: leaveRequests,
     });
   } catch (error) {
+    console.error(error);
     if (error instanceof Error) {
       res.status(httpStatus.BAD_REQUEST).json({
         message: "Something went wrong!",
-        errors: error,
+        errors: error.message,
       });
     } else {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -95,6 +127,7 @@ export const getLeaveRequests = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const getLeaveRequestByID = async (req: Request, res: Response) => {
   try {

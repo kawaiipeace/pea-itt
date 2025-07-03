@@ -96,7 +96,8 @@ const ApproveForm = () => {
         `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
         { status },
         {
-          withCredentials: true,}
+          withCredentials: true,
+        }
       );
       setLeaveData((prev) =>
         prev.map((item) =>
