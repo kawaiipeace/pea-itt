@@ -2,11 +2,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import IconUsers from "@/components/icon/icon-users"
-
+import IconUsers from "@/components/icon/icon-users";
 
 // ฟังก์ชันแปลงวันที่เป็นไทย
-
 const formatThaiDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("th-TH", {
@@ -26,15 +24,21 @@ const Card = ({ student }: any) => {
   return (
     <div
       onClick={() => clickme(student.id)}
-      key={student.id}
-      className="flex h-[300px] flex-col items-center rounded-2xl border border-transparent bg-white p-4
+      className="cursor-pointer flex h-[300px] flex-col items-center rounded-2xl border border-transparent bg-white p-4
         text-center shadow transition-colors hover:border-[#B10073] hover:bg-[#F7E3F0]
         hover:shadow-md dark:border-gray-900 dark:bg-gray-900 dark:text-[#506690]
         dark:hover:border-white dark:hover:bg-gray-900"
     >
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-        <IconUsers className="shrink-0 group-hover:!text-primary" />
-        
+      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+        {student.picture_url ? (
+          <img
+            src={student.picture_url}
+            alt={`${student.fname} ${student.lname}`}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <IconUsers className="shrink-0 group-hover:!text-primary text-gray-400" />
+        )}
       </div>
 
       <div className="mb-6 my-6 text-base font-semibold md:text-lg">

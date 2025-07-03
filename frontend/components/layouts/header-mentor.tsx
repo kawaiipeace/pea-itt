@@ -181,9 +181,8 @@ const Headermentor = () => {
 
   return (
     <header
-      className={`z-40 ${
-        themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
-      }`}
+      className={`z-40 ${themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
+        }`}
     >
       <div className="shadow-sm">
         <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
@@ -212,10 +211,9 @@ const Headermentor = () => {
             <div>
               {themeConfig.theme === "light" ? (
                 <button
-                  className={`${
-                    themeConfig.theme === "light" &&
+                  className={`${themeConfig.theme === "light" &&
                     "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                  }`}
+                    }`}
                   onClick={() => dispatch(toggleTheme("dark"))}
                 >
                   <IconSun />
@@ -225,10 +223,9 @@ const Headermentor = () => {
               )}
               {themeConfig.theme === "dark" && (
                 <button
-                  className={`${
-                    themeConfig.theme === "dark" &&
+                  className={`${themeConfig.theme === "dark" &&
                     "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                  }`}
+                    }`}
                   onClick={() => dispatch(toggleTheme("light"))}
                 >
                   <IconMoon />
@@ -360,8 +357,6 @@ const Headermentor = () => {
                       <div className="truncate ltr:pl-4 rtl:pr-4">
                         <h4 className="text-base">
                           {user?.fname} {user?.lname}
-                          <span className="rounded bg-success-light px-1 text-xs text-success ltr:ml-2 rtl:ml-2">
-                          </span>
                         </h4>
                         <button
                           type="button"
