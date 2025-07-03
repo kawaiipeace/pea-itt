@@ -57,13 +57,9 @@ const ApproveForm = () => {
   const fetchLeaveRequests = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}leave-request`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       const requests: LeaveItem[] = response.data.data;
@@ -73,14 +69,12 @@ const ApproveForm = () => {
           try {
             const userResponse = await axios.get(
               `${process.env.NEXT_PUBLIC_API_URL}users/${leave.user_id}`,
-              {
-                withCredentials: true,
-              }
+              { withCredentials: true }
             );
             return { ...leave, user: userResponse.data.data };
           } catch (err) {
             console.error(`Error fetching user ${leave.user_id}`, err);
-            return { ...leave }; // fallback ถ้าโหลด user ไม่ได้
+            return { ...leave };
           }
         })
       );
@@ -103,13 +97,13 @@ const ApproveForm = () => {
         `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
         { status },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setLeaveData((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, status } : item))
+        prev.map((item) =>
+          item.id === id ? { ...item, status } : item
+        )
       );
     } catch (error) {
       console.error("Error updating leave status:", error);
@@ -191,22 +185,32 @@ const ApproveForm = () => {
               </div>
               <div className="space-x-2">
                 <button
+                  disabled={item.status === "approved"}
                   className={`rounded px-3 py-1 text-white ${
                     item.status === "approved"
-                      ? "bg-green-700"
+                      ? "bg-green-700 cursor-not-allowed"
                       : "bg-green-500 hover:bg-green-600"
                   }`}
-                  onClick={() => updateLeaveStatus(item.id, "approved")}
+                  onClick={() => {
+                    if (item.status === "pending" || !item.status) {
+                      updateLeaveStatus(item.id, "approved");
+                    }
+                  }}
                 >
                   อนุมัติ
                 </button>
                 <button
+                  disabled={item.status === "rejected"}
                   className={`rounded px-3 py-1 text-white ${
                     item.status === "rejected"
-                      ? "bg-red-700"
+                      ? "bg-red-700 cursor-not-allowed"
                       : "bg-red-500 hover:bg-red-600"
                   }`}
-                  onClick={() => updateLeaveStatus(item.id, "rejected")}
+                  onClick={() => {
+                    if (item.status === "pending" || !item.status) {
+                      updateLeaveStatus(item.id, "rejected");
+                    }
+                  }}
                 >
                   ไม่อนุมัติ
                 </button>
