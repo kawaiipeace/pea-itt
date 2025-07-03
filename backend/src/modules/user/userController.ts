@@ -7,17 +7,28 @@ import { logAction } from "../../common/utils/logger";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const { department_id, mentor_id } = req.query;
+    const { department_id, mentor_id, show_ended } = req.query;
 
     const departmentId = department_id ? Number(department_id) : undefined;
     const mentorId = mentor_id ? Number(mentor_id) : undefined;
+    const showEnded = show_ended === "true";
+
+    const today = new Date();
 
     const users = await prisma.user.findMany({
       where: {
+        ...(departmentId ? { department_id: departmentId } : {}),
         student_profile: {
           ...(mentorId ? { mentor_id: mentorId } : {}),
+          ...(showEnded
+            ? {} 
+            : {
+                OR: [
+                  { end_date: { gte: today } },
+                  { end_date: null },
+                ],
+              }),
         },
-        ...(departmentId ? { department_id: departmentId } : {}),
       },
       include: {
         student_profile: true,
@@ -42,6 +53,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 export const getUserById = async (req: Request, res: Response) => {
   try {
