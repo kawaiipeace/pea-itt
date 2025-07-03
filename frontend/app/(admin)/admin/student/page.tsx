@@ -1,11 +1,17 @@
-import React from 'react'
+import React from "react";
+import { Metadata } from "next";
+import Studentform from "../../../../components/admin/student-form";
 
-const page = () => {
+export const metadata: Metadata = {
+  title: "หน้านักเรียนของแอดมิน",
+};
+
+const profile = () => {
   return (
-    <div>
-      
-    </div>
-  )
-}
+    <>
+      <Studentform />
+    </>
+  );
+};
 
-export default page
+export default profile;

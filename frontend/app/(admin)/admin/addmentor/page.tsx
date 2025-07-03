@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import Mentorform from "../../../../components/admin/mentor-form";
+import Addmentor from "../../../../components/admin/add-mentor";
 
 export const metadata: Metadata = {
   title: "หน้านักเรียนของแอดมิน",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const profile = () => {
   return (
     <>
-      <Mentorform />
+      <Addmentor />
     </>
   );
 };
