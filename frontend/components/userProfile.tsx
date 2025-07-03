@@ -164,9 +164,9 @@ const UserProfile = () => {
   return (
     <div className="mx-auto w-full max-w-6xl p-4 dark:bg-black-dark-light/5 dark:rounded-lg">
       <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 shadow-md dark:bg-gray-900 dark:border-gray-900 dark:text-[#506690] md:flex-row">
-        <div className="flex flex-col items-center md:w-1/5 md:items-start">
+        <div className="flex flex-col items-center md:items-start w-full md:w-1/5 text-center md:text-left">
           <h1 className="mb-4 text-xl font-bold">โปรไฟล์</h1>
-          <div className="relative mb-4 h-[160px] w-[160px]">
+          <div className="relative mb-4 h-28 w-28 md:h-40 md:w-40">
             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border bg-gray-100 dark:bg-gray-900 dark:border-gray-500">
               {imageSrc ? (
                 <img
@@ -215,13 +215,10 @@ const UserProfile = () => {
 
         <div className="mt-2 w-full md:flex-1">
           <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-            {/* ช่องกรอกทั่วไป */}
-            {[
-              { label: "ชื่อจริง", field: "name" },
+            {[{ label: "ชื่อจริง", field: "name" },
               { label: "นามสกุล", field: "surname" },
               { label: "อีเมล", field: "email", type: "email" },
-              { label: "เบอร์โทรศัพท์", field: "phone" },
-            ].map(({ label, field, type }) => (
+              { label: "เบอร์โทรศัพท์", field: "phone" }].map(({ label, field, type }) => (
               <div key={field}>
                 <label className="block text-sm font-medium">{label}</label>
                 <input
@@ -235,8 +232,7 @@ const UserProfile = () => {
               </div>
             ))}
 
-            {/* มหาวิทยาลัย + วันที่ฝึกงาน */}
-            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row">
+            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row md:items-end">
               <div className="w-full md:w-[50%]">
                 <label className="block text-sm font-medium">
                   มหาวิทยาลัยที่ศึกษาอยู่
@@ -277,7 +273,6 @@ const UserProfile = () => {
               ))}
             </div>
 
-            {/* แสดงผลเฉย ๆ */}
             {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
               <div key={label}>
                 <label className="block text-sm font-medium">{label}</label>
@@ -294,7 +289,7 @@ const UserProfile = () => {
               <button
                 type="submit"
                 onClick={handleClick}
-                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
+                className="w-full md:w-auto rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
               >
                 บันทึก
               </button>

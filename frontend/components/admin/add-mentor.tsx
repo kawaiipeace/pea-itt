@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -18,74 +19,50 @@ const divisionOptions = [
   { value: "กอพ.10", label: "กอพ.10" },
 ];
 
-const customStyles = {
-  control: (provided: any) => ({
-    ...provided,
-    width: "100%",
-    borderRadius: "8px",
-    borderColor: "#D1D0D3",
-    boxShadow: "none",
-    "&:hover": {
-      borderColor: "#74045F",
-    },
-  }),
-  indicatorSeparator: () => ({ display: "none" }),
-  menu: (provided: any) => ({
-    ...provided,
-    maxHeight: "none",
-    overflow: "visible",
-    borderRadius: "8px",
-    border: "1.5px solid #D1D0D3",
-    boxShadow: "none",
-  }),
-  menuList: (provided: any) => ({
-    ...provided,
-    maxHeight: 150,
-    overflowY: "auto",
-    paddingRight: 0,
-  }),
-  option: (provided: any, state: any) => ({
-    ...provided,
-    color: state.isSelected ? "white" : "black",
-    backgroundColor: state.isSelected ? "#74045F" : state.isFocused ? "#f3e6f0" : "white",
-    cursor: "pointer",
-    padding: "8px 12px",
-  }),
-  placeholder: (provided: any) => ({
-    ...provided,
-    color: "#999999",
-  }),
-  singleValue: (provided: any) => ({
-    ...provided,
-    color: "black",
-  }),
+const selectClassNames = {
+  control: ({ isFocused }: any) =>
+    `rounded-[8px] border-[1.5px] px-2 py-[2px] text-sm min-h-[40px] shadow-sm ${
+      isFocused ? "border-[#74045F]" : "border-[#D1D0D3] dark:border-gray-600"
+    } bg-white dark:bg-gray-800`,
+  placeholder: () => "text-gray-500 dark:text-gray-400",
+  singleValue: () => "text-gray-800 dark:text-gray-200",
+  input: () => "text-gray-800 dark:text-gray-200",
+  menu: () =>
+    "mt-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 z-10",
+  option: ({ isFocused, isSelected }: any) => {
+    if (isSelected)
+      return "bg-[#f3e6f0] text-[#74045F] dark:bg-[#74045F] dark:text-white";
+    if (isFocused) return "bg-gray-100 dark:bg-gray-700";
+    return "text-gray-800 dark:text-gray-200";
+  },
+  indicatorSeparator: () => "hidden",
 };
 
 const AddMentor = () => {
+  const router = useRouter();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [division, setDivision] = useState("");
+  const [division, setDivision] = useState<any>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const router = useRouter();
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
     if (!firstName.trim()) newErrors.firstName = "กรุณากรอกชื่อจริง";
     if (!lastName.trim()) newErrors.lastName = "กรุณากรอกนามสกุล";
     if (!email.trim()) newErrors.email = "กรุณากรอกอีเมล";
-    if (!phone.trim()) {
-      newErrors.phone = "กรุณากรอกเบอร์โทรศัพท์";
-    } else if (phone.length !== 10) {
-      newErrors.phone = "เบอร์โทรศัพท์ต้องมี 10 หลัก";
-    }
+    if (!phone.trim()) newErrors.phone = "กรุณากรอกเบอร์โทรศัพท์";
+    else if (phone.length !== 10) newErrors.phone = "เบอร์โทรศัพท์ต้องมี 10 หลัก";
     if (!password.trim()) newErrors.password = "กรุณากรอกรหัสผ่าน";
-    if (!confirmPassword.trim()) newErrors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
-    if (password !== confirmPassword) newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
-    if (!division.trim()) newErrors.division = "กรุณาเลือกชื่อกอง";
+    if (!confirmPassword.trim())
+      newErrors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
+    if (password !== confirmPassword)
+      newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
+    if (!division) newErrors.division = "กรุณาเลือกชื่อกอง";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -104,32 +81,32 @@ const AddMentor = () => {
   };
 
   return (
-    <div className="relative bg-[#fafafa] px-4 py-6 min-h-screen">
-      {/* ปุ่มย้อนกลับ */}
+    <div className="relative bg-[#fafafa] px-4 py-6 dark:bg-black-dark-light/5 ">
       <button
         onClick={() => router.back()}
-        className="absolute left-4 top-4 flex items-center text-sm text-black hover:underline"
+        className="absolute left-4 top-4 flex items-center text-sm text-black dark:text-white hover:underline"
       >
         <ChevronLeft className="mr-1 h-4 w-4" />
         ย้อนกลับ
       </button>
 
-      {/* ฟอร์ม */}
       <div className="mt-12 flex items-center justify-center">
-        <div className="w-full max-w-screen-sm md:max-w-2xl lg:max-w-4xl bg-white shadow-2xl rounded-xl px-4 md:px-12 py-10">
+        <div className="w-full max-w-screen-sm md:max-w-2xl lg:max-w-4xl bg-white dark:bg-gray-900 shadow-2xl rounded-xl px-4 md:px-12 py-10">
           <form
             onSubmit={handleSubmit}
             className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2"
           >
-            {/* ชื่อจริง */}
+            {/* First Name */}
             <div className="flex flex-col">
-              <label className="mb-1 font-semibold">ชื่อจริง</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                ชื่อจริง
+              </label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="กรุณากรอกชื่อจริง"
-                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] px-4 py-2 text-sm ${
+                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.firstName ? "border-red-500" : ""
                 } focus:outline-none focus:ring-0 focus:border-black`}
               />
@@ -138,15 +115,17 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* นามสกุล */}
+            {/* Last Name */}
             <div className="flex flex-col">
-              <label className="mb-1 font-semibold">นามสกุล</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                นามสกุล
+              </label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="กรุณากรอกนามสกุล"
-                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] px-4 py-2 text-sm ${
+                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.lastName ? "border-red-500" : ""
                 } focus:outline-none focus:ring-0 focus:border-black`}
               />
@@ -155,15 +134,17 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* อีเมล */}
+            {/* Email */}
             <div className="flex flex-col">
-              <label className="mb-1 font-semibold">อีเมล</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                อีเมล
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="กรุณากรอกอีเมล"
-                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] px-4 py-2 text-sm ${
+                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.email ? "border-red-500" : ""
                 } focus:outline-none focus:ring-0 focus:border-black`}
               />
@@ -172,9 +153,11 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* เบอร์โทรศัพท์ */}
+            {/* Phone */}
             <div className="flex flex-col">
-              <label className="mb-1 font-semibold">เบอร์โทรศัพท์</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                เบอร์โทรศัพท์
+              </label>
               <input
                 type="tel"
                 value={phone}
@@ -182,7 +165,7 @@ const AddMentor = () => {
                   setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
                 }
                 placeholder="กรุณากรอกเบอร์โทรศัพท์"
-                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] px-4 py-2 text-sm ${
+                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.phone ? "border-red-500" : ""
                 } focus:outline-none focus:ring-0 focus:border-black`}
               />
@@ -191,15 +174,17 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* รหัสผ่าน */}
+            {/* Password */}
             <div className="flex flex-col">
-              <label className="mb-1 font-semibold">รหัสผ่าน</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                รหัสผ่าน
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="กรุณากรอกรหัสผ่าน"
-                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] px-4 py-2 text-sm ${
+                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.password ? "border-red-500" : ""
                 } focus:outline-none focus:ring-0 focus:border-black`}
               />
@@ -208,15 +193,17 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* ยืนยันรหัสผ่าน */}
+            {/* Confirm Password */}
             <div className="flex flex-col">
-              <label className="mb-1 font-semibold">ยืนยันรหัสผ่าน</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                ยืนยันรหัสผ่าน
+              </label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="กรุณากรอกยืนยันรหัสผ่าน"
-                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] px-4 py-2 text-sm ${
+                className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.confirmPassword ? "border-red-500" : ""
                 } focus:outline-none focus:ring-0 focus:border-black`}
               />
@@ -225,24 +212,24 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* ชื่อกอง */}
+            {/* Division Select */}
             <div className="col-span-1 md:col-span-2 flex flex-col">
-              <label className="mb-1 font-semibold">ชื่อกอง</label>
+              <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
+                ชื่อกอง
+              </label>
               <Select
-                className="rounded-[8px] border border-[#D1D0D3]"
                 options={divisionOptions}
-                value={divisionOptions.find((d) => d.value === division) || null}
-                onChange={(selected) => setDivision(selected?.value || "")}
+                value={division}
+                onChange={setDivision}
                 placeholder="กรุณาเลือกกอง"
-                styles={customStyles}
                 isClearable
+                classNames={selectClassNames}
               />
               {errors.division && (
                 <span className="mt-1 text-sm text-red-500">{errors.division}</span>
               )}
             </div>
 
-            {/* ปุ่ม submit */}
             <div className="col-span-1 md:col-span-2 mt-2 text-center">
               <button
                 type="submit"
