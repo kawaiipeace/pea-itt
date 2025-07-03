@@ -51,20 +51,16 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
 
 export const getLeaveRequests = async (req: Request, res: Response) => {
   try {
-    const { mentor_id, status, sort = "leave_datetime", order = "desc" } = req.query;
+    const { user_id, mentor_id, status, sort = "leave_datetime", order = "desc" } = req.query;
 
     const Status = status ? String(status) : undefined;
+    const userId = user_id ? Number(user_id) : undefined;
+    const mentorUserId = mentor_id ? Number(mentor_id) : undefined;
 
-    // ถ้ามี mentor_id (mentor) ให้ดึง student ที่ mentor ดูแล
     let studentUserIds: number[] | undefined = undefined;
-    if (mentor_id) {
-      const mentorUserId = Number(mentor_id);
-      if (isNaN(mentorUserId)) {
-        res.status(httpStatus.BAD_REQUEST).json({
-          message: "mentor_id must be a valid number",
-        });
-      }
 
+    // ถ้ามี mentor_id → ดึง user_id ของ student ที่ mentor ดูแล
+    if (mentorUserId) {
       const mentor = await prisma.mentor_profile.findUnique({
         where: { user_id: mentorUserId },
         include: {
@@ -84,10 +80,15 @@ export const getLeaveRequests = async (req: Request, res: Response) => {
       studentUserIds = mentor.student_profile.map((sp) => sp.user_id);
     }
 
-    const whereCondition = {
-      ...(studentUserIds ? { user_id: { in: studentUserIds } } : {}),
+    const whereCondition: any = {
       ...(Status ? { status: Status } : {}),
     };
+
+    if (userId) {
+      whereCondition.user_id = userId;
+    } else if (studentUserIds) {
+      whereCondition.user_id = { in: studentUserIds };
+    }
 
     const leaveRequests = await prisma.leave_request.findMany({
       where: whereCondition,
@@ -127,6 +128,7 @@ export const getLeaveRequests = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 
 export const getLeaveRequestByID = async (req: Request, res: Response) => {
