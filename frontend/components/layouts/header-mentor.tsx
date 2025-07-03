@@ -42,39 +42,12 @@ import { getTranslation } from "@/i18n";
 import Image from "next/image";
 import Logo from "../../public/assets/images/PEAITT2.png"
 
-const Header = () => {
+const Headermentor = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
   const { t, i18n } = getTranslation();
-  const user = useAuthStore((state) => state.user)
-  const [myimg, setMyimg] = useState<string | null>(null)
 
-  useEffect(() => {
-    let imgUrl: string
-
-    const heyimg = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`, {
-          responseType: 'blob', withCredentials: true,
-        }
-        )
-        imgUrl = URL.createObjectURL(res.data)
-        setMyimg(imgUrl)
-      } catch (error) {
-        console.error("โหลดรูปไม่สำเร็จ", error)
-      }
-    }
-
-    if (user?.student_profile?.id) {
-      heyimg()
-    }
-
-    return () => {
-      if (imgUrl) URL.revokeObjectURL(imgUrl)
-    }
-  }, [user])
   useEffect(() => {
     const selector = document.querySelector(
       'ul.horizontal-menu a[href="' + window.location.pathname + '"]'
@@ -202,6 +175,7 @@ const Header = () => {
 
   const [search, setSearch] = useState(false);
 
+  const user = useAuthStore((state) => state.user);
 
 
 
@@ -367,7 +341,7 @@ const Header = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src={myimg ? myimg : "../../public/assets/images/profile-34.jpeg"}
+                    src="/assets/images/user-profile.jpeg"
                     alt="userProfile"
                   />
                 }
@@ -377,7 +351,7 @@ const Header = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src={myimg ? myimg : "../../public/assets/images/profile-34.jpeg"}
+                        src="/assets/images/user-profile.jpeg"
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
@@ -395,7 +369,7 @@ const Header = () => {
                   </li>
                   <li className="hover:bg-[#ECB9DB] hover:bg-opacity-50 ">
                     <Link
-                      href="/users/profile"
+                      href="/mentor/mentor-profile"
                       className="dark:hover:text-white "
                     >
                       <IconUser className="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
@@ -424,4 +398,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Headermentor;

@@ -158,7 +158,7 @@ const ComponentsAuthRegisterForm = () => {
         password_hash: password,
       });
 
-      router.push("/login");
+
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
         icon: "success",
@@ -167,6 +167,10 @@ const ComponentsAuthRegisterForm = () => {
         customClass: {
           confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
         },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/login");
+        }
       });
 
       setFormData({
@@ -203,9 +207,8 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.fname}
         onChange={handleChange}
         placeholder="กรุณากรอกชื่อจริง"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
-          errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-        }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+          }`}
       />
       <InputField
         label="นามสกุล"
@@ -214,9 +217,8 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.lname}
         onChange={handleChange}
         placeholder="กรุณากรอกนามสกุล"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
-          errors.lname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-        }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.lname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+          }`}
       />
       <InputField
         label="อีเมล"
@@ -226,9 +228,8 @@ const ComponentsAuthRegisterForm = () => {
         onChange={handleChange}
         type="email"
         placeholder="กรุณากรอกอีเมล"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
-          errors.email ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-        }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.email ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+          }`}
       />
       <div>
         <label className="mb-1 block font-medium">เบอร์โทรศัพท์</label>
@@ -241,9 +242,8 @@ const ComponentsAuthRegisterForm = () => {
           maxLength={10}
           value={formData.phone_number}
           placeholder="กรุณากรอกเบอร์โทรศัพท์"
-          className={`w-full max-w-[300px] rounded border px-3 py-2 ${
-            errors.phone_number ? "border-red-400" : "border-gray-300"
-          }`}
+          className={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.phone_number ? "border-red-400" : "border-gray-300"
+            }`}
         />
         {errors.phone_number && (
           <p className="mt-1 text-[11px] text-red-500">{errors.phone_number}</p>
@@ -256,9 +256,8 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.university}
         onChange={handleChange}
         placeholder="กรุณากรอกชื่อมหาวิทยาลัย"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
-          errors.university ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-        }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.university ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+          }`}
       />
 
       <div className="flex gap-1">
@@ -279,11 +278,10 @@ const ComponentsAuthRegisterForm = () => {
             locale="th"
             customInput={<CustomDateInput />}
             placeholderText="เลือกวันที่เริ่ม"
-            className={`w-full rounded border px-3 py-2 pr-10 ${
-              errors.start_date
+            className={`w-full rounded border px-3 py-2 pr-10 ${errors.start_date
                 ? "border-red-400 bg-[#FFEBEE]"
                 : "border-gray-300"
-            }`}
+              }`}
           />
           <IconCalendar className="pointer-events-none absolute right-3 top-8 text-gray-500" />
           {errors.start_date && (
@@ -303,16 +301,15 @@ const ComponentsAuthRegisterForm = () => {
             }
             minDate={
               formData.start_date ? new Date(formData.start_date) : undefined
-            } 
+            }
             dateFormat="dd/MM/yyyy"
             locale="th"
             customInput={<CustomDateInput />}
             placeholderText="เลือกวันที่สิ้นสุด"
-            className={`w-full rounded border px-3 py-2 pr-10 ${
-              errors.end_date
+            className={`w-full rounded border px-3 py-2 pr-10 ${errors.end_date
                 ? "border-red-400 bg-[#FFEBEE]"
                 : "border-gray-300"
-            }`}
+              }`}
           />
           <IconCalendar className="pointer-events-none absolute right-3 top-8 text-gray-500" />
           {errors.end_date && (

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
@@ -7,236 +7,295 @@ import { th } from "date-fns/locale";
 import { format } from "date-fns";
 import IconCalendar from "../components/icon/icon-calendar";
 import useAuthStore from "../store/authStore";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 registerLocale("th", th);
 
 const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
-  const user = useAuthStore((state) => state.user);
-  if (!value)
-    return (
-      <input
-        onClick={onClick}
-        className="w-full rounded border px-3 py-2 pr-10 text-sm"
-        placeholder="เลือกวันที่"
-        readOnly
-      />
-    );
-
-  const [day, month, year] = value.split("/");
-  const buddhistYear = String(parseInt(year) + 543);
+  const [day, month, year] = value?.split("/") || ["", "", ""];
+  const buddhistYear = year ? String(parseInt(year) + 543) : "";
 
   return (
-    <input
-      onClick={onClick}
-      value={`${day}/${month}/${buddhistYear}`}
-      readOnly
-      className="w-full rounded border px-3 py-2 pr-10 text-sm"
-    />
+    <div className="relative w-full">
+      <input
+        onClick={onClick}
+        value={value ? `${day}/${month}/${buddhistYear}` : ""}
+        readOnly
+        placeholder="เลือกวันที่"
+        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+      />
+      <IconCalendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+    </div>
   );
 });
 CustomDateInput.displayName = "CustomDateInput";
 
 const UserProfile = () => {
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.actionSetUser);
+  const refreshUser = useAuthStore((state) => state.refreshUser);
+
   const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    email: "",
-    university: "",
-    start_date: "",
-    end_date: "",
+    name: user?.fname || "",
+    surname: user?.lname || "",
+    email: user?.email || "",
+    university: user?.student_profile?.university || "",
+    phone: user?.phone_number || "",
+    start_date: user?.student_profile?.start_date || "",
+    end_date: user?.student_profile?.end_date || "",
+    mentor_id: user?.student_profile?.mentor_id || "",
+    department: user?.department_id || "",
   });
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [imageSrc, setImageSrc] = useState<string>(
+    `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`
+  );
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event: ProgressEvent<FileReader>) => {
+        const result = event.target?.result;
+        if (typeof result === "string") {
+          setImageSrc(result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  useEffect(() => {
+    const fetchMentorProfile = async () => {
+      try {
+        if (!user || !user.student_profile) return;
+
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user.student_profile.mentor_id}`
+        );
+        const dept = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}dept/${user.department_id}`
+        );
+        const deptName = dept.data.data.dept_name;
+        const mentor = response.data.data[0];
+
+        if (mentor) {
+          const fullName = `${mentor.fname} ${mentor.lname}`;
+          setFormData((prevData) => ({
+            ...prevData,
+            mentor_id: fullName,
+            department: deptName,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching mentor/dept profile:", error);
+      }
+    };
+
+    fetchMentorProfile();
+  }, []);
+
+  useEffect(() => {
+    const setImage = async () => {
+      if (user?.student_profile) {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}users/${user.student_profile.id}/picture`,
+            {
+              responseType: "blob",
+              withCredentials: true,
+            }
+          );
+          const blob = new Blob([response.data], { type: "image/jpeg" });
+          const image = URL.createObjectURL(blob);
+          setImageSrc(image);
+        } catch (error) {
+          console.error("Error fetching user image:", error);
+        }
+      }
+    };
+    setImage();
+  }, [user]);
+
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!user) {
+      alert("กรุณาเข้าสู่ระบบก่อน");
+      return;
+    }
+
+    try {
+      const form = new FormData();
+      form.append("fname", formData.name);
+      form.append("lname", formData.surname);
+      form.append("email", formData.email);
+      form.append("phone_number", formData.phone);
+      form.append("university", formData.university);
+      form.append("start_date", formData.start_date);
+      form.append("end_date", formData.end_date);
+      form.append("department_id", String(user.department_id));
+      form.append("mentor_id", String(user.student_profile?.mentor_id));
+      if (imageFile) form.append("picture", imageFile);
+
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}users/${user.id}`,
+        form,
+        { withCredentials: true }
+      );
+
+      Swal.fire({
+        title: "สำเร็จ",
+        text: "บันทึกข้อมูลโปรไฟล์สำเร็จ",
+        icon: "success",
+        confirmButtonText: "ตกลง",
+      }).then(() => {
+        setUser(response.data.data);
+        refreshUser();
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาด:", error);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลโปรไฟล์");
+    }
+  };
 
   return (
-    <div>
-      <div className="flex h-[480px] w-full flex-col rounded-lg border bg-white p-6 text-black shadow-md">
-        <div>
+    <div className="mx-auto w-full max-w-6xl p-4 dark:bg-black-dark-light/5 dark:rounded-lg">
+      <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 shadow-md dark:bg-gray-900 dark:border-gray-900 dark:text-[#506690] md:flex-row">
+        <div className="flex flex-col items-center md:items-start w-full md:w-1/5 text-center md:text-left">
           <h1 className="mb-4 text-xl font-bold">โปรไฟล์</h1>
+          <div className="relative mb-4 h-28 w-28 md:h-40 md:w-40">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border bg-gray-100 dark:bg-gray-900 dark:border-gray-500">
+              {imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt="profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <svg
+                  className="h-full w-full text-gray-300 dark:text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              )}
+            </div>
+            <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-[#9B006C] bg-[#F7E3F0] shadow dark:bg-gray-900 dark:border-gray-500">
+              <svg
+                className="h-4 w-4 text-[#9B006C] dark:text-gray-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="absolute inset-0 cursor-pointer opacity-0"
+              />
+            </label>
+          </div>
         </div>
 
-        <form className="flex flex-row gap-4">
-          <div className="w-1/6 bg-red-500">รูป</div>
+        <div className="mt-2 w-full md:flex-1">
+          <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+            {[{ label: "ชื่อจริง", field: "name" },
+              { label: "นามสกุล", field: "surname" },
+              { label: "อีเมล", field: "email", type: "email" },
+              { label: "เบอร์โทรศัพท์", field: "phone" }].map(({ label, field, type }) => (
+              <div key={field}>
+                <label className="block text-sm font-medium">{label}</label>
+                <input
+                  type={type || "text"}
+                  value={(formData as any)[field]}
+                  onChange={(e) =>
+                    setFormData({ ...formData, [field]: e.target.value })
+                  }
+                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                />
+              </div>
+            ))}
 
-          <div className="w-1/2">
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium">ชื่อ</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                className="w-full rounded border border-gray-300 p-2"
-                placeholder="กรุณากรอกชื่อ"
-              />
+            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row md:items-end">
+              <div className="w-full md:w-[50%]">
+                <label className="block text-sm font-medium">
+                  มหาวิทยาลัยที่ศึกษาอยู่
+                </label>
+                <input
+                  type="text"
+                  value={formData.university}
+                  onChange={(e) =>
+                    setFormData({ ...formData, university: e.target.value })
+                  }
+                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                />
+              </div>
+
+              {["start_date", "end_date"].map((field, index) => (
+                <div className="w-full md:w-[25%]" key={field}>
+                  <label className="block text-sm font-medium">
+                    {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
+                  </label>
+                  <DatePicker
+                    selected={formData[field] ? new Date(formData[field]) : null}
+                    onChange={(date: Date | null) =>
+                      setFormData({
+                        ...formData,
+                        [field]: date ? format(date, "yyyy-MM-dd") : "",
+                      })
+                    }
+                    dateFormat="dd/MM/yyyy"
+                    locale="th"
+                    minDate={
+                      field === "end_date" && formData.start_date
+                        ? new Date(formData.start_date)
+                        : undefined
+                    }
+                    customInput={<CustomDateInput />}
+                  />
+                </div>
+              ))}
             </div>
 
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium">อีเมล</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, email: e.target.value }))
-                }
-                className="w-full rounded border border-gray-300 p-2"
-                placeholder="กรุณากรอกอีเมล"
-              />
-            </div>
+            {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
+              <div key={label}>
+                <label className="block text-sm font-medium">{label}</label>
+                <input
+                  type="text"
+                  value={value}
+                  readOnly
+                  className="w-full rounded border bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
+                />
+              </div>
+            ))}
 
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium">
-                มหาวิทยาลัยที่ศึกษาอยู่
-              </label>
-              <input
-                type="text"
-                name="university"
-                value={formData.university}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    university: e.target.value,
-                  }))
-                }
-                className="w-full rounded border border-gray-300 p-2"
-                placeholder="มหาวิทยาลัยที่ศึกษาอยู่"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium">กอง</label>
-              <input
-                type="text"
-                name="department"
-                className="w-full rounded border border-gray-300 bg-gray-300 p-2"
-                value="กองพัฒนาระบบงาน"
-                readOnly
-              />
-            </div>
-
-            <div>
+            <div className="mt-4 md:col-span-2">
               <button
                 type="submit"
-                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
+                onClick={handleClick}
+                className="w-full md:w-auto rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073]"
               >
                 บันทึก
               </button>
             </div>
-          </div>
-
-          <div className="w-1/2">
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium">นามสกุล</label>
-              <input
-                type="text"
-                name="surname"
-                value={formData.surname}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, surname: e.target.value }))
-                }
-                className="w-full rounded border border-gray-300 p-2"
-                placeholder="นามสกุล"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium">
-                เบอร์โทรศัพท์
-              </label>
-              <input
-                type="text"
-                name="university"
-                value={formData.university}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    university: e.target.value,
-                  }))
-                }
-                className="w-full rounded border border-gray-300 p-2"
-                placeholder="เบอร์โทรศัพท์"
-              />
-            </div>
-
-            <div className="mb-4 gap-2 flex justify-between">
-              <div className="relative xw-{1/2}">
-                <label className="mb-2 block font-medium">
-                  วันที่เริ่มฝึกงาน
-                </label>
-                <DatePicker
-                  selected={
-                    formData.start_date ? new Date(formData.start_date) : null
-                  }
-                  onChange={(date: Date | null) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      start_date: date ? format(date, "yyyy-MM-dd") : "",
-                    }))
-                  }
-                  minDate={new Date()}
-                  dateFormat="dd/MM/yyyy"
-                  locale="th"
-                  customInput={<CustomDateInput />}
-                  placeholderText="เลือกวันที่เริ่ม"
-                />
-                <IconCalendar className="pointer-events-none absolute right-3 top-9 text-gray-500" />
-                {errors.start_date && (
-                  <p className="mt-1 text-[11px] text-red-500">
-                    {errors.start_date}
-                  </p>
-                )}
-              </div>
-
-              <div className="relative w-{1/2}">
-                <label className="mb-2 block font-medium">
-                  วันที่สิ้นสุดฝึกงาน
-                </label>
-                <DatePicker
-                  selected={
-                    formData.end_date ? new Date(formData.end_date) : null
-                  }
-                  onChange={(date: Date | null) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      end_date: date ? format(date, "yyyy-MM-dd") : "",
-                    }))
-                  }
-                  minDate={
-                    formData.start_date
-                      ? new Date(formData.start_date)
-                      : undefined
-                  }
-                  dateFormat="dd/MM/yyyy"
-                  locale="th"
-                  customInput={<CustomDateInput />}
-                  placeholderText="เลือกวันที่สิ้นสุด"
-                />
-                <IconCalendar className="pointer-events-none absolute right-3 top-9 text-gray-500" />
-                {errors.end_date && (
-                  <p className="mt-1 text-[11px] text-red-500">
-                    {errors.end_date}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <label className="mb-1 block text-sm font-medium">
-                ชื่อพี่เลี้ยง
-              </label>
-              <input
-                type="text"
-                name="mentor"
-                className="w-full rounded border border-gray-300 bg-gray-300 p-2"
-                value="ยังไม่กำหนด"
-                readOnly
-              />
-            </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

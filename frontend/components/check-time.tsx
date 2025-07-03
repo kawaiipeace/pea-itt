@@ -171,7 +171,7 @@ const CheckTime = () => {
         setCanCheckOut(isWithin && hour === 17);
       }
     }, 1000);
-    return () => clearInterval(timer);
+    return () => clearInterval(timer); 
   }, [userLocation]);
 
   useEffect(() => {

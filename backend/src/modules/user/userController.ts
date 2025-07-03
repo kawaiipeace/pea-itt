@@ -7,28 +7,32 @@ import { logAction } from "../../common/utils/logger";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
+    const { department_id, mentor_id, show_ended } = req.query;
+
+    const departmentId = department_id ? Number(department_id) : undefined;
+    const mentorId = mentor_id ? Number(mentor_id) : undefined;
+    const showEnded = show_ended === "true";
+
+    const today = new Date();
+
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        role_id: true,
-        department_id: true,
-        fname: true,
-        lname: true,
-        email: true,
-        phone_number: true,
-        created_at: true,
-        department: {
-          select: {
-            dept_id: true,
-            dept_name: true,
-          },
+      where: {
+        ...(departmentId ? { department_id: departmentId } : {}),
+        student_profile: {
+          ...(mentorId ? { mentor_id: mentorId } : {}),
+          ...(showEnded
+            ? {} 
+            : {
+                OR: [
+                  { end_date: { gte: today } },
+                  { end_date: null },
+                ],
+              }),
         },
-        role: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+      },
+      include: {
+        student_profile: true,
+        mentor_profile: true,
       },
       orderBy: {
         fname: "asc",
@@ -49,6 +53,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 export const getUserById = async (req: Request, res: Response) => {
   try {
@@ -78,10 +83,26 @@ export const getUserById = async (req: Request, res: Response) => {
             dept_name: true,
           },
         },
-        role: {
+        student_profile: {
           select: {
             id: true,
-            name: true,
+            university: true,
+            start_date: true,
+            end_date: true,
+            picture: true,
+            mentor_id: true,
+          },
+        },
+        mentor_profile: {
+          select: {
+            id: true,
+            user_id: true,
+            student_profile:
+            {
+              select: {
+                id: true,
+              },
+            },
           },
         },
       },
@@ -111,16 +132,23 @@ export const getUserById = async (req: Request, res: Response) => {
 
 export const getMentors = async (req: Request, res: Response) => {
   try {
-    const { department_id, user_id  } = req.query;
+    const { department_id, user_id, mentor_id } = req.query;
+
 
     const departmentId = department_id ? Number(department_id) : undefined;
     const userId = user_id ? Number(user_id) : undefined;
+    const mentorId = mentor_id ? Number(mentor_id) : undefined;
 
     const mentors = await prisma.user.findMany({
       where: {
         role_id: 2, // MENTOR role
         ...(departmentId !== undefined && { department_id: departmentId }),
         ...(userId !== undefined && { id: userId }),
+        ...(mentorId !== undefined && {
+          mentor_profile: {
+            id: mentorId,
+          },
+        }),
       },
       select: {
         id: true,
@@ -318,6 +346,111 @@ export const updateUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const updateMentor = async (req: Request, res: Response) => {
+  try {
+
+    const validateData = usersModels.updateMentorSchema.parse(req.body);
+    const { id } = req.params;
+    const userId = parseInt(id);
+
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    if (userId !== req.user.id) {
+      res.status(httpStatus.FORBIDDEN).json({
+        message: "เฉพาะเจ้าของบัญชี (ตัวเอง) เท่านั้นที่มีสิทธิ์อัปเดตข้อมูล",
+      });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { mentor_profile: true },
+    });
+
+    if (!user) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "User not found",
+      });
+      return;
+    }
+
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email: validateData.email,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingEmail) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Email already exists",
+      });
+      return;
+    }
+
+    const existingPhone = await prisma.user.findFirst({
+      where: {
+        phone_number: validateData.phone_number,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingPhone) {
+      res.status(httpStatus.CONFLICT).json({
+        message: "Phone number already exists",
+      });
+      return;
+    }
+
+    const updatedData = await prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: {
+          fname: validateData.fname,
+          lname: validateData.lname,
+          email: validateData.email,
+          phone_number: validateData.phone_number,
+        },
+        select: {
+          fname: true,
+          lname: true,
+          email: true,
+          phone_number: true,
+        },
+      });
+    });
+
+    res.status(httpStatus.OK).json({
+      message: "User and mentor profile updated successfully",
+      data: updatedData,
+    });
+
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Validation error",
+        errors: error.errors,
+      });
+    } else if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+
+  }
+}
+
 export const updateDeptMent = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -449,9 +582,8 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     await logAction({
       admin_id: req.user.id,
-      action: `Deleted user: ${user.fname ?? ""} ${user.lname ?? ""} (email: ${
-        user.email ?? "N/A"
-      })`,
+      action: `Deleted user: ${user.fname ?? ""} ${user.lname ?? ""} (email: ${user.email ?? "N/A"
+        })`,
     });
 
     res.status(httpStatus.OK).json({

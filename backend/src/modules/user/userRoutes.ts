@@ -325,6 +325,15 @@ router.put(
   userController.updateUsers
 );
 
+
+router.put(
+  "/users/mentor/:id",
+  authenticateJWT,
+  authorizeRoles(ROLE_IDS.MENTOR),
+  upload.single("picture"),
+  userController.updateMentor
+);
+
 /**
  * @swagger
  * /users/admin/{id}:

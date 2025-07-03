@@ -21,6 +21,13 @@ export const updateUserSchema = z
     message: "End date must be after start date",
   });
 
+export const updateMentorSchema = z.object({
+  fname: z.string().min(2, "First name must be at least 2 characters"),
+  lname: z.string().min(2, "Last name must be at least 2 characters"),
+  phone_number: z.coerce.string().min(10, "Phone number must be at least 10 digits"),
+  email: z.string().email("Invalid email format"),
+})
+
 export const updateDeptMentSchema = z.object({
   department_id: z.coerce
     .number()

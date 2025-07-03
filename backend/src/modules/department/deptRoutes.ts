@@ -1,5 +1,7 @@
 import express from "express";
 import * as departmentController from "./deptController";
+import { authenticateJWT } from "../../common/middleware/authenticateJWT";
+import { authorizeRoles, ROLE_IDS } from "../../common/middleware/authorizeRoles";
 
 const router = express.Router();
 
@@ -55,7 +57,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/dept", departmentController.createDepartment);
+router.post("/dept", authenticateJWT, authorizeRoles(ROLE_IDS.ADMIN), departmentController.createDepartment);
 
 /**
  * @swagger
@@ -131,5 +133,9 @@ router.get("/dept", departmentController.getAllDepartments);
  *         description: Internal server error
  */
 router.get("/dept/:id", departmentController.getDepartmentbyId);
+
+router.put("/dept/:id", authenticateJWT, authorizeRoles(ROLE_IDS.ADMIN), departmentController.updateDepartment);
+
+router.delete("/dept/:id", authenticateJWT, authorizeRoles(ROLE_IDS.ADMIN), departmentController.deleteDepartment);
 
 export default router;
