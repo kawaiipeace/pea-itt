@@ -127,7 +127,7 @@ const EditMentor = () => {
               <select
                 value={division}
                 onChange={(e) => setDivision(e.target.value)}
-                className={`w-[49%] rounded border border-gray-300  p-2 text-black dark:border-gray-600 dark:bg-gray-800 ${
+                className={`w-full sm:w-[49%] rounded border border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 ${
                   division === ""
                     ? "text-gray-400 dark:text-gray-400"
                     : "dark:text-white"
