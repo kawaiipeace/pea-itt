@@ -4,7 +4,8 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { th } from "date-fns/locale";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
-import useAuthStore from "@/store/authStore";
+import useAuthStore from "../../store/authStore";
+import Swal from "sweetalert2";
 
 registerLocale("th", th);
 
@@ -97,9 +98,7 @@ const ApproveForm = () => {
       await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
         { status },
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       setLeaveData((prev) =>
         prev.map((item) =>
@@ -120,10 +119,11 @@ const ApproveForm = () => {
     date1.getMonth() === date2.getMonth() &&
     date1.getDate() === date2.getDate();
 
+  // ✅ filter เฉพาะ status pending
   const filteredLeaveData = leaveData.filter((item) => {
     if (!item.leave_datetime || !selectedDate) return false;
     const leaveDate = new Date(item.leave_datetime);
-    return isSameDay(leaveDate, selectedDate);
+    return isSameDay(leaveDate, selectedDate) && (item.status === "pending" || !item.status);
   });
 
   return (
@@ -186,31 +186,37 @@ const ApproveForm = () => {
               </div>
               <div className="space-x-2">
                 <button
-                  disabled={item.status === "approved"}
-                  className={`rounded px-3 py-1 text-white ${
-                    item.status === "approved"
-                      ? "bg-green-700 cursor-not-allowed"
-                      : "bg-green-500 hover:bg-green-600"
-                  }`}
+                  className="rounded px-3 py-1 text-white bg-green-500 hover:bg-green-600"
                   onClick={() => {
-                    if (item.status === "pending" || !item.status) {
+                    Swal.fire({
+                      title: "บันทึกข้อมูลการอนุมัติ",
+                      icon: "success",
+                      confirmButtonText: "ตกลง",
+                      width: "400px",
+                      customClass: {
+                        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+                      },
+                    }).then(() => {
                       updateLeaveStatus(item.id, "approved");
-                    }
+                    });
                   }}
                 >
                   อนุมัติ
                 </button>
                 <button
-                  disabled={item.status === "rejected"}
-                  className={`rounded px-3 py-1 text-white ${
-                    item.status === "rejected"
-                      ? "bg-red-700 cursor-not-allowed"
-                      : "bg-red-500 hover:bg-red-600"
-                  }`}
+                  className="rounded px-3 py-1 text-white bg-red-500 hover:bg-red-600"
                   onClick={() => {
-                    if (item.status === "pending" || !item.status) {
+                    Swal.fire({
+                      title: "บันทึกข้อมูลการอนุมัติ",
+                      icon: "success",
+                      confirmButtonText: "ตกลง",
+                      width: "400px",
+                      customClass: {
+                        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+                      },
+                    }).then(() => {
                       updateLeaveStatus(item.id, "rejected");
-                    }
+                    });
                   }}
                 >
                   ไม่อนุมัติ
