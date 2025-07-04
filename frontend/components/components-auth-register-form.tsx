@@ -364,6 +364,15 @@ const ComponentsAuthRegisterForm = () => {
           สมัครเข้าใช้งาน
         </button>
       </div>
+
+      <div className="mt-2 text-center md:col-span-2">
+        <a
+          href="/login"
+          className="hover:text-primary-dark text-sm text-purple-900 underline "
+        >
+          เข้าสู่ระบบ
+        </a>
+      </div>
     </form>
   );
 };
