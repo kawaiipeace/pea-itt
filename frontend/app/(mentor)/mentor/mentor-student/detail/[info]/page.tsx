@@ -6,6 +6,8 @@ import clsx from "clsx";
 import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
 import axios from "axios";
 import IconUsers from "@/components/icon/icon-users";
+import wattdee from "../../../../../../public/assets/images/watdee.jpeg";
+import Image from "next/image";
 
 interface PageProps {
   params: { info: string };
@@ -202,9 +204,9 @@ const InfoPage = ({ params }: PageProps) => {
 
       {/* ข้อมูลส่วนตัว */}
       <div className="flex items-center justify-center px-4">
-        <div className="grid w-full max-w-4xl grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
+        <div className="grid w-full max-w-4xl grid-cols-1 items-center  gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
           <div className="flex justify-center">
-            <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+            <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-gray-100">
               {personalInfo?.picture_url ? (
                 <img
                   src={personalInfo.picture_url}
@@ -212,7 +214,11 @@ const InfoPage = ({ params }: PageProps) => {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <IconUsers className="shrink-0 text-gray-400 group-hover:!text-primary" />
+                <Image
+                  src={wattdee}
+                  alt={`watdee`}
+                  className="h-full w-full object-cover"
+                />
               )}
             </div>
           </div>
