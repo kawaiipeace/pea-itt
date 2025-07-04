@@ -71,11 +71,6 @@ const SidebarMentor = () => {
                       }`}
                     >
                       <div className="flex items-center">
-                        {/* <img
-                          className="w-[20px] flex-none"
-                          src="/assets/images/time.png"
-                          alt="logo"
-                        /> */}
                         <IconUsers className="shrink-0 group-hover:!text-primary" />
                         <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                           {t("นักศึกษาของคุณ")}
@@ -87,9 +82,9 @@ const SidebarMentor = () => {
                   
                   <li className="nav-item">
                     <Link
-                      href="approver"
+                      href="/mentor/approver"
                       className={`nav-link group w-full ${
-                        pathname.startsWith("/approver")
+                        pathname.startsWith("/mentor/approver")
                           ? "active"
                           : ""
                       }`}
