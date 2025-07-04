@@ -1,69 +1,116 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import IconUser from "@/components/icon/icon-user";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import Swal from "sweetalert2";
 
-const divisionOptions = [
-  { value: "กอง1", label: "กอง1" },
-  { value: "กอง2", label: "กอง2" },
-  { value: "กอง3", label: "กอง3" },
-  { value: "กอง4", label: "กอง4" },
-  { value: "กอง5", label: "กอง5" },
-  { value: "กอง6", label: "กอง6" },
-  { value: "กอง7", label: "กอง7" },
-  { value: "กอง8", label: "กอง8" },
-  { value: "กอง9", label: "กอง9" },
-];
+interface DepartmentOption {
+  value: number;
+  label: string;
+}
 
-const mentorOptions = [
-  { value: "พี่พีช", label: "พี่พีช" },
-  { value: "พี่วิทย์", label: "พี่วิทย์" },
-  { value: "พี่ปอนด์", label: "พี่ปอนด์" },
-];
+interface MentorOption {
+  value: number;
+  label: string;
+}
 
-const mockStudents = [
-  { name: "เดือนเพ็ญ โฉมฉาย", division: "กอง1", mentor: "พี่พีช" },
-  { name: "สุขหทัย พลยะเรศ", division: "กอง2", mentor: "พี่วิทย์" },
-  { name: "อภิวัฒน์ ลานทอง", division: "กอง3", mentor: "พี่ปอนด์" },
-  { name: "ภูมิพัฒน์ เวฬุฬฐ์วรรณราช", division: "กอง3", mentor: "พี่ปอนด์" },
-  { name: "นฤมล สีละมุด", division: "กอง3", mentor: "พี่ปอนด์" },
-];
+interface Student {
+  id: number;
+  fname: string;
+  lname: string;
+  department_id: number;
+  mentor_id: number;
+}
 
 const StudentForm = () => {
-  const [selectedDivision, setSelectedDivision] = useState<any>(null);
-  const [selectedMentor, setSelectedMentor] = useState<any>(null);
-  const [filteredStudents, setFilteredStudents] = useState<typeof mockStudents>([]);
+  const [selectedDivision, setSelectedDivision] = useState<DepartmentOption | null>(null);
+  const [selectedMentor, setSelectedMentor] = useState<MentorOption | null>(null);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [departmentOptions, setDepartmentOptions] = useState<DepartmentOption[]>([]);
+  const [mentorOptions, setMentorOptions] = useState<MentorOption[]>([]);
+  const router = useRouter();
 
+  // โหลดกอง
   useEffect(() => {
-    if (selectedDivision && selectedMentor) {
-      const results = mockStudents.filter(
-        (student) =>
-          student.division === selectedDivision.value &&
-          student.mentor === selectedMentor.value
-      );
-      setFilteredStudents(results);
-    } else {
-      setFilteredStudents([]);
-    }
-  }, [selectedDivision, selectedMentor]);
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}dept`)
+      .then((res) => {
+        const departments = res.data?.data || [];
+        setDepartmentOptions(
+          departments.map((d: any) => ({
+            value: d.dept_id,
+            label: d.dept_name,
+          }))
+        );
+      })
+      .catch(() => {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถโหลดข้อมูลกองได้",
+          icon: "error",
+        });
+      });
+  }, []);
 
+  // โหลดพี่เลี้ยงเมื่อเลือกกอง
+  useEffect(() => {
+    if (!selectedDivision) return;
+
+    setSelectedMentor(null);
+    setFilteredStudents([]);
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}user/mentor?department_id=${selectedDivision.value}`)
+      .then((res) => {
+        const mentors = res.data?.data || [];
+        setMentorOptions(
+          mentors.map((m: any) => ({
+            value: m.mentor_profile?.id || m.id,
+            label: `${m.fname} ${m.lname}`,
+          }))
+        );
+      })
+      .catch(() => {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถโหลดข้อมูลพี่เลี้ยงได้",
+          icon: "error",
+        });
+      });
+  }, [selectedDivision]);
+
+  // โหลดนักศึกษาตามพี่เลี้ยงที่เลือก
+  useEffect(() => {
+    if (!selectedMentor) return;
+
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`)
+      .then((res) => {
+        setFilteredStudents(res.data?.data || []);
+      })
+      .catch(() => {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถโหลดข้อมูลนักศึกษาได้",
+          icon: "error",
+        });
+      });
+  }, [selectedMentor]);
+
+  // ตรวจ dark mode
   useEffect(() => {
     const updateDarkMode = () => {
-      if (
+      const isDark =
         document.documentElement.classList.contains("dark") ||
-        (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ) {
-        setIsDarkMode(true);
-      } else {
-        setIsDarkMode(false);
-      }
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setIsDarkMode(isDark);
     };
 
     updateDarkMode();
-
-    const observer = new MutationObserver(() => updateDarkMode());
+    const observer = new MutationObserver(updateDarkMode);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -94,7 +141,6 @@ const StudentForm = () => {
     },
     dropdownIndicator: () => "text-gray-500 dark:text-gray-300",
     clearIndicator: () => "text-gray-500 dark:text-gray-300",
-    // ✅ ลบขีดคั่นกลาง
     indicatorSeparator: () => "hidden",
   };
 
@@ -104,12 +150,11 @@ const StudentForm = () => {
         ข้อมูลนักศึกษาฝึกงาน
       </h1>
 
-      {/* Dropdowns */}
       <div className="mb-10 flex flex-wrap justify-center gap-4 sm:gap-6 sm:px-6">
         <div>
           <label className="mb-2 block text-base font-medium dark:text-[#506690]">ชื่อกอง</label>
           <Select
-            options={divisionOptions}
+            options={departmentOptions}
             value={selectedDivision}
             onChange={setSelectedDivision}
             placeholder="เลือกกอง"
@@ -133,22 +178,22 @@ const StudentForm = () => {
         </div>
       </div>
 
-      {/* Result Section */}
       <div className="-mt-4 flex h-[350px] w-full max-w-[900px] flex-col justify-start rounded-lg bg-[#eae9eb] p-3 shadow sm:mx-auto sm:p-6 dark:border dark:border-gray-500 dark:bg-gray-900">
         {selectedDivision && selectedMentor ? (
           filteredStudents.length > 0 ? (
             <div className="flex-1 overflow-y-auto">
               <div className="flex w-full flex-col gap-3 sm:gap-4">
-                {filteredStudents.map((student, idx) => (
+                {filteredStudents.map((student) => (
                   <div
-                    key={idx}
+                    key={student.id}
+                    onClick={() => router.push(`/users/profile/${student.id}`)}
                     className="flex cursor-pointer items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500"
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 sm:h-10 sm:w-10 dark:bg-gray-700">
-                      <IconUser className="" />
+                      <IconUser />
                     </div>
                     <p className="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-400">
-                      {student.name}
+                      {student.fname} {student.lname}
                     </p>
                   </div>
                 ))}
