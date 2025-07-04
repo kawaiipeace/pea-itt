@@ -4,7 +4,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { th } from "date-fns/locale";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
-import useAuthStore from "@/store/authStore";
+import useAuthStore from "../../store/authStore";
 import Swal from "sweetalert2";
 
 registerLocale("th", th);
