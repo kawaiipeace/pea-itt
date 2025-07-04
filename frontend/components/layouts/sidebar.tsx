@@ -125,7 +125,14 @@ const Sidebar = () => {
               </h2>
 
               <li className="menu nav-item">
-                <Link href="#" className="group">
+                <Link
+                      href="/admin/student"
+                      className={`nav-link group w-full ${
+                        pathname.startsWith("/admin/student")
+                          ? "active"
+                          : ""
+                      }`}
+                    >
                   <div className="flex items-center">
                     <IconMenuTables className="shrink-0 group-hover:!text-primary" />
                     <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
@@ -136,7 +143,14 @@ const Sidebar = () => {
               </li>
 
               <li className="menu nav-item">
-                <Link href="#" className="group">
+                <Link
+                      href="/admin/mentor"
+                      className={`nav-link group w-full ${
+                        pathname.startsWith("/admin/mentor")
+                          ? "active"
+                          : ""
+                      }`}
+                    >
                   <div className="flex items-center">
                     <IconMenuTables className="shrink-0 group-hover:!text-primary" />
                     <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
@@ -147,7 +161,14 @@ const Sidebar = () => {
               </li>
 
               <li className="menu nav-item">
-                <Link href="#" className="group">
+                <Link
+                      href="/admin/department"
+                      className={`nav-link group w-full ${
+                        pathname.startsWith("/admin/department")
+                          ? "active"
+                          : ""
+                      }`}
+                    >
                   <div className="flex items-center">
                     <IconMenuTables className="shrink-0 group-hover:!text-primary" />
                     <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
