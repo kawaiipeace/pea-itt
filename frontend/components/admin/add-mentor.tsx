@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const divisionOptions = [
   { value: "กอพ.1", label: "กอพ.1" },
@@ -18,6 +19,19 @@ const divisionOptions = [
   { value: "กอพ.9", label: "กอพ.9" },
   { value: "กอพ.10", label: "กอพ.10" },
 ];
+
+const departmentMap: { [key: string]: number } = {
+  "กอพ.1": 1,
+  "กอพ.2": 2,
+  "กอพ.3": 3,
+  "กอพ.4": 4,
+  "กอพ.5": 5,
+  "กอพ.6": 6,
+  "กอพ.7": 7,
+  "กอพ.8": 8,
+  "กอพ.9": 9,
+  "กอพ.10": 10,
+};
 
 const selectClassNames = {
   control: ({ isFocused }: any) =>
@@ -68,12 +82,35 @@ const AddMentor = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (!validateForm()) return;
+
+    try {
+      const department_id = departmentMap[division?.value];
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}register/mentor`, {
+        fname: firstName,
+        lname: lastName,
+        email,
+        phone_number: phone,
+        password_hash: password,
+        department_id,
+      }, { withCredentials: true });
+
       Swal.fire({
         icon: "success",
         title: "เพิ่มพี่เลี้ยงสำเร็จ",
+        confirmButtonText: "ปิด",
+        confirmButtonColor: "#74045F",
+      }).then(() => {
+        router.push("/admin/mentor");
+      });
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการส่งข้อมูล", error);
+      Swal.fire({
+        icon: "error",
+        title: "ไม่สำเร็จ",
+        text: "ไม่สามารถเพิ่มพี่เลี้ยงได้",
         confirmButtonText: "ปิด",
         confirmButtonColor: "#74045F",
       });
@@ -96,7 +133,6 @@ const AddMentor = () => {
             onSubmit={handleSubmit}
             className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2"
           >
-            {/* First Name */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 ชื่อจริง
@@ -115,7 +151,6 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* Last Name */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 นามสกุล
@@ -134,7 +169,6 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* Email */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 อีเมล
@@ -153,7 +187,6 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* Phone */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 เบอร์โทรศัพท์
@@ -161,9 +194,7 @@ const AddMentor = () => {
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) =>
-                  setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
-                }
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                 placeholder="กรุณากรอกเบอร์โทรศัพท์"
                 className={`rounded-[8px] border-[1.5px] border-[#D1D0D3] dark:border-gray-600 dark:bg-gray-800 px-4 py-2 text-sm text-black dark:text-white ${
                   errors.phone ? "border-red-500" : ""
@@ -174,7 +205,6 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* Password */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 รหัสผ่าน
@@ -193,7 +223,6 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 ยืนยันรหัสผ่าน
@@ -212,7 +241,6 @@ const AddMentor = () => {
               )}
             </div>
 
-            {/* Division Select */}
             <div className="col-span-1 md:col-span-2 flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
                 ชื่อกอง
