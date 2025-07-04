@@ -4,8 +4,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
-import IconUser from "@/components/icon/icon-user";
-import IconUserPlus from "@/components/icon/icon-user-plus";
+import { Trash } from "lucide-react";
+import IconUser from "../../components/icon/icon-user";
+import IconUserPlus from "../../components/icon/icon-user-plus";
 
 interface Option {
   value: number;
@@ -100,7 +101,7 @@ export default function MentorForm() {
     e.stopPropagation();
     if (!confirm(`ต้องการลบพี่เลี้ยง ${m.fname} ${m.lname}?`)) return;
     try {
-      await api.delete(`/user/mentor/${m.id}`);
+      await api.delete(`/admin/editmentor`);
       setMentors((prev) => prev.filter((x) => x.id !== m.id));
       if (selectedMentor && selectedMentor.value === m.id) setSelectedMentor(null);
     } catch (err) {
@@ -162,7 +163,7 @@ export default function MentorForm() {
                       }`}
                     >
                       {/* avatar & name */}
-                      <div className="flex flex-1 cursor-pointer items-center gap-3" onClick={() => router.push(`/mentor/mentor-profile/${m.id}`)}>
+                      <div className="flex flex-1 cursor-pointer items-center gap-3" onClick={() => router.push(`/admin/editmentor`)}>
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 sm:h-10 sm:w-10 dark:bg-gray-700">
                           <IconUser />
                         </div>
@@ -171,21 +172,13 @@ export default function MentorForm() {
                         </p>
                       </div>
 
-                      {/* actions */}
-                      <div className="ml-auto flex gap-2">
-                        <button
-                          onClick={() => router.push(`/mentor/mentor-profile/${m.id}`)}
-                          className="rounded px-2 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700"
-                        >
-                          แก้ไข
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(m, e)}
-                          className="rounded px-2 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700"
-                        >
-                          ลบ
-                        </button>
-                      </div>
+                         <button
+                        onClick={(e) => handleDelete(m, e)}
+                        className="ml-auto rounded p-2 text-white bg-red-600 hover:bg-red-700"
+                        aria-label="ลบ"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
