@@ -91,12 +91,24 @@ const HistoryForm: React.FC = () => {
       try {
         const [checkRes, leaveRes] = await Promise.all([
           axios
-            .get(`${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`, { withCredentials: true })
+            .get(
+              `${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`,
+              { withCredentials: true }
+            )
             .then((res) => (Array.isArray(res.data?.data) ? res.data.data : []))
             .catch(() => []),
           axios
-            .get(`${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${user.id}`, { withCredentials: true })
-            .then((res) => (Array.isArray(res.data?.data) ? res.data.data : res.data?.data ? [res.data.data] : []))
+            .get(
+              `${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${user.id}`,
+              { withCredentials: true }
+            )
+            .then((res) =>
+              Array.isArray(res.data?.data)
+                ? res.data.data
+                : res.data?.data
+                ? [res.data.data]
+                : []
+            )
             .catch(() => []),
         ]);
 
@@ -147,7 +159,9 @@ const HistoryForm: React.FC = () => {
       });
     });
 
-    return Array.from(map.values()).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
+    return Array.from(map.values()).sort((a, b) =>
+      b.dateKey.localeCompare(a.dateKey)
+    );
   }, [checks, leaves]);
 
   const pages = Math.max(1, Math.ceil(viewRows.length / ITEMS));
@@ -157,35 +171,54 @@ const HistoryForm: React.FC = () => {
     <section className="flex h-full flex-col px-6 py-4">
       <button
         onClick={() => router.back()}
-        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:bg-black-dark-light/5 dark:border-[#506690] dark:text-[#506690]"
+        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
       >
         <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
       </button>
 
-      <div className="overflow-auto rounded-lg border border-gray-200 bg-white dark:bg-black-dark-light/5 dark:border-gray-900 dark:text-[#506690]">
-        <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:bg-black-dark-light/90 dark:border-[#506690] dark:text-[#506690]">
-          {["วันที่", "เวลาเข้างาน", "เวลาออกงาน", "สถานะ", "หมายเหตุ", "อนุมัติการลา"].map((h) => (
-            <div key={h} className="p-3">{h}</div>
+      <div className="overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690]">
+        <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:border-[#506690] dark:bg-black-dark-light/90 dark:text-[#506690]">
+          {[
+            "วันที่",
+            "เวลาเข้างาน",
+            "เวลาออกงาน",
+            "สถานะ",
+            "หมายเหตุ",
+            "อนุมัติการลา",
+          ].map((h) => (
+            <div key={h} className="p-3">
+              {h}
+            </div>
           ))}
         </div>
 
         <div className="divide-y text-center text-sm">
-          {loading && <p className="p-6 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</p>}
-          {error && <p className="p-6 text-red-500 dark:text-red-400">{error}</p>}
+          {loading && (
+            <p className="p-6 text-gray-500 dark:text-gray-400">
+              กำลังโหลดข้อมูล...
+            </p>
+          )}
+          {error && (
+            <p className="p-6 text-red-500 dark:text-red-400">{error}</p>
+          )}
           {!loading && !error && viewRows.length === 0 && (
             <p className="p-6 text-gray-500 dark:text-gray-400">ไม่มีข้อมูล</p>
           )}
 
-          {!loading && !error && slice.map((r) => (
-            <div key={r.dateKey} className="grid min-w-[820px] grid-cols-6">
-              <div className="p-3">{r.dateTH}</div>
-              <div className="p-3">{r.inTime}</div>
-              <div className="p-3">{r.outTime}</div>
-              <div className="p-3">{r.status}</div>
-              <div className="p-3">{r.note}</div>
-              <div className="p-3">{r.status === "ลา" ? <Badge value={r.approval} /> : "-"}</div>
-            </div>
-          ))}
+          {!loading &&
+            !error &&
+            slice.map((r) => (
+              <div key={r.dateKey} className="grid min-w-[820px] grid-cols-6">
+                <div className="p-3">{r.dateTH}</div>
+                <div className="p-3">{r.inTime}</div>
+                <div className="p-3">{r.outTime}</div>
+                <div className="p-3">{r.status}</div>
+                <div className="p-3">{r.note}</div>
+                <div className="p-3">
+                  {r.status === "ลา" ? <Badge value={r.approval} /> : "-"}
+                </div>
+              </div>
+            ))}
         </div>
       </div>
 
@@ -239,7 +272,8 @@ const HistoryForm: React.FC = () => {
 
       {!loading && !error && viewRows.length > 0 && (
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          แสดง {(page - 1) * ITEMS + 1}-{Math.min(page * ITEMS, viewRows.length)} จาก {viewRows.length} รายการ
+          แสดง {(page - 1) * ITEMS + 1}-
+          {Math.min(page * ITEMS, viewRows.length)} จาก {viewRows.length} รายการ
         </p>
       )}
     </section>
