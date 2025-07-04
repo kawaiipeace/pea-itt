@@ -7,14 +7,21 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { logAction } from "../../common/utils/logger";
+import fs from "fs";
+import path from "path";
+
 
 dotenv.config();
 
 export const registerStu = async (req: Request, res: Response) => {
   try {
+
+    const defaultImagePath = path.join(__dirname, "../../common/assets/watt-de.jpeg");
+    const pictureBuffer = req.file?.buffer || fs.readFileSync(defaultImagePath);
+
     const validatedData = authModels.RegisterStuSchema.parse({
       ...req.body,
-      picture: req.file?.buffer,
+      picture: pictureBuffer,
     });
 
     const existingUser = await prisma.user.findUnique({

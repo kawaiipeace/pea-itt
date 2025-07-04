@@ -37,8 +37,11 @@ const Card = ({ student }: any) => {
             className="h-full w-full object-cover"
           />
         ) : (
-          <IconUsers className="shrink-0 group-hover:!text-primary text-gray-400" />
-        )}
+          <img
+            src="../public/assets/images/watdee.jpeg"
+            alt={`${student.fname} ${student.lname}`}
+            className="h-full w-full object-cover"
+          />)}
       </div>
 
       <div className="mb-6 my-6 text-base font-semibold md:text-lg">

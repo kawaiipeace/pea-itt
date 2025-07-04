@@ -338,7 +338,7 @@ const Headermentor = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src="/assets/images/user-profile.jpeg"
+                    src="/assets/images/watdee.jpeg"
                     alt="userProfile"
                   />
                 }
@@ -348,7 +348,7 @@ const Headermentor = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src="/assets/images/user-profile.jpeg"
+                        src="/assets/images/watdee.jpeg"
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
