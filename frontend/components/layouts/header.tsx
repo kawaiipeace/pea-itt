@@ -367,7 +367,7 @@ const Header = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src={myimg ? myimg : "../../public/assets/images/profile-34.jpeg"}
+                    src={myimg ? myimg : "../../public/assets/images/watdee.jpeg"}
                     alt="userProfile"
                   />
                 }
@@ -377,7 +377,7 @@ const Header = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src={myimg ? myimg : "../../public/assets/images/profile-34.jpeg"}
+                        src={myimg ? myimg : "../../public/assets/images/watdee.jpeg"}
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
