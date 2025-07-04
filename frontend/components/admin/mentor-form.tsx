@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
-import { Trash } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import IconUser from "../../components/icon/icon-user";
 import IconUserPlus from "../../components/icon/icon-user-plus";
 
@@ -44,24 +44,21 @@ const selectClassNames = {
 export default function MentorForm() {
   const router = useRouter();
 
-  
   const [divisionOpts, setDivisionOpts] = useState<Option[]>([]);
   const [mentorOpts, setMentorOpts] = useState<Option[]>([]);
   const [selectedDivision, setSelectedDivision] = useState<Option | null>(null);
   const [selectedMentor, setSelectedMentor] = useState<Option | null>(null);
   const [mentors, setMentors] = useState<Mentor[]>([]);
 
-  
   const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true,
   });
 
-  
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get("/dept");
+        const { data } = await api.get("dept");
         setDivisionOpts(
           data.data.map((d: any) => ({ value: d.dept_id, label: d.dept_name }))
         );
@@ -71,16 +68,18 @@ export default function MentorForm() {
     })();
   }, []);
 
- 
   useEffect(() => {
     if (!selectedDivision) return;
     (async () => {
       try {
-        const { data } = await api.get("/user/mentor", {
+        const { data } = await api.get("user/mentor", {
           params: { department_id: selectedDivision.value },
         });
         setMentorOpts(
-          data.data.map((m: any) => ({ value: m.id, label: `${m.fname} ${m.lname}` }))
+          data.data.map((m: any) => ({
+            value: m.id,
+            label: `${m.fname} ${m.lname}`,
+          }))
         );
         setMentors(data.data as Mentor[]);
         setSelectedMentor(null);
@@ -90,39 +89,37 @@ export default function MentorForm() {
     })();
   }, [selectedDivision]);
 
- 
   const listMentors = useMemo(() => {
-    if (!selectedDivision || !selectedMentor) return [] as Mentor[];
+    if (!selectedDivision) return [];
+    if (!selectedMentor) return mentors;
     return mentors.filter((m) => m.id === selectedMentor.value);
   }, [mentors, selectedDivision, selectedMentor]);
 
- 
   const handleDelete = async (m: Mentor, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm(`ต้องการลบพี่เลี้ยง ${m.fname} ${m.lname}?`)) return;
     try {
       await api.delete(`/admin/editmentor`);
       setMentors((prev) => prev.filter((x) => x.id !== m.id));
-      if (selectedMentor && selectedMentor.value === m.id) setSelectedMentor(null);
+      if (selectedMentor?.value === m.id) setSelectedMentor(null);
     } catch (err) {
       alert("ลบไม่สำเร็จ");
       console.error(err);
     }
   };
 
- 
   return (
     <>
-      {/* header & filters */}
-      <div className="bg-gray-50 px-4 pb-10 pt-6 sm:px-6 md:px-10 dark:bg-black-dark-light/5">
-        <h1 className="mb-4 text-2xl font-semibold sm:text-3xl md:text-[32px] dark:text-gray-400">
+      <div className="bg-gray-50 px-4 pb-10 pt-6 dark:bg-black-dark-light/5 sm:px-6 md:px-10">
+        <h1 className="mb-4 text-2xl font-semibold dark:text-gray-400 sm:text-3xl md:text-[32px]">
           ข้อมูลพี่เลี้ยง
         </h1>
 
         <div className="mb-10 flex flex-wrap justify-center gap-4 sm:gap-6 sm:px-6">
-          {/* Division */}
           <div>
-            <label className="mb-2 block text-base font-medium dark:text-[#506690]">ชื่อกอง</label>
+            <label className="mb-2 block text-base font-medium dark:text-[#506690]">
+              ชื่อกอง
+            </label>
             <Select<Option, false>
               options={divisionOpts}
               value={selectedDivision}
@@ -133,9 +130,10 @@ export default function MentorForm() {
               isClearable
             />
           </div>
-          {/* Mentor */}
           <div>
-            <label className="mb-2 block text-base font-medium dark:text-[#506690]">ชื่อพี่เลี้ยง</label>
+            <label className="mb-2 block text-base font-medium dark:text-[#506690]">
+              ชื่อพี่เลี้ยง
+            </label>
             <Select<Option, false>
               options={mentorOpts}
               value={selectedMentor}
@@ -149,8 +147,7 @@ export default function MentorForm() {
           </div>
         </div>
 
-        {/* list container */}
-        <div className="-mt-4 flex h-[350px] w-full max-w-[900px] flex-col justify-start rounded-lg bg-[#eae9eb] p-4 shadow sm:mx-auto sm:p-6 dark:border dark:border-gray-500 dark:bg-gray-900">
+        <div className="-mt-4 flex h-[350px] w-full max-w-[900px] flex-col justify-start rounded-lg bg-[#eae9eb] p-4 shadow dark:border dark:border-gray-500 dark:bg-gray-900 sm:mx-auto sm:p-6">
           {selectedDivision ? (
             listMentors.length ? (
               <div className="flex-1 overflow-y-auto">
@@ -158,26 +155,32 @@ export default function MentorForm() {
                   {listMentors.map((m) => (
                     <div
                       key={m.id}
-                      className={`flex items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500 ${
-                        selectedMentor && selectedMentor.value === m.id ? "border-[#B10073] bg-[#F7E3F0] dark:bg-[#593049]" : ""
+                      className={`flex items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4 ${
+                        selectedMentor?.value === m.id
+                          ? "border-[#B10073] bg-[#F7E3F0] dark:bg-[#593049]"
+                          : ""
                       }`}
                     >
-                      {/* avatar & name */}
-                      <div className="flex flex-1 cursor-pointer items-center gap-3" onClick={() => router.push(`/admin/editmentor`)}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 sm:h-10 sm:w-10 dark:bg-gray-700">
+                      <div
+                        className="flex flex-1 cursor-pointer items-center gap-3"
+                        onClick={() =>
+                          router.push(`/admin/editmentor?id=${m.id}`)
+                        }
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10">
                           <IconUser />
                         </div>
-                        <p className="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-400">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
                           {m.fname} {m.lname}
                         </p>
                       </div>
 
-                         <button
+                      <button
                         onClick={(e) => handleDelete(m, e)}
-                        className="ml-auto rounded p-2 text-white bg-red-600 hover:bg-red-700"
+                        className="borde ml-auto rounded p-2 transition-colors"
                         aria-label="ลบ"
                       >
-                        <Trash className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-black" />
                       </button>
                     </div>
                   ))}
@@ -185,18 +188,21 @@ export default function MentorForm() {
               </div>
             ) : (
               <div className="flex flex-1 items-center justify-center">
-                <p className="text-center text-sm text-gray-500 sm:text-base dark:text-[#506690]">ไม่พบพี่เลี้ยงที่ตรงกับเงื่อนไข</p>
+                <p className="text-center text-sm text-gray-500 dark:text-[#506690] sm:text-base">
+                  ไม่พบพี่เลี้ยงที่ตรงกับเงื่อนไข
+                </p>
               </div>
             )
           ) : (
             <div className="flex flex-1 items-center justify-center">
-              <p className="text-center text-sm text-gray-400 sm:text-base dark:text-[#506690]">เลือกกองและพี่เลี้ยงเพื่อดูข้อมูล</p>
+              <p className="text-center text-sm text-gray-400 dark:text-[#506690] sm:text-base">
+                เลือกกองและพี่เลี้ยงเพื่อดูข้อมูล
+              </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* floating button */}
       <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6 md:bottom-10 md:right-12">
         <button
           type="button"
