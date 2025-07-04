@@ -87,7 +87,10 @@ const StudentForm = () => {
     if (!selectedMentor) return;
 
     axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`)
+      .get(`${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`,{
+        withCredentials: true
+      })
+       
       .then((res) => {
         setFilteredStudents(res.data?.data || []);
       })
