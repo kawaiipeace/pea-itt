@@ -34,7 +34,7 @@ interface ViewRow {
   outTime: string | "-";
   status: "มา" | "ลา";
   note: string | "-";
-  approval?: "approved" | "declined" | "pending";
+  approval?: "approved" | "rejected" | "pending";
 }
 
 const formatThaiDate = (dateString: string) => {
@@ -176,7 +176,7 @@ const InfoPage = ({ params }: PageProps) => {
             อนุมัติ
           </span>
         );
-      case "declined":
+      case "rejected":
         return (
           <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">
             ไม่อนุมัติ

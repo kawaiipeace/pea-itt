@@ -187,15 +187,12 @@ const Headermentor = () => {
       <div className="shadow-sm">
         <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
           <div className="horizontal-logo flex items-center justify-between ltr:mr-2 rtl:ml-2 lg:hidden">
-            <Link href="/" className="main-logo flex shrink-0 items-center">
+            <Link href="/mentor/mentor-student" className="main-logo flex shrink-0 items-center">
               <Image
                 className="inline w-[132px] ltr:-ml-1 rtl:-mr-1"
                 src={Logo}
                 alt="logo"
               />
-              {/* <span className="hidden align-middle text-2xl  font-semibold  transition-all duration-300 ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light md:inline">
-                PEA-iTT
-              </span> */}
             </Link>
             <button
               type="button"
@@ -341,7 +338,7 @@ const Headermentor = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src="/assets/images/user-profile.jpeg"
+                    src="/assets/images/watdee.jpeg"
                     alt="userProfile"
                   />
                 }
@@ -351,7 +348,7 @@ const Headermentor = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src="/assets/images/user-profile.jpeg"
+                        src="/assets/images/watdee.jpeg"
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
