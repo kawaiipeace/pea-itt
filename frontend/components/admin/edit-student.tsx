@@ -21,13 +21,18 @@ interface stuPro {
   mentor_id: number;
 }
 
+interface deptData {
+  dept_id: number;
+  dept_name: string;
+}
+
 interface studentProfile {
   id: number;
   fname: string;
   lname: string;
   email: string;
   phone_number: string;
-  department_id: number;
+  department: deptData | null;
   student_profile: stuPro | null;
 }
 
@@ -90,6 +95,26 @@ const EditStudent = ({ id }: { id: number }) => {
           }
         );
         setStuInfo(response.data.data);
+
+        const dept = response.data.data.department;
+        if (dept) {
+          setDepartmentOptions((prev) => [
+            { value: dept.dept_id.toString(), label: dept.dept_name },
+            ...prev.filter((d) => d.value !== dept.dept_id.toString()),
+          ]);
+        }
+        const IDSTU = response.data.data.student_profile.id;
+
+        const responseImg = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users/${IDSTU}/picture`,
+          {
+            responseType: "blob",
+            withCredentials: true,
+          }
+        );
+        const blob = new Blob([responseImg.data], { type: "image/jpeg" });
+        const image = URL.createObjectURL(blob);
+        setImageSrc(image);
       } catch (error) {
         console.error("Error fetching student info:", error);
       }
@@ -108,32 +133,10 @@ const EditStudent = ({ id }: { id: number }) => {
         start_date: stuInfo.student_profile?.start_date || "",
         end_date: stuInfo.student_profile?.end_date || "",
         mentor_id: stuInfo.student_profile?.mentor_id?.toString() || "",
-        department: stuInfo.department_id?.toString() || "",
+        department: stuInfo.department?.dept_id.toString() || "",
       });
     }
   }, [stuInfo]);
-
-  useEffect(() => {
-    const setImage = async () => {
-      if (id) {
-        try {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}users/${id}/picture`,
-            {
-              responseType: "blob",
-              withCredentials: true,
-            }
-          );
-          const blob = new Blob([response.data], { type: "image/jpeg" });
-          const image = URL.createObjectURL(blob);
-          setImageSrc(image);
-        } catch (error) {
-          console.error("Error fetching user image:", error);
-        }
-      }
-    };
-    setImage();
-  }, [id]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -165,6 +168,7 @@ const EditStudent = ({ id }: { id: number }) => {
         }));
         setMentorOptions(mentors);
 
+        // แก้ URL ให้แน่ใจว่ามี / ตรงกลางระหว่าง base กับ endpoint
         const deptRes = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}dept`,
           {
@@ -173,8 +177,9 @@ const EditStudent = ({ id }: { id: number }) => {
         );
         const depts = deptRes.data.data.map((d: any) => ({
           label: d.dept_name,
-          value: d.id.toString(),
+          value: (d.dept_id).toString(), // รองรับทั้ง dept_id หรือ id
         }));
+
         setDepartmentOptions(depts);
       } catch (err) {
         console.error("โหลดข้อมูล mentor/department ล้มเหลว:", err);
