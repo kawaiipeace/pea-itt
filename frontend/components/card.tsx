@@ -3,6 +3,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import IconUsers from "@/components/icon/icon-users";
+import wattdee from "../public/assets/images/watdee.jpeg"
+import Image from "next/image";
 
 // ฟังก์ชันแปลงวันที่เป็นไทย
 const formatThaiDate = (dateString: string) => {
@@ -29,7 +31,7 @@ const Card = ({ student }: any) => {
         hover:shadow-md dark:border-gray-900 dark:bg-gray-900 dark:text-[#506690]
         dark:hover:border-white dark:hover:bg-gray-900"
     >
-      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+      <div className="flex h-20 mt-5 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-100">
         {student.picture_url ? (
           <img
             src={student.picture_url}
@@ -37,8 +39,8 @@ const Card = ({ student }: any) => {
             className="h-full w-full object-cover"
           />
         ) : (
-          <img
-            src="../public/assets/images/watdee.jpeg"
+          <Image
+            src={wattdee}
             alt={`${student.fname} ${student.lname}`}
             className="h-full w-full object-cover"
           />)}

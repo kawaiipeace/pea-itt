@@ -7,11 +7,13 @@ import Select from "react-select";
 import { Trash2 } from "lucide-react";
 import IconUser from "../../components/icon/icon-user";
 import IconUserPlus from "../../components/icon/icon-user-plus";
+import Swal from "sweetalert2";
 
 interface Option {
   value: number;
   label: string;
 }
+
 interface Mentor {
   id: number;
   fname: string;
@@ -97,14 +99,40 @@ export default function MentorForm() {
 
   const handleDelete = async (m: Mentor, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm(`ต้องการลบพี่เลี้ยง ${m.fname} ${m.lname}?`)) return;
+
+    const confirmResult = await Swal.fire({
+      title: `ยืนยันการลบพี่เลี้ยง`,
+      text: `คุณแน่ใจหรือไม่ว่าต้องการลบ ${m.fname} ${m.lname}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#74045F",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
     try {
-      await api.delete(`/admin/editmentor`);
+      await api.delete(`/users/admin/${m.id}`);
       setMentors((prev) => prev.filter((x) => x.id !== m.id));
       if (selectedMentor?.value === m.id) setSelectedMentor(null);
+
+      Swal.fire({
+        icon: "success",
+        title: "ลบพี่เลี้ยงสำเร็จ",
+        confirmButtonColor: "#74045F",
+        confirmButtonText: "ปิด",
+      });
     } catch (err) {
-      alert("ลบไม่สำเร็จ");
-      console.error(err);
+      console.error("ลบพี่เลี้ยงล้มเหลว", err);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถลบพี่เลี้ยงได้",
+        confirmButtonColor: "#74045F",
+        confirmButtonText: "ปิด",
+      });
     }
   };
 
