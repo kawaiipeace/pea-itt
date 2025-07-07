@@ -24,7 +24,7 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
         value={value ? `${day}/${month}/${buddhistYear}` : ""}
         readOnly
         placeholder="เลือกวันที่"
-        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
       />
       <IconCalendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
     </div>
@@ -167,49 +167,77 @@ const EditStudent = () => {
               {imageSrc ? (
                 <img src={imageSrc} alt="profile" className="h-full w-full object-cover" />
               ) : (
-                <svg className="h-full w-full text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg
+                  className="h-full w-full text-gray-300 dark:text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                   <circle cx="12" cy="12" r="10" />
                 </svg>
               )}
             </div>
             <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-[#9B006C] bg-[#F7E3F0] shadow dark:bg-gray-900 dark:border-gray-500">
-              <svg className="h-4 w-4 text-[#9B006C] dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              <svg
+                className="h-4 w-4 text-[#9B006C] dark:text-gray-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
               </svg>
-              <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 cursor-pointer opacity-0" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="absolute inset-0 cursor-pointer opacity-0"
+              />
             </label>
           </div>
         </div>
 
         <div className="mt-2 w-full md:flex-1">
           <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-            {[{ label: "ชื่อจริง", field: "name" }, { label: "นามสกุล", field: "surname" }, { label: "อีเมล", field: "email", type: "email" }, { label: "เบอร์โทรศัพท์", field: "phone" }].map(({ label, field, type }) => (
-              <div key={field}>
-                <label className="block text-sm font-medium">{label}</label>
-                <input
-                  type={type || "text"}
-                  value={(formData as any)[field]}
-                  onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
-                />
-              </div>
-            ))}
+            {[{ label: "ชื่อจริง", field: "name" }, { label: "นามสกุล", field: "surname" }, { label: "อีเมล", field: "email", type: "email" }, { label: "เบอร์โทรศัพท์", field: "phone" }].map(
+              ({ label, field, type }) => (
+                <div key={field}>
+                  <label className="block text-sm font-medium">{label}</label>
+                  <input
+                    type={type || "text"}
+                    value={(formData as any)[field]}
+                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                    className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
+                  />
+                </div>
+              )
+            )}
 
-            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row md:items-end">
-              <div className="w-full md:w-[50%]">
+            {/* ส่วนมหาวิทยาลัยกับวันที่ */}
+            <div className="w-full md:col-span-2 flex flex-col md:flex-row gap-4 md:gap-6 md:items-end">
+              <div className="w-full md:w-1/2">
                 <label className="block text-sm font-medium">มหาวิทยาลัยที่ศึกษาอยู่</label>
                 <input
                   type="text"
                   value={formData.university}
                   onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
                 />
               </div>
 
               {["start_date", "end_date"].map((field, index) => (
                 <div className="w-full md:w-[25%]" key={field}>
-                  <label className="block text-sm font-medium">{index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}</label>
+                  <label className="block text-sm font-medium">
+                    {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
+                  </label>
                   <DatePicker
                     selected={formData[field] ? new Date(formData[field]) : null}
                     onChange={(date: Date | null) =>
@@ -221,12 +249,15 @@ const EditStudent = () => {
                     dateFormat="dd/MM/yyyy"
                     locale="th"
                     minDate={field === "end_date" && formData.start_date ? new Date(formData.start_date) : undefined}
+                    wrapperClassName="w-full"
+                    className="w-full"
                     customInput={<CustomDateInput />}
                   />
                 </div>
               ))}
             </div>
 
+            {/* กองที่สังกัด */}
             <div className="w-full">
               <label className="block text-sm font-medium">กองที่สังกัด</label>
               <Select
@@ -256,6 +287,7 @@ const EditStudent = () => {
               />
             </div>
 
+            {/* ชื่อพี่เลี้ยง */}
             <div className="w-full">
               <label className="block text-sm font-medium">ชื่อพี่เลี้ยง</label>
               <Select
@@ -285,6 +317,7 @@ const EditStudent = () => {
               />
             </div>
 
+            {/* ปุ่มบันทึก */}
             <div className="mt-4 md:col-span-2">
               <button
                 type="submit"
