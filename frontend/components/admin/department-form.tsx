@@ -77,7 +77,7 @@ export default function DepartmentForm() {
     e.stopPropagation();
     if (!confirm(`ต้องการลบ ${d.dept_name}?`)) return;
     try {
-      await api.delete(`/department/${d.dept_id}`);
+      await api.delete(`/dept/${d.dept_id}`);
       setDepartments((prev) =>
         prev.filter((dept) => dept.dept_id !== d.dept_id)
       );
