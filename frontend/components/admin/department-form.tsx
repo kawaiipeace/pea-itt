@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Select from "react-select";
 import IconUser from "@/components/icon/icon-user";
 import IconUserPlus from "@/components/icon/icon-user-plus";
+import Swal from "sweetalert2";
 
 interface department {
   dept_id: number;
@@ -55,7 +56,7 @@ export default function DepartmentForm() {
   useEffect(() => {
     async function fetchDepartments() {
       try {
-        const response = await api.get("/dept"); // เปลี่ยน path ให้ตรงกับ API จริง
+        const response = await api.get("/dept");
         setDepartments(response.data.data as department[]);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -75,15 +76,39 @@ export default function DepartmentForm() {
 
   const handleDeptDelete = async (d: department, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm(`ต้องการลบ ${d.dept_name}?`)) return;
+
+    const result = await Swal.fire({
+      title: "ต้องการลบ",
+      text: `ต้องการลบ ${d.dept_name} หรือไม่?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       await api.delete(`/dept/${d.dept_id}`);
       setDepartments((prev) =>
         prev.filter((dept) => dept.dept_id !== d.dept_id)
       );
       setSelectedDept(null);
+
+      await Swal.fire({
+        title: "ลบสำเร็จ",
+        text: `ลบ ${d.dept_name} สำเร็จแล้ว`,
+        icon: "success",
+        confirmButtonText: "ตกลง",
+      });
     } catch (error) {
       console.error("ลบไม่สำเร็จ:", error);
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่",
+        icon: "error",
+        confirmButtonText: "ปิด",
+      });
     }
   };
 
