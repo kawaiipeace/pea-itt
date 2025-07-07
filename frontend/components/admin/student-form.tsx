@@ -233,12 +233,12 @@ const StudentForm = () => {
               <div className="flex w-full flex-col gap-3 sm:gap-4">
                 {filteredStudents.map((student) => (
                   <div
-                    key={student.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500"
+                  key={student.id}
+                  className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500"
+                    onClick={() => router.push(`/admin/student/${student.id}`)}
                   >
                     <div
                       className="flex cursor-pointer items-center gap-3"
-                      onClick={() => router.push(`/admin/student/${student.id}`)}
                     >
                       <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                         {student.picture_url ? (
