@@ -5,6 +5,7 @@ import IconUser from "@/components/icon/icon-user";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { Trash2 } from "lucide-react";
 
 interface DepartmentOption {
   value: number;
@@ -22,6 +23,8 @@ interface Student {
   lname: string;
   department_id: number;
   mentor_id: number;
+  student_profile: any;
+  picture_url?: string | null;
 }
 
 const StudentForm = () => {
@@ -33,7 +36,6 @@ const StudentForm = () => {
   const [mentorOptions, setMentorOptions] = useState<MentorOption[]>([]);
   const router = useRouter();
 
-  // โหลดกอง
   useEffect(() => {
     axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}dept`)
@@ -55,10 +57,8 @@ const StudentForm = () => {
       });
   }, []);
 
-  // โหลดพี่เลี้ยงเมื่อเลือกกอง
   useEffect(() => {
     if (!selectedDivision) return;
-
     setSelectedMentor(null);
     setFilteredStudents([]);
 
@@ -82,28 +82,46 @@ const StudentForm = () => {
       });
   }, [selectedDivision]);
 
-  // โหลดนักศึกษาตามพี่เลี้ยงที่เลือก
   useEffect(() => {
     if (!selectedMentor) return;
 
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`,{
-        withCredentials: true
-      })
-       
-      .then((res) => {
-        setFilteredStudents(res.data?.data || []);
-      })
-      .catch(() => {
+    const fetchStudentsWithPicture = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`,
+          { withCredentials: true }
+        );
+
+        const students: Student[] = res.data?.data || [];
+
+        const studentsWithPictures = await Promise.all(
+          students.map(async (student) => {
+            try {
+              const imgRes = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}users/${student.student_profile.id}/picture`,
+                { responseType: "blob", withCredentials: true }
+              );
+              const imageUrl = URL.createObjectURL(imgRes.data);
+              return { ...student, picture_url: imageUrl };
+            } catch {
+              return { ...student, picture_url: null };
+            }
+          })
+        );
+
+        setFilteredStudents(studentsWithPictures);
+      } catch {
         Swal.fire({
           title: "เกิดข้อผิดพลาด",
           text: "ไม่สามารถโหลดข้อมูลนักศึกษาได้",
           icon: "error",
         });
-      });
+      }
+    };
+
+    fetchStudentsWithPicture();
   }, [selectedMentor]);
 
-  // ตรวจ dark mode
   useEffect(() => {
     const updateDarkMode = () => {
       const isDark =
@@ -124,6 +142,33 @@ const StudentForm = () => {
       mediaQuery.removeEventListener("change", updateDarkMode);
     };
   }, []);
+
+  const handleDelete = (student: Student) => {
+    Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: `ต้องการลบนักศึกษา ${student.fname} ${student.lname} ใช่ไหม?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ยกเลิก",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${process.env.NEXT_PUBLIC_API_URL}users/admin/${student.id}`, {
+            withCredentials: true,
+          })
+          .then(() => {
+            setFilteredStudents((prev) => prev.filter((s) => s.id !== student.id));
+            Swal.fire("ลบสำเร็จ!", "นักศึกษาได้ถูกลบแล้ว", "success");
+          })
+          .catch(() => {
+            Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถลบนักศึกษาได้", "error");
+          });
+      }
+    });
+  };
 
   const customSelectClassNames = {
     control: ({ isFocused }: any) =>
@@ -189,15 +234,33 @@ const StudentForm = () => {
                 {filteredStudents.map((student) => (
                   <div
                     key={student.id}
-                    onClick={() => router.push(`/users/profile/${student.id}`)}
-                    className="flex cursor-pointer items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500"
+                    className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 sm:h-10 sm:w-10 dark:bg-gray-700">
-                      <IconUser />
+                    <div
+                      className="flex cursor-pointer items-center gap-3"
+                      onClick={() => router.push(`/admin/student/${student.id}`)}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                        {student.picture_url ? (
+                          <img
+                            src={student.picture_url}
+                            alt="student"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <IconUser />
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-400">
+                        {student.fname} {student.lname}
+                      </p>
                     </div>
-                    <p className="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-400">
-                      {student.fname} {student.lname}
-                    </p>
+                    <button onClick={() => handleDelete(student)}>
+                      <Trash2
+                        className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"
+                        style={{ textDecoration: "line-through" }}
+                      />
+                    </button>
                   </div>
                 ))}
               </div>

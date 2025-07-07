@@ -49,9 +49,13 @@ const Student = () => {
               const imageUrl = URL.createObjectURL(imageRes.data);
               return { ...student, picture_url: imageUrl };
             } catch (error: any) {
+              if (error?.response?.status == 404) {
+                console.log("ไม่มีรูปภาพ");
+              }
               if (error?.response?.status !== 404) {
                 console.error("เกิดข้อผิดพลาดในการโหลดรูป:", student.id, error);
               }
+              
               return { ...student, picture_url: null };
             }
           })

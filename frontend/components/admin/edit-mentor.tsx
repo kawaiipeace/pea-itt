@@ -1,58 +1,106 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import useAuthStore from "@/store/authStore";
 import Swal from "sweetalert2";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 const EditMentor = () => {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
-  const refreshUser = useAuthStore((state) => state.refreshUser);
+  const searchParams = useSearchParams();
+  const mentorId = searchParams.get("id");
 
   const [formData, setFormData] = useState({
-    fname: user?.fname || "",
-    lname: user?.lname || "",
-    email: user?.email || "",
-    phone_number: user?.phone_number || "",
+    fname: "",
+    lname: "",
+    email: "",
+    phone_number: "",
   });
+  const [division, setDivision] = useState<number | "">("");
+  const [divisions, setDivisions] = useState<{ label: string; value: number }[]>([]);
 
-  const [division, setDivision] = useState(user?.division || "");
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}dept`, {
+          withCredentials: true,
+        });
+        const mapped = data.data.map((d: any) => ({ label: d.dept_name, value: d.dept_id }));
+        setDivisions(mapped);
+      } catch (err) {
+        console.error("โหลดรายชื่อกองล้มเหลว", err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!mentorId) return;
+    (async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}user/mentor`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        const mentorList = data.data;
+        const user = mentorList.find((m: any) => m.id === Number(mentorId));
+
+        if (!user) {
+          console.error("ไม่พบพี่เลี้ยงในรายการ");
+          return;
+        }
+
+        setFormData({
+          fname: user.fname,
+          lname: user.lname,
+          email: user.email,
+          phone_number: user.phone_number,
+        });
+
+        setDivision(user.department?.dept_id || "");
+      } catch (error: any) {
+        console.error("โหลดข้อมูลพี่เลี้ยงล้มเหลว:", error?.response || error);
+      }
+    })();
+  }, [mentorId]);
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
     try {
       const form = new FormData();
       form.append("fname", formData.fname);
       form.append("lname", formData.lname);
       form.append("email", formData.email);
       form.append("phone_number", formData.phone_number);
-      form.append("division", division);
+      form.append("department_id", String(division));
 
-      if (!user || !user.id) {
-        alert("ไม่สามารถบันทึกข้อมูลได้ เนื่องจากไม่มีข้อมูลผู้ใช้");
-        return;
-      }
+      if (!mentorId) return;
 
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}users/mentor/${user.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}admin/editmentor/${mentorId}`,
         form,
         { withCredentials: true }
       );
 
       Swal.fire({
         title: "สำเร็จ",
-        text: "บันทึกข้อมูลโปรไฟล์สำเร็จ",
+        text: "บันทึกข้อมูลพี่เลี้ยงสำเร็จ",
         icon: "success",
         confirmButtonText: "ตกลง",
       }).then(() => {
-        refreshUser();
+        router.push("/admin/mentor");
       });
     } catch (error) {
       console.error("เกิดข้อผิดพลาด:", error);
-      alert("ไม่สามารถบันทึกข้อมูลได้");
+      Swal.fire({
+        title: "ไม่สำเร็จ",
+        text: "ไม่สามารถบันทึกข้อมูลได้",
+        icon: "error",
+        confirmButtonText: "ปิด",
+      });
     }
   };
 
@@ -65,7 +113,6 @@ const EditMentor = () => {
 
   return (
     <div className="w-full">
-      {/* ปุ่มย้อนกลับอยู่นอก container และไม่โดน padding ใด ๆ */}
       <div
         className="mb-4 flex cursor-pointer items-center gap-2 px-4 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white"
         onClick={() => router.back()}
@@ -74,7 +121,6 @@ const EditMentor = () => {
         <span>ย้อนกลับ</span>
       </div>
 
-      {/* กล่องฟอร์มอยู่ใน container มี padding */}
       <div className="mx-auto w-full max-w-5xl px-4">
         <div className="rounded border bg-white p-6 shadow-md dark:text-[#506690] dark:border-gray-800 dark:bg-gray-900">
           <h1 className="mb-6 text-xl font-bold dark:text-gray-400">โปรไฟล์</h1>
@@ -84,9 +130,7 @@ const EditMentor = () => {
               <input
                 type="text"
                 value={formData.fname}
-                onChange={(e) =>
-                  setFormData({ ...formData, fname: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, fname: e.target.value })}
                 className="w-full rounded border border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
             </div>
@@ -95,9 +139,7 @@ const EditMentor = () => {
               <input
                 type="text"
                 value={formData.lname}
-                onChange={(e) =>
-                  setFormData({ ...formData, lname: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, lname: e.target.value })}
                 className="w-full rounded border border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
             </div>
@@ -106,9 +148,7 @@ const EditMentor = () => {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full rounded border border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
             </div>
@@ -126,19 +166,19 @@ const EditMentor = () => {
               <label className="mb-1 block text-sm font-medium">ชื่อกอง</label>
               <select
                 value={division}
-                onChange={(e) => setDivision(e.target.value)}
-                className={`w-[49%] rounded border border-gray-300  p-2 text-black dark:border-gray-600 dark:bg-gray-800 ${
-                  division === ""
-                    ? "text-gray-400 dark:text-gray-400"
-                    : "dark:text-white"
+                onChange={(e) => setDivision(Number(e.target.value))}
+                className={`w-full sm:w-[49%] rounded border border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 ${
+                  division === "" ? "text-gray-400 dark:text-gray-400" : "dark:text-white"
                 }`}
               >
                 <option value="" disabled hidden>
                   เลือกชื่อกอง
                 </option>
-                <option value="กอง 1">กอง 1</option>
-                <option value="กอง 2">กอง 2</option>
-                <option value="กอง 3">กอง 3</option>
+                {divisions.map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
               </select>
             </div>
           </form>
