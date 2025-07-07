@@ -28,11 +28,16 @@ interface Student {
 }
 
 const StudentForm = () => {
-  const [selectedDivision, setSelectedDivision] = useState<DepartmentOption | null>(null);
-  const [selectedMentor, setSelectedMentor] = useState<MentorOption | null>(null);
+  const [selectedDivision, setSelectedDivision] =
+    useState<DepartmentOption | null>(null);
+  const [selectedMentor, setSelectedMentor] = useState<MentorOption | null>(
+    null
+  );
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [departmentOptions, setDepartmentOptions] = useState<DepartmentOption[]>([]);
+  const [departmentOptions, setDepartmentOptions] = useState<
+    DepartmentOption[]
+  >([]);
   const [mentorOptions, setMentorOptions] = useState<MentorOption[]>([]);
   const router = useRouter();
 
@@ -63,7 +68,9 @@ const StudentForm = () => {
     setFilteredStudents([]);
 
     axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}user/mentor?department_id=${selectedDivision.value}`)
+      .get(
+        `${process.env.NEXT_PUBLIC_API_URL}user/mentor?department_id=${selectedDivision.value}`
+      )
       .then((res) => {
         const mentors = res.data?.data || [];
         setMentorOptions(
@@ -132,7 +139,10 @@ const StudentForm = () => {
 
     updateDarkMode();
     const observer = new MutationObserver(updateDarkMode);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     mediaQuery.addEventListener("change", updateDarkMode);
@@ -156,11 +166,16 @@ const StudentForm = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`${process.env.NEXT_PUBLIC_API_URL}users/admin/${student.id}`, {
-            withCredentials: true,
-          })
+          .delete(
+            `${process.env.NEXT_PUBLIC_API_URL}users/admin/${student.id}`,
+            {
+              withCredentials: true,
+            }
+          )
           .then(() => {
-            setFilteredStudents((prev) => prev.filter((s) => s.id !== student.id));
+            setFilteredStudents((prev) =>
+              prev.filter((s) => s.id !== student.id)
+            );
             Swal.fire("ลบสำเร็จ!", "นักศึกษาได้ถูกลบแล้ว", "success");
           })
           .catch(() => {
@@ -183,7 +198,8 @@ const StudentForm = () => {
     menu: () =>
       "mt-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 z-10",
     option: ({ isFocused, isSelected }: any) => {
-      if (isSelected) return "bg-blue-100 text-blue-800 dark:bg-blue-600 dark:text-white";
+      if (isSelected)
+        return "bg-blue-100 text-blue-800 dark:bg-blue-600 dark:text-white";
       if (isFocused) return "bg-gray-100 dark:bg-gray-700";
       return "text-gray-800 dark:text-gray-200";
     },
@@ -193,14 +209,16 @@ const StudentForm = () => {
   };
 
   return (
-    <div className="bg-gray-50 px-4 pb-10 pt-6 sm:px-6 md:px-10 dark:bg-black-dark-light/5">
-      <h1 className="mb-4 text-2xl font-semibold sm:text-3xl md:text-[32px] dark:text-gray-400">
+    <div className="bg-gray-50 px-4 pb-10 pt-6 dark:bg-black-dark-light/5 sm:px-6 md:px-10">
+      <h1 className="mb-4 text-2xl font-semibold dark:text-gray-400 sm:text-3xl md:text-[32px]">
         ข้อมูลนักศึกษาฝึกงาน
       </h1>
 
       <div className="mb-10 flex flex-wrap justify-center gap-4 sm:gap-6 sm:px-6">
         <div>
-          <label className="mb-2 block text-base font-medium dark:text-[#506690]">ชื่อกอง</label>
+          <label className="mb-2 block text-base font-medium dark:text-[#506690]">
+            ชื่อกอง
+          </label>
           <Select
             options={departmentOptions}
             value={selectedDivision}
@@ -213,7 +231,9 @@ const StudentForm = () => {
         </div>
 
         <div>
-          <label className="mb-2 block text-base font-medium dark:text-[#506690]">ชื่อพี่เลี้ยง</label>
+          <label className="mb-2 block text-base font-medium dark:text-[#506690]">
+            ชื่อพี่เลี้ยง
+          </label>
           <Select
             options={mentorOptions}
             value={selectedMentor}
@@ -226,55 +246,60 @@ const StudentForm = () => {
         </div>
       </div>
 
-      <div className="-mt-4 flex h-[350px] w-full max-w-[900px] flex-col justify-start rounded-lg bg-[#eae9eb] p-3 shadow sm:mx-auto sm:p-6 dark:border dark:border-gray-500 dark:bg-gray-900">
+      <div className="-mt-4 flex h-[350px] w-full max-w-[900px] flex-col justify-start rounded-lg bg-[#eae9eb] p-3 shadow dark:border dark:border-gray-500 dark:bg-gray-900 sm:mx-auto sm:p-6">
         {selectedDivision && selectedMentor ? (
           filteredStudents.length > 0 ? (
             <div className="flex-1 overflow-y-auto">
               <div className="flex w-full flex-col gap-3 sm:gap-4">
                 {filteredStudents.map((student) => (
                   <div
-                  key={student.id}
-                  className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg sm:gap-4 sm:p-4 dark:bg-gray-900 dark:border-gray-500 dark:hover:bg-gray-500"
-                    onClick={() => router.push(`/admin/student/${student.id}`)}
+                    key={student.id}
+                    className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4"
                   >
                     <div
-                      className="flex cursor-pointer items-center gap-3"
+                      onClick={() =>
+                        router.push(`/admin/student/${student.id}`)
+                      }
                     >
-                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                        {student.picture_url ? (
-                          <img
-                            src={student.picture_url}
-                            alt="student"
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <IconUser />
-                        )}
+                      <div className="flex cursor-pointer items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                          {student.picture_url ? (
+                            <img
+                              src={student.picture_url}
+                              alt="student"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <IconUser />
+                          )}
+                        </div>
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
+                          {student.fname} {student.lname}
+                        </p>
                       </div>
-                      <p className="text-sm font-medium text-gray-800 sm:text-base dark:text-gray-400">
-                        {student.fname} {student.lname}
-                      </p>
                     </div>
-                    <button onClick={() => handleDelete(student)}>
-                      <Trash2
-                        className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"
-                        style={{ textDecoration: "line-through" }}
-                      />
-                    </button>
+                    <div>
+                      <button onClick={() => handleDelete(student)}>
+                        <Trash2
+                          className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"
+                          style={{ textDecoration: "line-through" }}
+                        />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
             <div className="flex flex-1 items-center justify-center">
-              <p className="text-center text-sm text-gray-500 sm:text-base dark:text-[#506690]">
+              <p className="text-center text-sm text-gray-500 dark:text-[#506690] sm:text-base">
                 ไม่พบนักศึกษาที่ตรงกับเงื่อนไข
               </p>
             </div>
           )
         ) : (
           <div className="flex flex-1 items-center justify-center">
-            <p className="text-center text-sm text-gray-400 sm:text-base dark:text-[#506690]">
+            <p className="text-center text-sm text-gray-400 dark:text-[#506690] sm:text-base">
               ข้อมูลนักศึกษาฝึกงานจะปรากฏตรงนี้
             </p>
           </div>
