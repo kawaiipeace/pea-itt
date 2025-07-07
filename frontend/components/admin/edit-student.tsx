@@ -282,6 +282,7 @@ const EditStudent = ({ id }: { id: number }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
+                  readOnly
                   className="absolute inset-0 cursor-pointer opacity-0"
                 />
               </label>
@@ -303,7 +304,8 @@ const EditStudent = ({ id }: { id: number }) => {
                     onChange={(e) =>
                       setFormData({ ...formData, [field]: e.target.value })
                     }
-                    className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900 dark:text-gray-400"
+                    readOnly
+                    className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900 dark:text-[#506690]"
                   />
                 </div>
               ))}
@@ -315,15 +317,16 @@ const EditStudent = ({ id }: { id: number }) => {
                   <input
                     type="text"
                     value={formData.university}
+                    readOnly
                     onChange={(e) =>
                       setFormData({ ...formData, university: e.target.value })
                     }
-                    className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900 dark:text-gray-400"
+                    className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900  dark:text-[#506690]"
                   />
                 </div>
                 {["start_date", "end_date"].map((field, index) => (
                   <div className="w-full md:w-[25%]" key={field}>
-                    <label className="block text-sm font-medium">
+                    <label className="block text-sm font-medium dark:text-[#506690]">
                       {index === 0
                         ? "วันที่เริ่มฝึกงาน"
                         : "วันที่สิ้นสุดฝึกงาน"}
@@ -338,6 +341,7 @@ const EditStudent = ({ id }: { id: number }) => {
                           [field]: date ? format(date, "yyyy-MM-dd") : "",
                         })
                       }
+                      readOnly
                       dateFormat="dd/MM/yyyy"
                       locale="th"
                       minDate={
