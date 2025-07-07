@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
@@ -26,7 +26,7 @@ interface studentProfile {
   email: string;
   phone_number: string;
   department_id: number;
-  student_profile: stuPro | null,
+  student_profile: stuPro | null;
 }
 
 registerLocale("th", th);
@@ -55,6 +55,10 @@ const EditStudent = ({ id }: any) => {
   const setUser = useAuthStore((state) => state.actionSetUser);
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const [stuInfo, setStuInfo] = useState<studentProfile>();
+  const [imageSrc, setImageSrc] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [mentorOptions, setMentorOptions] = useState<{ label: string; value: string }[]>([]);
+  const [departmentOptions, setDepartmentOptions] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
     const fetchStudentInfo = async () => {
@@ -62,9 +66,7 @@ const EditStudent = ({ id }: any) => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users/${id}`, {
           withCredentials: true,
         });
-        // console.log("Student Info:", response.data.data.fname);   
         setStuInfo(response.data.data);
-
       } catch (error) {
         console.error("Error fetching student info:", error);
       }
@@ -73,15 +75,15 @@ const EditStudent = ({ id }: any) => {
   }, [id]);
 
   const [formData, setFormData] = useState({
-    name: stuInfo?.fname || "",
-    surname: stuInfo?.lname || "",
-    email: stuInfo?.email || "",
-    university: stuInfo?.student_profile?.university || "",
-    phone: stuInfo?.phone_number || "",
-    start_date: stuInfo?.student_profile?.start_date || "",
-    end_date: stuInfo?.student_profile?.end_date || "",
-    mentor_id: stuInfo?.student_profile?.mentor_id || "",
-    department: stuInfo?.department_id || "",
+    name: "",
+    surname: "",
+    email: "",
+    university: "",
+    phone: "",
+    start_date: "",
+    end_date: "",
+    mentor_id: "",
+    department: "",
   });
 
   useEffect(() => {
@@ -94,21 +96,33 @@ const EditStudent = ({ id }: any) => {
         phone: stuInfo.phone_number || "",
         start_date: stuInfo.student_profile?.start_date || "",
         end_date: stuInfo.student_profile?.end_date || "",
-        mentor_id: stuInfo.student_profile?.mentor_id || "",
-        department: stuInfo.department_id || "",
+        mentor_id: stuInfo.student_profile?.mentor_id?.toString() || "",
+        department: stuInfo.department_id?.toString() || "",
       });
     }
   }, [stuInfo]);
 
-
-
-
-  const [imageSrc, setImageSrc] = useState<string>(
-    `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`
-  );
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [mentorOptions, setMentorOptions] = useState<{ label: string; value: string }[]>([]);
-  const [departmentOptions, setDepartmentOptions] = useState<{ label: string; value: string }[]>([]);
+  useEffect(() => {
+    const setImage = async () => {
+      if (id) {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}users/${id}/picture`,
+            {
+              responseType: "blob",
+              withCredentials: true,
+            }
+          );
+          const blob = new Blob([response.data], { type: "image/jpeg" });
+          const image = URL.createObjectURL(blob);
+          setImageSrc(image);
+        } catch (error) {
+          console.error("Error fetching user image:", error);
+        }
+      }
+    };
+    setImage();
+  }, [id]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -128,17 +142,21 @@ const EditStudent = ({ id }: any) => {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const mentorRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}user/mentors`);
+        const mentorRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}user/mentor`, {
+          withCredentials: true,
+        });
         const mentors = mentorRes.data.data.map((m: any) => ({
           label: `${m.fname} ${m.lname}`,
-          value: m.id,
+          value: m.id.toString(),
         }));
         setMentorOptions(mentors);
 
-        const deptRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}departments`);
+        const deptRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}dept`, {
+          withCredentials: true,
+        });
         const depts = deptRes.data.data.map((d: any) => ({
           label: d.dept_name,
-          value: d.id,
+          value: d.id.toString(),
         }));
         setDepartmentOptions(depts);
       } catch (err) {
@@ -147,28 +165,6 @@ const EditStudent = ({ id }: any) => {
     };
     fetchOptions();
   }, []);
-
-  useEffect(() => {
-    const setImage = async () => {
-      if (user?.student_profile) {
-        try {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}users/${user.student_profile.id}/picture`,
-            {
-              responseType: "blob",
-              withCredentials: true,
-            }
-          );
-          const blob = new Blob([response.data], { type: "image/jpeg" });
-          const image = URL.createObjectURL(blob);
-          setImageSrc(image);
-        } catch (error) {
-          console.error("Error fetching user image:", error);
-        }
-      }
-    };
-    setImage();
-  }, [user]);
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -186,8 +182,8 @@ const EditStudent = ({ id }: any) => {
       form.append("university", formData.university);
       form.append("start_date", formData.start_date);
       form.append("end_date", formData.end_date);
-      form.append("department_id", String(formData.department));
-      form.append("mentor_id", String(formData.mentor_id));
+      form.append("department_id", formData.department);
+      form.append("mentor_id", formData.mentor_id);
       if (imageFile) form.append("picture", imageFile);
 
       const response = await axios.put(
@@ -210,6 +206,7 @@ const EditStudent = ({ id }: any) => {
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลโปรไฟล์");
     }
   };
+
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4 dark:bg-black-dark-light/5 dark:rounded-lg">
@@ -258,26 +255,21 @@ const EditStudent = ({ id }: any) => {
             </label>
           </div>
         </div>
-
         <div className="mt-2 w-full md:flex-1">
           <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-            {[{ label: "ชื่อจริง", field: "name" }, { label: "นามสกุล", field: "surname" }, { label: "อีเมล", field: "email", type: "email" }, { label: "เบอร์โทรศัพท์", field: "phone" }].map(
-              ({ label, field, type }) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium">{label}</label>
-                  <input
-                    type={type || "text"}
-                    value={(formData as any)[field]}
-                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                    className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
-                  />
-                </div>
-              )
-            )}
-
-            {/* ส่วนมหาวิทยาลัยกับวันที่ */}
-            <div className="w-full md:col-span-2 flex flex-col md:flex-row gap-4 md:gap-6 md:items-end">
-              <div className="w-full md:w-1/2">
+            {[{ label: "ชื่อจริง", field: "name" }, { label: "นามสกุล", field: "surname" }, { label: "อีเมล", field: "email", type: "email" }, { label: "เบอร์โทรศัพท์", field: "phone" }].map(({ label, field, type }) => (
+              <div key={field}>
+                <label className="block text-sm font-medium">{label}</label>
+                <input
+                  type={type || "text"}
+                  value={(formData as any)[field]}
+                  onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+                />
+              </div>
+            ))}
+            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row md:items-end">
+              <div className="w-full md:w-[50%]">
                 <label className="block text-sm font-medium">มหาวิทยาลัยที่ศึกษาอยู่</label>
                 <input
                   type="text"
@@ -286,7 +278,6 @@ const EditStudent = ({ id }: any) => {
                   className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
                 />
               </div>
-
               {["start_date", "end_date"].map((field, index) => (
                 <div className="w-full md:w-[25%]" key={field}>
                   <label className="block text-sm font-medium">
@@ -310,8 +301,6 @@ const EditStudent = ({ id }: any) => {
                 </div>
               ))}
             </div>
-
-            {/* กองที่สังกัด */}
             <div className="w-full">
               <label className="block text-sm font-medium">กองที่สังกัด</label>
               <Select
@@ -321,25 +310,15 @@ const EditStudent = ({ id }: any) => {
                 placeholder="เลือกกอง"
                 classNames={{
                   control: ({ isFocused }) =>
-                    `rounded border text-sm ${isFocused
-                      ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                      : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
-                    } text-gray-900 dark:text-gray-300`,
+                    `rounded border text-sm ${isFocused ? "border-[#9B006C] bg-white dark:bg-gray-900" : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"} text-gray-900 dark:text-gray-300`,
                   singleValue: () => "text-gray-900 dark:text-gray-300",
                   placeholder: () => "text-gray-400 dark:text-gray-500",
                   menu: () => "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
                   option: ({ isFocused, isSelected }) =>
-                    `cursor-pointer ${isSelected
-                      ? "bg-[#9B006C] text-white"
-                      : isFocused
-                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
-                        : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
-                    }`,
+                    `cursor-pointer ${isSelected ? "bg-[#9B006C] text-white" : isFocused ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300" : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"}`,
                 }}
               />
             </div>
-
-            {/* ชื่อพี่เลี้ยง */}
             <div className="w-full">
               <label className="block text-sm font-medium">ชื่อพี่เลี้ยง</label>
               <Select
@@ -349,25 +328,15 @@ const EditStudent = ({ id }: any) => {
                 placeholder="เลือกพี่เลี้ยง"
                 classNames={{
                   control: ({ isFocused }) =>
-                    `rounded border text-sm ${isFocused
-                      ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                      : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
-                    } text-gray-900 dark:text-gray-300`,
+                    `rounded border text-sm ${isFocused ? "border-[#9B006C] bg-white dark:bg-gray-900" : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"} text-gray-900 dark:text-gray-300`,
                   singleValue: () => "text-gray-900 dark:text-gray-300",
                   placeholder: () => "text-gray-400 dark:text-gray-500",
                   menu: () => "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
                   option: ({ isFocused, isSelected }) =>
-                    `cursor-pointer ${isSelected
-                      ? "bg-[#9B006C] text-white"
-                      : isFocused
-                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
-                        : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
-                    }`,
+                    `cursor-pointer ${isSelected ? "bg-[#9B006C] text-white" : isFocused ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300" : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"}`,
                 }}
               />
             </div>
-
-            {/* ปุ่มบันทึก */}
             <div className="mt-4 md:col-span-2">
               <button
                 type="submit"
