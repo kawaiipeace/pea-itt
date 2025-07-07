@@ -49,7 +49,7 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
         value={value ? `${day}/${month}/${buddhistYear}` : ""}
         readOnly
         placeholder="เลือกวันที่"
-        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:border-gray-500 dark:bg-gray-900 dark:text-gray-400"
+        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
       />
       <IconCalendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
     </div>
@@ -333,6 +333,7 @@ const EditStudent = ({ id }: { id: number }) => {
                     </label>
                     <DatePicker
                       selected={
+                        //@ts-ignore
                         formData[field] ? new Date(formData[field]) : null
                       }
                       onChange={(date: Date | null) =>
@@ -363,6 +364,7 @@ const EditStudent = ({ id }: { id: number }) => {
                   value={departmentOptions.find(
                     (opt) => opt.value === formData.department
                   )}
+                  //@ts-ignore
                   onChange={(option) =>
                     setFormData({
                       ...formData,
@@ -371,21 +373,21 @@ const EditStudent = ({ id }: { id: number }) => {
                   }
                   placeholder="เลือกกอง"
                   classNames={{
+                    //@ts-ignore
                     control: ({ isFocused }) =>
-                      `rounded border text-sm ${
-                        isFocused
-                          ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                          : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
+                      `rounded border text-sm ${isFocused
+                        ? "border-[#9B006C] bg-white dark:bg-gray-900"
+                        : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
                       } text-gray-900 dark:text-gray-300`,
                     singleValue: () => "text-gray-900 dark:text-gray-300",
                     placeholder: () => "text-gray-400 dark:text-gray-500",
                     menu: () =>
                       "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
+                    //@ts-ignore
                     option: ({ isFocused, isSelected }) =>
-                      `cursor-pointer ${
-                        isSelected
-                          ? "bg-[#9B006C] text-white"
-                          : isFocused
+                      `cursor-pointer ${isSelected
+                        ? "bg-[#9B006C] text-white"
+                        : isFocused
                           ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                           : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                       }`,
@@ -401,26 +403,27 @@ const EditStudent = ({ id }: { id: number }) => {
                   value={mentorOptions.find(
                     (opt) => opt.value === formData.mentor_id
                   )}
+                  //@ts-ignore
                   onChange={(option) =>
                     setFormData({ ...formData, mentor_id: option?.value || "" })
                   }
                   placeholder="เลือกพี่เลี้ยง"
                   classNames={{
+                    //@ts-ignore
                     control: ({ isFocused }) =>
-                      `rounded border text-sm ${
-                        isFocused
-                          ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                          : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
+                      `rounded border text-sm ${isFocused
+                        ? "border-[#9B006C] bg-white dark:bg-gray-900"
+                        : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
                       } text-gray-900 dark:text-gray-300`,
                     singleValue: () => "text-gray-900 dark:text-gray-300",
                     placeholder: () => "text-gray-400 dark:text-gray-500",
                     menu: () =>
                       "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
+                    //@ts-ignore
                     option: ({ isFocused, isSelected }) =>
-                      `cursor-pointer ${
-                        isSelected
-                          ? "bg-[#9B006C] text-white"
-                          : isFocused
+                      `cursor-pointer ${isSelected
+                        ? "bg-[#9B006C] text-white"
+                        : isFocused
                           ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                           : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                       }`,
