@@ -2,10 +2,14 @@ import React from "react";
 import EditStudent from "@/components/admin/edit-student";
 
 interface PageProps {
-  params: { id: number };
+  params: { info: number };
 }
 const page = ({ params }: PageProps) => {
-  return <EditStudent />;
+  console.log("Page params:", params.info);
+  
+  return (
+    <EditStudent id={params.info} />
+  );
 };
 
 export default page;

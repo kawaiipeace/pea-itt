@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
@@ -10,6 +10,24 @@ import IconCalendar from "../icon/icon-calendar";
 import useAuthStore from "../../store/authStore";
 import axios from "axios";
 import Swal from "sweetalert2";
+
+interface stuPro {
+  id: number;
+  end_date: string;
+  start_date: string;
+  university: string;
+  mentor_id: number;
+}
+
+interface studentProfile {
+  id: number;
+  fname: string;
+  lname: string;
+  email: string;
+  phone_number: string;
+  department_id: number;
+  student_profile: stuPro | null,
+}
 
 registerLocale("th", th);
 
@@ -32,22 +50,58 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
 });
 CustomDateInput.displayName = "CustomDateInput";
 
-const EditStudent = () => {
+const EditStudent = ({ id }: any) => {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.actionSetUser);
   const refreshUser = useAuthStore((state) => state.refreshUser);
+  const [stuInfo, setStuInfo] = useState<studentProfile>();
+
+  useEffect(() => {
+    const fetchStudentInfo = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users/${id}`, {
+          withCredentials: true,
+        });
+        // console.log("Student Info:", response.data.data.fname);   
+        setStuInfo(response.data.data);
+
+      } catch (error) {
+        console.error("Error fetching student info:", error);
+      }
+    };
+    fetchStudentInfo();
+  }, [id]);
 
   const [formData, setFormData] = useState({
-    name: user?.fname || "",
-    surname: user?.lname || "",
-    email: user?.email || "",
-    university: user?.student_profile?.university || "",
-    phone: user?.phone_number || "",
-    start_date: user?.student_profile?.start_date || "",
-    end_date: user?.student_profile?.end_date || "",
-    mentor_id: user?.student_profile?.mentor_id || "",
-    department: user?.department_id || "",
+    name: stuInfo?.fname || "",
+    surname: stuInfo?.lname || "",
+    email: stuInfo?.email || "",
+    university: stuInfo?.student_profile?.university || "",
+    phone: stuInfo?.phone_number || "",
+    start_date: stuInfo?.student_profile?.start_date || "",
+    end_date: stuInfo?.student_profile?.end_date || "",
+    mentor_id: stuInfo?.student_profile?.mentor_id || "",
+    department: stuInfo?.department_id || "",
   });
+
+  useEffect(() => {
+    if (stuInfo) {
+      setFormData({
+        name: stuInfo.fname || "",
+        surname: stuInfo.lname || "",
+        email: stuInfo.email || "",
+        university: stuInfo.student_profile?.university || "",
+        phone: stuInfo.phone_number || "",
+        start_date: stuInfo.student_profile?.start_date || "",
+        end_date: stuInfo.student_profile?.end_date || "",
+        mentor_id: stuInfo.student_profile?.mentor_id || "",
+        department: stuInfo.department_id || "",
+      });
+    }
+  }, [stuInfo]);
+
+
+
 
   const [imageSrc, setImageSrc] = useState<string>(
     `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`
@@ -236,19 +290,17 @@ const EditStudent = () => {
                 placeholder="เลือกกอง"
                 classNames={{
                   control: ({ isFocused }) =>
-                    `rounded border text-sm ${
-                      isFocused
-                        ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                        : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
+                    `rounded border text-sm ${isFocused
+                      ? "border-[#9B006C] bg-white dark:bg-gray-900"
+                      : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
                     } text-gray-900 dark:text-gray-300`,
                   singleValue: () => "text-gray-900 dark:text-gray-300",
                   placeholder: () => "text-gray-400 dark:text-gray-500",
                   menu: () => "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
                   option: ({ isFocused, isSelected }) =>
-                    `cursor-pointer ${
-                      isSelected
-                        ? "bg-[#9B006C] text-white"
-                        : isFocused
+                    `cursor-pointer ${isSelected
+                      ? "bg-[#9B006C] text-white"
+                      : isFocused
                         ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                         : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                     }`,
@@ -265,19 +317,17 @@ const EditStudent = () => {
                 placeholder="เลือกพี่เลี้ยง"
                 classNames={{
                   control: ({ isFocused }) =>
-                    `rounded border text-sm ${
-                      isFocused
-                        ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                        : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
+                    `rounded border text-sm ${isFocused
+                      ? "border-[#9B006C] bg-white dark:bg-gray-900"
+                      : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
                     } text-gray-900 dark:text-gray-300`,
                   singleValue: () => "text-gray-900 dark:text-gray-300",
                   placeholder: () => "text-gray-400 dark:text-gray-500",
                   menu: () => "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
                   option: ({ isFocused, isSelected }) =>
-                    `cursor-pointer ${
-                      isSelected
-                        ? "bg-[#9B006C] text-white"
-                        : isFocused
+                    `cursor-pointer ${isSelected
+                      ? "bg-[#9B006C] text-white"
+                      : isFocused
                         ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                         : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                     }`,
