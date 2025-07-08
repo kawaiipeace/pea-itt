@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
-import IconUser from "@/components/icon/icon-user";
-import IconUserPlus from "@/components/icon/icon-user-plus";
+import IconUser from "../../components/icon/icon-user";
+import IconUserPlus from "../../components/icon/icon-user-plus";
 import Swal from "sweetalert2";
 
 interface department {
