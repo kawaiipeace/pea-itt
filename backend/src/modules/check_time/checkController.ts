@@ -27,6 +27,24 @@ export const checkTime = async (req: Request, res: Response) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
+    const leaveToday = await prisma.leave_request.findFirst({
+      where: {
+        user_id: user.id,
+        leave_datetime: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+        status: "approved",
+      },
+    });
+
+    if (leaveToday) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "คุณได้ลาวันนี้แล้ว ไม่สามารถเช็กเวลาได้",
+      });
+      return;
+    }
+
     const existingSameTypeCheck = await prisma.check_time.findFirst({
       where: {
         user_id: user.id,

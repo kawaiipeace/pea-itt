@@ -70,7 +70,6 @@ export const createLeaveRequest = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getLeaveRequests = async (req: Request, res: Response) => {
   try {
     const { user_id, mentor_id, status, sort = "leave_datetime", order = "desc" } = req.query;
