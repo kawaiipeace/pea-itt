@@ -31,12 +31,24 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
 });
 CustomDateInput.displayName = "CustomDateInput";
 
+type FormField = "name" | "surname" | "email" | "university" | "phone" | "start_date" | "end_date" | "mentor_id" | "department";
+
 const UserProfile = () => {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.actionSetUser);
   const refreshUser = useAuthStore((state) => state.refreshUser);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    surname: string;
+    email: string;
+    university: string;
+    phone: string;
+    start_date: string;
+    end_date: string;
+    mentor_id: string | number;
+    department: string | number;
+  }>({
     name: user?.fname || "",
     surname: user?.lname || "",
     email: user?.email || "",
@@ -233,44 +245,32 @@ const UserProfile = () => {
             ))}
 
             <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row md:items-end">
-              <div className="w-full md:w-[50%]">
-                <label className="block text-sm font-medium">
-                  มหาวิทยาลัยที่ศึกษาอยู่
-                </label>
-                <input
-                  type="text"
-                  value={formData.university}
-                  onChange={(e) =>
-                    setFormData({ ...formData, university: e.target.value })
-                  }
-                  className="w-full rounded border p-2 dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
-                />
+              <div className="w-full md:w-[50%] flex gap-4">
+                {(["start_date", "end_date"] as const).map((field, index) => (
+                  <div className="w-full" key={field}>
+                    <label className="block text-sm font-medium">
+                      {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
+                    </label>
+                    <DatePicker
+                      selected={formData[field] ? new Date(formData[field]) : null}
+                      onChange={(date: Date | null) =>
+                        setFormData({
+                          ...formData,
+                          [field]: date ? format(date, "yyyy-MM-dd") : "",
+                        })
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      locale="th"
+                      minDate={
+                        field === "end_date" && formData.start_date
+                          ? new Date(formData.start_date)
+                          : undefined
+                      }
+                      customInput={<CustomDateInput />}
+                    />
+                  </div>
+                ))}
               </div>
-
-              {["start_date", "end_date"].map((field, index) => (
-                <div className="w-full md:w-[25%]" key={field}>
-                  <label className="block text-sm font-medium">
-                    {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
-                  </label>
-                  <DatePicker
-                    selected={formData[field] ? new Date(formData[field]) : null}
-                    onChange={(date: Date | null) =>
-                      setFormData({
-                        ...formData,
-                        [field]: date ? format(date, "yyyy-MM-dd") : "",
-                      })
-                    }
-                    dateFormat="dd/MM/yyyy"
-                    locale="th"
-                    minDate={
-                      field === "end_date" && formData.start_date
-                        ? new Date(formData.start_date)
-                        : undefined
-                    }
-                    customInput={<CustomDateInput />}
-                  />
-                </div>
-              ))}
             </div>
 
             {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
