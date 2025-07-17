@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const profile = () => {
   return (
     <>
-      <Editstudent />
+      <Editstudent id={0} />
     </>
   );
 };
