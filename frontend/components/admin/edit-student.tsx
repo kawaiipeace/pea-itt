@@ -196,21 +196,17 @@ const EditStudent = ({ id }: { id: number }) => {
     }
 
     try {
-      const form = new FormData();
-      form.append("fname", formData.name);
-      form.append("lname", formData.surname);
-      form.append("email", formData.email);
-      form.append("phone_number", formData.phone);
-      form.append("university", formData.university);
-      form.append("start_date", formData.start_date);
-      form.append("end_date", formData.end_date);
-      form.append("department_id", formData.department);
-      form.append("mentor_id", formData.mentor_id);
-      if (imageFile) form.append("picture", imageFile);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users/${formData.mentor_id}`, { withCredentials: true })
+      const mentID = res.data.data.mentor_profile.id
+  
 
-      const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}users/${id}`, // ✅ ใช้ id จาก props
-        form,
+
+       axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}users/admin/${id}`, // ✅ ใช้ id จาก props
+        {
+          "department_id": formData.department,
+          "mentor_id": mentID
+        },
         { withCredentials: true }
       );
 
