@@ -9,6 +9,7 @@ import { BiExport } from "react-icons/bi";
 import IconArrowBackward from "../components/icon/icon-arrow-backward";
 import IconLogout from "../components/icon/icon-logout";
 import useAuthStore from "../store/authStore";
+import { Trash2 } from "lucide-react";
 
 interface CheckRow {
   id: number;
@@ -95,17 +96,15 @@ const HistoryForm: React.FC = () => {
       try {
         const [checkRes, leaveRes] = await Promise.all([
           axios
-            .get(
-              `${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`,
-              { withCredentials: true }
-            )
+            .get(`${process.env.NEXT_PUBLIC_API_URL}check-time?user_id=${user.id}`, {
+              withCredentials: true,
+            })
             .then((res) => (Array.isArray(res.data?.data) ? res.data.data : []))
             .catch(() => []),
           axios
-            .get(
-              `${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${user.id}`,
-              { withCredentials: true }
-            )
+            .get(`${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${user.id}`, {
+              withCredentials: true,
+            })
             .then((res) =>
               Array.isArray(res.data?.data)
                 ? res.data.data
@@ -196,12 +195,16 @@ const HistoryForm: React.FC = () => {
     const lastName = user?.lname || "นามสกุล";
     const fullName = `${firstName}_${lastName}`.replace(/\s+/g, "");
 
-    const fileName =
-      fileType === "csv"
-        ? `${fullName}.csv`
-        : `${fullName}.xlsx`;
+    const fileName = fileType === "csv" ? `${fullName}.csv` : `${fullName}.xlsx`;
 
     XLSX.writeFile(workbook, fileName, { bookType: fileType });
+  };
+
+  const handleDelete = (row: ViewRow) => {
+    const confirmDelete = window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบวันที่ ${row.dateTH}?`);
+    if (confirmDelete) {
+      setLeaves((prev) => prev.filter((l) => !l.leave_datetime?.startsWith(row.dateKey)));
+    }
   };
 
   return (
@@ -214,7 +217,7 @@ const HistoryForm: React.FC = () => {
       </button>
 
       <div className="overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690]">
-        <div className="grid min-w-[820px] grid-cols-6 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:border-[#506690] dark:bg-black-dark-light/90 dark:text-[#506690]">
+        <div className="grid min-w-[920px] grid-cols-7 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:border-[#506690] dark:bg-black-dark-light/90 dark:text-[#506690]">
           {["วันที่", "เวลาเข้างาน", "เวลาออกงาน", "สถานะ", "หมายเหตุ", "อนุมัติการลา"].map(
             (h) => (
               <div key={h} className="p-3">
@@ -225,9 +228,7 @@ const HistoryForm: React.FC = () => {
         </div>
 
         <div className="divide-y text-center text-sm">
-          {loading && (
-            <p className="p-6 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</p>
-          )}
+          {loading && <p className="p-6 text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูล...</p>}
           {error && <p className="p-6 text-red-500 dark:text-red-400">{error}</p>}
           {!loading && !error && viewRows.length === 0 && (
             <p className="p-6 text-gray-500 dark:text-gray-400">ไม่มีข้อมูล</p>
@@ -235,13 +236,20 @@ const HistoryForm: React.FC = () => {
           {!loading &&
             !error &&
             slice.map((r) => (
-              <div key={r.dateKey} className="grid min-w-[820px] grid-cols-6">
+              <div key={r.dateKey} className="grid min-w-[920px] grid-cols-7">
                 <div className="p-3">{r.dateTH}</div>
                 <div className="p-3">{r.inTime}</div>
                 <div className="p-3">{r.outTime}</div>
                 <div className="p-3">{r.status}</div>
                 <div className="p-3">{r.note}</div>
                 <div className="p-3">{r.status === "ลา" ? <Badge value={r.approval} /> : "-"}</div>
+                <div className="p-3">
+                  {r.status === "ลา" && (
+                    <button onClick={() => handleDelete(r)}>
+                      <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
         </div>
@@ -250,7 +258,6 @@ const HistoryForm: React.FC = () => {
       {!loading && !error && viewRows.length > 0 && (
         <>
           <div className="mt-4 flex items-center justify-between">
-            {/* Export Icon with Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setShowExportMenu((prev) => !prev)}
