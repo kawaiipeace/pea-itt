@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
+import IconLogout from "../../../../../../components/icon/icon-logout"; // ไอคอนส่งออก
 import axios from "axios";
 import IconUsers from "@/components/icon/icon-users";
 import wattdee from "../../../../../../public/assets/images/watdee.jpeg";
 import Image from "next/image";
+import * as XLSX from "xlsx";
 
 interface PageProps {
   params: { info: string };
@@ -56,11 +58,11 @@ const InfoPage = ({ params }: PageProps) => {
 
   const [personalInfo, setPersonalInfo] = useState<detailStu>();
   const [viewRows, setViewRows] = useState<ViewRow[]>([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // โหลดข้อมูลนักศึกษา
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}users/${params.info}`,
           { withCredentials: true }
@@ -69,7 +71,6 @@ const InfoPage = ({ params }: PageProps) => {
 
         let picture_url: string | null = null;
 
-        // โหลดรูปภาพ (ถ้ามี)
         try {
           const imageRes = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}users/${student.student_profile.id}/picture`,
@@ -88,7 +89,6 @@ const InfoPage = ({ params }: PageProps) => {
 
         setPersonalInfo({ ...student, picture_url });
 
-        // โหลด check-in/out และ ใบลา แบบ Promise.all (แต่ดัก error แยกกัน)
         let checkRes: any[] = [];
         let leaveRes: any[] = [];
 
@@ -112,10 +112,8 @@ const InfoPage = ({ params }: PageProps) => {
           console.warn("ไม่มีข้อมูลใบลา");
         }
 
-        // รวมข้อมูลเข้างาน + ลา
         const map = new Map<string, ViewRow>();
 
-        // ข้อมูลเข้างาน
         checkRes.forEach((r: any) => {
           const key = r.time.split("T")[0];
           if (!map.has(key)) {
@@ -138,7 +136,6 @@ const InfoPage = ({ params }: PageProps) => {
           if (r.type_check === "out") row.outTime = time;
         });
 
-        // ข้อมูลใบลา
         leaveRes.forEach((lv: any) => {
           const dateTime = lv.leave_datetime ?? new Date().toISOString();
           const key = dateTime.split("T")[0];
@@ -164,7 +161,43 @@ const InfoPage = ({ params }: PageProps) => {
     };
 
     fetchData();
-  }, []);
+  }, [params.info]);
+
+  const handleExport = (format: "xlsx" | "csv") => {
+    if (!personalInfo) return;
+
+    // เตรียมข้อมูลส่งออกโดยเพิ่มชื่อ-นามสกุล
+    const exportData = viewRows.map((row) => ({
+      ชื่อ: personalInfo.fname,
+      นามสกุล: personalInfo.lname,
+      วันที่: row.dateTH,
+      "เวลาเข้างาน": row.inTime,
+      "เวลาออกงาน": row.outTime,
+      สถานะ: row.status,
+      หมายเหตุ: row.note,
+      "อนุมัติการลา": row.approval || "-",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, personalInfo.fname);
+
+    // สร้างชื่อไฟล์จากชื่อ-นามสกุล โดยแทนช่องว่างด้วย _
+    const fileNameBase = `${personalInfo.fname}_${personalInfo.lname}`.replace(/\s+/g, "_");
+
+    if (format === "xlsx") {
+      XLSX.writeFile(workbook, `${fileNameBase}.xlsx`);
+    } else if (format === "csv") {
+      const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+      const blob = new Blob([csvOutput], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `${fileNameBase}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const pages = Math.ceil(viewRows.length / ITEMS);
   const slice = viewRows.slice((page - 1) * ITEMS, page * ITEMS);
@@ -204,7 +237,7 @@ const InfoPage = ({ params }: PageProps) => {
 
       {/* ข้อมูลส่วนตัว */}
       <div className="flex items-center justify-center px-4">
-        <div className="grid w-full max-w-4xl grid-cols-1 items-center  gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
+        <div className="grid w-full max-w-4xl grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow dark:border-[#506690] dark:bg-black-dark-light/55 dark:text-[#506690] md:h-[250px] md:grid-cols-3">
           <div className="flex justify-center">
             <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-full bg-gray-100">
               {personalInfo?.picture_url ? (
@@ -286,48 +319,85 @@ const InfoPage = ({ params }: PageProps) => {
         </div>
       </div>
 
-      {/* Pagination */}
-      <div className="mt-4 flex items-center justify-end gap-2">
-        <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
-          className={clsx(
-            "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-            page === 1
-              ? "cursor-not-allowed text-gray-300"
-              : "text-gray-700 hover:bg-gray-200"
-          )}
-        >
-          &lt;
-        </button>
-
-        {Array.from({ length: pages }).map((_, i) => (
+      {/* Export Dropdown Button และ Pagination ในแถวเดียวกัน */}
+      <div className="mt-4 flex items-center justify-between">
+        {/* Export Icon with Dropdown */}
+        <div className="relative">
           <button
-            key={i + 1}
-            onClick={() => setPage(i + 1)}
+            onClick={() => setShowExportMenu((prev) => !prev)}
+            className="mb-4 flex w-max items-center gap-2 text-sm text-gray-600 hover:text-[#ECB9DB] dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
+            title="ส่งออกไฟล์"
+          >
+            <IconLogout className="h-10 w-5 font-extrabold text-[#B10073] hover:text-[#ECB9DB]" />
+            ส่งออกตาราง
+          </button>
+          {showExportMenu && (
+            <div className="absolute z-10 mt-2 w-32 rounded border bg-white p-2 text-sm shadow-lg dark:border-gray-700 dark:bg-black-dark-light/80">
+              <button
+                onClick={() => {
+                  handleExport("xlsx");
+                  setShowExportMenu(false);
+                }}
+                className="block w-full rounded px-2 py-1 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Excel (.xlsx)
+              </button>
+              <button
+                onClick={() => {
+                  handleExport("csv");
+                  setShowExportMenu(false);
+                }}
+                className="block w-full rounded px-2 py-1 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                CSV (.csv)
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
             className={clsx(
               "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-              page === i + 1
-                ? "bg-[#B10073] text-white"
+              page === 1
+                ? "cursor-not-allowed text-gray-300"
                 : "text-gray-700 hover:bg-gray-200"
             )}
           >
-            {i + 1}
+            &lt;
           </button>
-        ))}
 
-        <button
-          onClick={() => setPage((p) => Math.min(pages, p + 1))}
-          disabled={page === pages}
-          className={clsx(
-            "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
-            page === pages
-              ? "cursor-not-allowed text-gray-300"
-              : "text-gray-700 hover:bg-gray-200"
-          )}
-        >
-          &gt;
-        </button>
+          {Array.from({ length: pages }).map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setPage(i + 1)}
+              className={clsx(
+                "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
+                page === i + 1
+                  ? "bg-[#B10073] text-white"
+                  : "text-gray-700 hover:bg-gray-200"
+              )}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            disabled={page === pages}
+            className={clsx(
+              "flex h-8 w-8 items-center justify-center rounded-full border text-sm",
+              page === pages
+                ? "cursor-not-allowed text-gray-300"
+                : "text-gray-700 hover:bg-gray-200"
+            )}
+          >
+            &gt;
+          </button>
+        </div>
       </div>
     </section>
   );
