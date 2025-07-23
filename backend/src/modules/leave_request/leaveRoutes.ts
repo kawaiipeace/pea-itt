@@ -204,6 +204,30 @@ router.put(
   leaveController.updateLeaveRequest
 );
 
+/**
+ * @swagger
+ * /leave-request/{id}:
+ *   delete:
+ *     summary: Delete a leave request
+ *     tags: [Leave Request]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Leave request deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Leave request not found
+ */
 router.delete(
    "/leave-request/:id",
    authenticateJWT,
