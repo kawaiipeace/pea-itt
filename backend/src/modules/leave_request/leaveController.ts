@@ -8,36 +8,37 @@ import { startOfDay, endOfDay } from "date-fns";
 
 export const createLeaveRequest = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error: "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return
+    }
+
     const validatedData = leaveModels.leaveRequestSchema.parse({
       ...req.body,
       file: req.file ? req.file.buffer : undefined,
     });
 
-    if (!req.user) {
-      res.status(httpStatus.BAD_REQUEST).json({
-        error: "Oops! We couldn't find your user info. Please log in again to continue.",
-      });
-    }
-
-    const now = new Date();
-    const todayStart = startOfDay(now);
-    const todayEnd = endOfDay(now);
+    const leaveDate = new Date(validatedData.leave_datetime);
+    const leaveStart = startOfDay(leaveDate);
+    const leaveEnd = endOfDay(leaveDate);
 
     const existingRequest = await prisma.leave_request.findFirst({
       where: {
         user_id: req.user.id,
         leave_datetime: {
-          gte: todayStart,
-          lte: todayEnd,
+          gte: leaveStart,
+          lte: leaveEnd,
         },
       },
     });
 
     if (existingRequest) {
       res.status(httpStatus.CONFLICT).json({
-        message: "You have already submitted a leave request today.",
+        message: `You have already submitted a leave request for ${leaveDate.toDateString()}.`,
       });
-      return;
+      return
     }
 
     const leaveRequest = await prisma.leave_request.create({
