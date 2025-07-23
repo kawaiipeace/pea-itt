@@ -74,7 +74,7 @@ const ComponentsAuthLoginForm = () => {
 
       // ใช้ myinfo แทน user เพราะ actionSetUser อาจยังไม่อัปเดต user state
       if (myinfo.role_id === 3) {
-        router.push("/admin/student");
+        router.push("/admin/dashbord");
       } else if (myinfo.role_id === 2) {
         router.push("/mentor/mentor-student");
       } else {

@@ -124,6 +124,26 @@ const Sidebar = () => {
                 <span>{t("Administrator")}</span>
               </h2>
 
+
+              
+              <li className="menu nav-item">
+                <Link
+                      href="/admin/dashbord"
+                      className={`nav-link group w-full ${
+                        pathname.startsWith("/admin/dashbord")
+                          ? "active"
+                          : ""
+                      }`}
+                    >
+                  <div className="flex items-center">
+                    <IconMenuCharts className="shrink-0 group-hover:!text-primary" />
+                    <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                      {t("แดชบอร์ดนักศึกษา")}
+                    </span>
+                  </div>
+                </Link>
+              </li>
+
               <li className="menu nav-item">
                 <Link
                       href="/admin/student"
