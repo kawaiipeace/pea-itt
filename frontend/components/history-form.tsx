@@ -10,6 +10,7 @@ import IconArrowBackward from "../components/icon/icon-arrow-backward";
 import IconLogout from "../components/icon/icon-logout";
 import useAuthStore from "../store/authStore";
 import { Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface CheckRow {
   id: number;
@@ -28,6 +29,7 @@ interface LeaveRow {
 }
 
 interface ViewRow {
+  id:number
   dateKey: string;
   dateTH: string;
   inTime: string | "-";
@@ -109,8 +111,8 @@ const HistoryForm: React.FC = () => {
               Array.isArray(res.data?.data)
                 ? res.data.data
                 : res.data?.data
-                ? [res.data.data]
-                : []
+                  ? [res.data.data]
+                  : []
             )
             .catch(() => []),
         ]);
@@ -126,7 +128,7 @@ const HistoryForm: React.FC = () => {
     };
 
     fetchData();
-  }, [user]);
+  }, [user,leaves]);
 
   const viewRows: ViewRow[] = useMemo(() => {
     const map = new Map<string, ViewRow>();
@@ -135,6 +137,7 @@ const HistoryForm: React.FC = () => {
       const key = r.time.split("T")[0];
       if (!map.has(key)) {
         map.set(key, {
+          id: r.id,
           dateKey: key,
           dateTH: fmtDate(r.time),
           inTime: "-",
@@ -152,6 +155,7 @@ const HistoryForm: React.FC = () => {
       const dateTime = lv.leave_datetime ?? new Date().toISOString();
       const key = dateTime.split("T")[0];
       map.set(key, {
+        id: lv.id,
         dateKey: key,
         dateTH: fmtDate(dateTime),
         inTime: "-",
@@ -182,8 +186,8 @@ const HistoryForm: React.FC = () => {
           ? row.approval === "approved"
             ? "อนุมัติ"
             : row.approval === "rejected"
-            ? "ไม่อนุมัติ"
-            : "รออนุมัติ"
+              ? "ไม่อนุมัติ"
+              : "รออนุมัติ"
           : "-",
     }));
 
@@ -200,12 +204,31 @@ const HistoryForm: React.FC = () => {
     XLSX.writeFile(workbook, fileName, { bookType: fileType });
   };
 
-  const handleDelete = (row: ViewRow) => {
-    const confirmDelete = window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบวันที่ ${row.dateTH}?`);
-    if (confirmDelete) {
-      setLeaves((prev) => prev.filter((l) => !l.leave_datetime?.startsWith(row.dateKey)));
+  const handleDelete = (id: any) => {
+    try {
+      Swal.fire({
+        title: "ลบการลาเรียบร้อย",
+        icon: "success",
+        confirmButtonText: "ตกลง",
+        width: "400px",
+        customClass: {
+          confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+        },
+      }).then(async () => {
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`, {
+          withCredentials: true
+        })        
+      });
+
+    } catch (error) {
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: `${error}`,
+        icon: "error",
+      });
     }
-  };
+
+  }
 
   return (
     <section className="flex h-full flex-col px-6 py-4">
@@ -245,7 +268,7 @@ const HistoryForm: React.FC = () => {
                 <div className="p-3">{r.status === "ลา" ? <Badge value={r.approval} /> : "-"}</div>
                 <div className="p-3">
                   {r.status === "ลา" && (
-                    <button onClick={() => handleDelete(r)}>
+                    <button onClick={() => handleDelete(r.id)}>
                       <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
                     </button>
                   )}
