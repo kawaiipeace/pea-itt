@@ -258,3 +258,37 @@ export const leaveRequestPicture = async (req: Request, res: Response) => {
       .json({ error: "Server error" });
   }
 };
+
+export const deleteLeaveRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!req.user) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          "Oops! We couldn't find your user info. Please log in again to continue.",
+      });
+      return;
+    }
+
+    await prisma.leave_request.delete({
+      where: { id: Number(id) }
+    })
+
+    res.status(httpStatus.OK).json({
+      message: "Leave request deleted successfully"
+    });
+
+
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};

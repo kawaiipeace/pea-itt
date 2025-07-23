@@ -204,4 +204,11 @@ router.put(
   leaveController.updateLeaveRequest
 );
 
+router.delete(
+   "/leave-request/:id",
+   authenticateJWT,
+   authorizeRoles(ROLE_IDS.STUDENT),
+   leaveController.deleteLeaveRequest
+)
+
 export default router;
