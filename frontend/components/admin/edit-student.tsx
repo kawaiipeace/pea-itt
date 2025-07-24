@@ -320,8 +320,9 @@ const EditStudent = ({ id }: { id: number }) => {
                     className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900  dark:text-[#506690]"
                   />
                 </div>
+                
                 {["start_date", "end_date"].map((field, index) => (
-                  <div className="w-full md:w-[25%]" key={field}>
+                  <div className="w-full md:flex-1" key={field}>
                     <label className="block text-sm font-medium dark:text-[#506690]">
                       {index === 0
                         ? "วันที่เริ่มฝึกงาน"

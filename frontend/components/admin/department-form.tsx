@@ -7,6 +7,7 @@ import Select from "react-select";
 import IconUser from "../../components/icon/icon-user";
 import IconUserPlus from "../../components/icon/icon-user-plus";
 import Swal from "sweetalert2";
+import { Trash2 } from "lucide-react";
 
 interface department {
   dept_id: number;
@@ -82,6 +83,8 @@ export default function DepartmentForm() {
       text: `ต้องการลบ ${d.dept_name} หรือไม่?`,
       icon: "warning",
       showCancelButton: true,
+      confirmButtonColor: "#74045F",
+      cancelButtonColor: "#d33",
       confirmButtonText: "ตกลง",
       cancelButtonText: "ยกเลิก",
     });
@@ -99,6 +102,7 @@ export default function DepartmentForm() {
         title: "ลบสำเร็จ",
         text: `ลบ ${d.dept_name} สำเร็จแล้ว`,
         icon: "success",
+        confirmButtonColor: "#74045F",
         confirmButtonText: "ตกลง",
       });
     } catch (error) {
@@ -137,7 +141,7 @@ export default function DepartmentForm() {
         </div>
       </div>
 
-      {/* list container */}
+      {/* รายการกอง */}
       <div className="-mt-4 flex h-[350px] w-full max-w-[900px] flex-col justify-start rounded-lg bg-[#eae9eb] p-4 shadow dark:border dark:border-gray-500 dark:bg-gray-900 sm:mx-auto sm:p-6">
         {departments.length > 0 ? (
           <div className="flex-1 overflow-y-auto">
@@ -160,14 +164,13 @@ export default function DepartmentForm() {
                       {dept.dept_name}
                     </p>
                   </div>
-                  <div className="ml-auto flex gap-2">
-                    <button
-                      onClick={(e) => handleDeptDelete(dept, e)}
-                      className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700"
-                    >
-                      ลบ
-                    </button>
-                  </div>
+                  <button
+                    onClick={(e) => handleDeptDelete(dept, e)}
+                    className="ml-auto rounded p-2 transition-colors"
+                    aria-label="ลบ"
+                  >
+                    <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
+                  </button>
                 </div>
               ))}
             </div>

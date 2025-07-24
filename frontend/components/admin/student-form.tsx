@@ -159,8 +159,8 @@ const StudentForm = () => {
       text: `ต้องการลบนักศึกษา ${student.fname} ${student.lname} ใช่ไหม?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#74045F",
+      cancelButtonColor: "#d33",
       confirmButtonText: "ตกลง",
       cancelButtonText: "ยกเลิก",
     }).then((result) => {
