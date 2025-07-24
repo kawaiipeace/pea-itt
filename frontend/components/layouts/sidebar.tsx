@@ -31,6 +31,7 @@ import IconMenuUsers from "@/components/icon/menu/icon-menu-users";
 import IconMenuPages from "@/components/icon/menu/icon-menu-pages";
 import IconMenuAuthentication from "@/components/icon/menu/icon-menu-authentication";
 import IconMenuDocumentation from "@/components/icon/menu/icon-menu-documentation";
+import IconUser from "@/components/icon/icon-user";
 import { usePathname } from "next/navigation";
 import { getTranslation } from "@/i18n";
 
@@ -154,7 +155,7 @@ const Sidebar = () => {
                       }`}
                     >
                   <div className="flex items-center">
-                    <IconMenuTables className="shrink-0 group-hover:!text-primary" />
+                    <IconUser className="shrink-0 group-hover:!text-primary" />
                     <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("จัดการข้อมูลนักศึกษา")}
                     </span>
@@ -172,7 +173,7 @@ const Sidebar = () => {
                       }`}
                     >
                   <div className="flex items-center">
-                    <IconMenuTables className="shrink-0 group-hover:!text-primary" />
+                    <IconMenuUsers className="shrink-0 group-hover:!text-primary" />
                     <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("จัดการข้อมูลพี่เลี้ยง")}
                     </span>
@@ -190,7 +191,7 @@ const Sidebar = () => {
                       }`}
                     >
                   <div className="flex items-center">
-                    <IconMenuTables className="shrink-0 group-hover:!text-primary" />
+                    <IconMenuWidgets className="shrink-0 group-hover:!text-primary" />
                     <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("จัดการข้อมูลกอง")}
                     </span>

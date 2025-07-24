@@ -29,7 +29,7 @@ interface LeaveRow {
 }
 
 interface ViewRow {
-  id:number
+  id: number;
   dateKey: string;
   dateTH: string;
   inTime: string | "-";
@@ -111,8 +111,8 @@ const HistoryForm: React.FC = () => {
               Array.isArray(res.data?.data)
                 ? res.data.data
                 : res.data?.data
-                  ? [res.data.data]
-                  : []
+                ? [res.data.data]
+                : []
             )
             .catch(() => []),
         ]);
@@ -128,7 +128,7 @@ const HistoryForm: React.FC = () => {
     };
 
     fetchData();
-  }, [user,leaves]);
+  }, [user]);
 
   const viewRows: ViewRow[] = useMemo(() => {
     const map = new Map<string, ViewRow>();
@@ -186,8 +186,8 @@ const HistoryForm: React.FC = () => {
           ? row.approval === "approved"
             ? "อนุมัติ"
             : row.approval === "rejected"
-              ? "ไม่อนุมัติ"
-              : "รออนุมัติ"
+            ? "ไม่อนุมัติ"
+            : "รออนุมัติ"
           : "-",
     }));
 
@@ -204,22 +204,39 @@ const HistoryForm: React.FC = () => {
     XLSX.writeFile(workbook, fileName, { bookType: fileType });
   };
 
-  const handleDelete = (id: any) => {
+  const handleDelete = async (id: number) => {
+    const confirm = await Swal.fire({
+      title: "คุณต้องการลบการลานี้หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+      width: "400px",
+      customClass: {
+        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3 !w-[120px] ",
+        cancelButton: "swal2-cancel !bg-red-500 !text-white !px-6 !py-3 !w-[120px]",
+      },
+    });
+
+    if (!confirm.isConfirmed) return;
+
     try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`, {
+        withCredentials: true,
+      });
+
+      // อัปเดตข้อมูล leaves ทันที
+      setLeaves((prev) => prev.filter((lv) => lv.id !== id));
+
       Swal.fire({
-        title: "ลบการลาเรียบร้อย",
+        title: "ลบสำเร็จ",
         icon: "success",
         confirmButtonText: "ตกลง",
         width: "400px",
         customClass: {
           confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
         },
-      }).then(async () => {
-        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`, {
-          withCredentials: true
-        })        
       });
-
     } catch (error) {
       Swal.fire({
         title: "เกิดข้อผิดพลาด",
@@ -227,8 +244,7 @@ const HistoryForm: React.FC = () => {
         icon: "error",
       });
     }
-
-  }
+  };
 
   return (
     <section className="flex h-full flex-col px-6 py-4">
@@ -267,7 +283,7 @@ const HistoryForm: React.FC = () => {
                 <div className="p-3">{r.note}</div>
                 <div className="p-3">{r.status === "ลา" ? <Badge value={r.approval} /> : "-"}</div>
                 <div className="p-3">
-                  {r.status === "ลา" && (
+                  {r.status === "ลา" && r.approval === "pending" && (
                     <button onClick={() => handleDelete(r.id)}>
                       <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
                     </button>
