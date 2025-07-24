@@ -95,10 +95,8 @@ export const checkTime = async (req: Request, res: Response) => {
       ip: ip,
       note:
         validatedData.type_check === "in"
-          ? `${user.fname} ${user.lname
-          } checked in at ${new Date().toLocaleString()} from IP: ${ip}`
-          : `${user.fname} ${user.lname
-          } checked out at ${new Date().toLocaleString()} from IP: ${ip}`,
+          ? `${user.fname} ${user.lname} checked in at ${new Date().toLocaleString()} from IP: ${ip}`
+          : `${user.fname} ${user.lname} checked out at ${new Date().toLocaleString()} from IP: ${ip}`,
       latitude: validatedData.latitude,
       longitude: validatedData.longitude,
     };
@@ -106,6 +104,37 @@ export const checkTime = async (req: Request, res: Response) => {
     const checkTime = await prisma.check_time.create({
       data: checkTimeData,
     });
+
+    if (validatedData.type_check === "out") {
+      const checkInToday = await prisma.check_time.findFirst({
+        where: {
+          user_id: user.id,
+          type_check: "in",
+          time: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+        orderBy: {
+          time: "asc",
+        },
+      });
+
+
+      if (checkInToday && checkInToday.time) {
+        const durationMs = new Date().getTime() - checkInToday.time.getTime();
+        const durationHours = durationMs / (1000 * 60 * 60); 
+
+        await prisma.student_profile.updateMany({
+          where: { user_id: user.id },
+          data: {
+            hours: {
+              increment: parseFloat(durationHours.toFixed(2)), 
+            },
+          },
+        });
+      }
+    }
 
     res.status(httpStatus.OK).json({
       message:
@@ -132,6 +161,7 @@ export const checkTime = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const getTimeCheck = async (req: Request, res: Response) => {
   try {
