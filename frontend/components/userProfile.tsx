@@ -273,17 +273,17 @@ const UserProfile = () => {
               </div>
             </div>
 
-            {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
-              <div key={label}>
-                <label className="block text-sm font-medium">{label}</label>
-                <input
-                  type="text"
-                  value={value}
-                  readOnly
-                  className="w-full rounded border bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
-                />
-              </div>
-            ))}
+            `  {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
+                <div key={label}>
+                  <label className="block text-sm font-medium">{label}</label>
+                  <input
+                    type="text"
+                    value={value}
+                    readOnly
+                    className="w-full rounded border bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
+                  />
+                </div>
+              ))}`
 
             <div className="mt-4 md:col-span-2">
               <button

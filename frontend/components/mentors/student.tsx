@@ -73,7 +73,7 @@ const Student = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-4 flex flex-col justify-between gap-2 md:flex-row md:items-center">
-        <h2 className="text-center text-xl font-bold md:text-left md:text-2xl">
+        <h2 className="text-center text-xl font-semibold md:text-left md:text-[40px]">
           ข้อมูลนักศึกษาในความดูแล
         </h2>
 
