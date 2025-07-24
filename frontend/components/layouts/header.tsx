@@ -40,41 +40,52 @@ import IconMenuMore from "../../components/icon/menu/icon-menu-more";
 import { usePathname, useRouter } from "next/navigation";
 import { getTranslation } from "@/i18n";
 import Image from "next/image";
-import Logo from "../../public/assets/images/PEAITT2.png"
+import Logo from "../../public/assets/images/PEAITT2.png";
+
+interface noti {
+  id: number;
+  user_id: number;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: any;
+}
 
 const Header = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
   const { t, i18n } = getTranslation();
-  const user = useAuthStore((state) => state.user)
-  const [myimg, setMyimg] = useState<string | null>(null)
+  const user = useAuthStore((state) => state.user);
+  const [myimg, setMyimg] = useState<string | null>(null);
 
   useEffect(() => {
-    let imgUrl: string
+    let imgUrl: string;
 
     const heyimg = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`, {
-          responseType: 'blob', withCredentials: true,
-        }
-        )
-        imgUrl = URL.createObjectURL(res.data)
-        setMyimg(imgUrl)
+          `${process.env.NEXT_PUBLIC_API_URL}users/${user?.student_profile?.id}/picture`,
+          {
+            responseType: "blob",
+            withCredentials: true,
+          }
+        );
+        imgUrl = URL.createObjectURL(res.data);
+        setMyimg(imgUrl);
       } catch (error) {
-        console.error("โหลดรูปไม่สำเร็จ", error)
+        console.error("โหลดรูปไม่สำเร็จ", error);
       }
-    }
+    };
 
     if (user?.student_profile?.id) {
-      heyimg()
+      heyimg();
     }
 
     return () => {
-      if (imgUrl) URL.revokeObjectURL(imgUrl)
-    }
-  }, [user])
+      if (imgUrl) URL.revokeObjectURL(imgUrl);
+    };
+  }, [user]);
   useEffect(() => {
     const selector = document.querySelector(
       'ul.horizontal-menu a[href="' + window.location.pathname + '"]'
@@ -173,46 +184,41 @@ const Header = () => {
     setMessages(messages.filter((user) => user.id !== value));
   };
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      profile: "user-profile.jpeg",
-      message:
-        '<strong class="text-sm mr-1">John Doe</strong>invite you to <strong>Prototyping</strong>',
-      time: "45 min ago",
-    },
-    {
-      id: 2,
-      profile: "profile-34.jpeg",
-      message:
-        '<strong class="text-sm mr-1">Adam Nolan</strong>mentioned you to <strong>UX Basics</strong>',
-      time: "9h Ago",
-    },
-    {
-      id: 3,
-      profile: "profile-16.jpeg",
-      message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
-      time: "9h Ago",
-    },
-  ]);
+  const [notifications, setNotifications] = useState<noti[]>([]);
+  useEffect(() => {
+    const fetch = async () => {
+      const mynoti = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}noti?user_id=${user?.id}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setNotifications(mynoti.data.data);
+    };
+    fetch();
+  }, []);
+  const removeNotification = async (value: number) => {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_API_URL}noti/read/${value}`,{},
+      {
+        withCredentials: true,
+      }
+    );
 
-  const removeNotification = (value: number) => {
-    setNotifications(notifications.filter((user) => user.id !== value));
+    console.log(res);
   };
 
   const [search, setSearch] = useState(false);
 
-
-
-
   return (
     <header
-      className={`z-40 ${themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
-        }`}
+      className={`z-40 ${
+        themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
+      }`}
     >
       <div className="shadow-sm">
         <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
-          <div className="horizontal-logo flex items-center justify-between ltr:mr-2 rtl:ml-2 lg:hidden">
+          <div className="horizontal-logo flex items-center justify-between lg:hidden ltr:mr-2 rtl:ml-2">
             <Link href="/" className="main-logo flex shrink-0 items-center">
               <Image
                 className="inline w-[132px] ltr:-ml-1 rtl:-mr-1"
@@ -225,21 +231,22 @@ const Header = () => {
             </Link>
             <button
               type="button"
-              className="collapse-icon flex flex-none rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary ltr:ml-2 rtl:mr-2 dark:bg-dark/40 dark:text-[#d0d2d6] dark:hover:bg-dark/60 dark:hover:text-primary lg:hidden"
+              className="collapse-icon flex flex-none rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:text-[#d0d2d6] dark:hover:bg-dark/60 dark:hover:text-primary lg:hidden ltr:ml-2 rtl:mr-2"
               onClick={() => dispatch(toggleSidebar())}
             >
               <IconMenu className="h-5 w-5 " />
             </button>
           </div>
 
-          <div className="flex items-center space-x-1.5 ltr:ml-auto rtl:mr-auto rtl:space-x-reverse dark:text-[#d0d2d6] sm:flex-1 ltr:sm:ml-0 sm:rtl:mr-0 lg:space-x-2">
+          <div className="flex items-center space-x-1.5 dark:text-[#d0d2d6] sm:flex-1 lg:space-x-2 ltr:ml-auto ltr:sm:ml-0 rtl:mr-auto rtl:space-x-reverse sm:rtl:mr-0">
             <div className="sm:ltr:mr-auto sm:rtl:ml-auto"></div>
             <div>
               {themeConfig.theme === "light" ? (
                 <button
-                  className={`${themeConfig.theme === "light" &&
+                  className={`${
+                    themeConfig.theme === "light" &&
                     "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                    }`}
+                  }`}
                   onClick={() => dispatch(toggleTheme("dark"))}
                 >
                   <IconSun />
@@ -249,9 +256,10 @@ const Header = () => {
               )}
               {themeConfig.theme === "dark" && (
                 <button
-                  className={`${themeConfig.theme === "dark" &&
+                  className={`${
+                    themeConfig.theme === "dark" &&
                     "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                    }`}
+                  }`}
                   onClick={() => dispatch(toggleTheme("light"))}
                 >
                   <IconMoon />
@@ -302,20 +310,26 @@ const Header = () => {
                                   <img
                                     className="h-12 w-12 rounded-full object-cover"
                                     alt="profile"
-                                    src={`/assets/images/${notification.profile}`}
+                                    src={`/assets/images/k`}
                                   />
                                   <span className="absolute bottom-0 right-[6px] block h-2 w-2 rounded-full bg-success"></span>
                                 </div>
                               </div>
                               <div className="flex flex-auto ltr:pl-3 rtl:pr-3">
                                 <div className="ltr:pr-3 rtl:pl-3">
+                                  <h5
+                                    className="font-semibold"
+                                    dangerouslySetInnerHTML={{
+                                      __html: notification.title,
+                                    }}
+                                  ></h5>
                                   <h6
                                     dangerouslySetInnerHTML={{
                                       __html: notification.message,
                                     }}
                                   ></h6>
                                   <span className="block text-xs font-normal dark:text-gray-500">
-                                    {notification.time}
+                                    {notification.created_at}
                                   </span>
                                 </div>
                                 <button
@@ -367,7 +381,9 @@ const Header = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src={myimg ? myimg : "../../public/assets/images/watdee.jpeg"}
+                    src={
+                      myimg ? myimg : "../../public/assets/images/watdee.jpeg"
+                    }
                     alt="userProfile"
                   />
                 }
@@ -377,7 +393,11 @@ const Header = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src={myimg ? myimg : "../../public/assets/images/watdee.jpeg"}
+                        src={
+                          myimg
+                            ? myimg
+                            : "../../public/assets/images/watdee.jpeg"
+                        }
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
@@ -402,8 +422,9 @@ const Header = () => {
                       โปรไฟล์
                     </Link>
                   </li>
-                  <li className="border-t border-white-light dark:border-white-light/10 hover:bg-[#ECB9DB] hover:bg-opacity-50 ">
-                    <Link onClick={haddleLogout}
+                  <li className="border-t border-white-light hover:bg-[#ECB9DB] hover:bg-opacity-50 dark:border-white-light/10 ">
+                    <Link
+                      onClick={haddleLogout}
                       href="/login"
                       className="!py-3 text-danger"
                     >
@@ -418,7 +439,7 @@ const Header = () => {
         </div>
 
         {/* horizontal menu */}
-        <ul className="horizontal-menu hidden border-t border-[#ebedf2] bg-white px-6 py-1.5 font-semibold text-black rtl:space-x-reverse dark:border-[#191e3a] dark:bg-black dark:text-white-dark lg:space-x-1.5 xl:space-x-8"></ul>
+        <ul className="horizontal-menu hidden border-t border-[#ebedf2] bg-white px-6 py-1.5 font-semibold text-black dark:border-[#191e3a] dark:bg-black dark:text-white-dark lg:space-x-1.5 xl:space-x-8 rtl:space-x-reverse"></ul>
       </div>
     </header>
   );
