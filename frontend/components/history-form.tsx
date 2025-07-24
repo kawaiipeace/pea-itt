@@ -234,7 +234,7 @@ const HistoryForm: React.FC = () => {
         confirmButtonText: "ตกลง",
         width: "400px",
         customClass: {
-          confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+          confirmButton: "swal2-confirm !bg-[#74045F] !text-white !px-6 !py-3",
         },
       });
     } catch (error) {
@@ -249,7 +249,7 @@ const HistoryForm: React.FC = () => {
   return (
     <section className="flex h-full flex-col px-6 py-4">
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push("/")}
         className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
       >
         <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
