@@ -15,4 +15,5 @@ export const createNotificationSchema = z.object({
 
 export interface GetNotificationQuery {
     user_id?: number;
+    is_read?: boolean
 }
