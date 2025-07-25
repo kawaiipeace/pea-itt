@@ -70,10 +70,7 @@ const authStore: StateCreator<AuthStore> = (set) => ({
     });
 
     set({ user: null });
-
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth");
-    }
+    localStorage.removeItem("auth");
 
     return res;
   },

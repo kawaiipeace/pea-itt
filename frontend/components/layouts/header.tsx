@@ -38,8 +38,8 @@ const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const { t, i18n } = getTranslation();
-  const user = useAuthStore((state) => state.user);
-  const [myimg, setMyimg] = useState<string | null>(null);
+  const user = useAuthStore((state) => state.user)
+  const [myimg, setMyimg] = useState<string | null>(null)
 
   useEffect(() => {
     let imgUrl: string;
@@ -116,9 +116,7 @@ const Header = () => {
 
   const haddleLogout = async () => {
     try {
-      await axios.get(`${process.env.NEXT_PUBLIC_API_URL}logout`, {
-        withCredentials: true,
-      });
+      await actionLogout()
     } catch (error) {
       console.log(error);
     }
