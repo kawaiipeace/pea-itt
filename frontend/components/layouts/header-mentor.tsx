@@ -42,6 +42,15 @@ import { getTranslation } from "@/i18n";
 import Image from "next/image";
 import Logo from "../../public/assets/images/PEAITT2.png"
 
+interface noti {
+  id: number;
+  user_id: number;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: any;
+}
+
 const Headermentor = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -146,33 +155,40 @@ const Headermentor = () => {
     setMessages(messages.filter((user) => user.id !== value));
   };
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      profile: "user-profile.jpeg",
-      message:
-        '<strong class="text-sm mr-1">John Doe</strong>invite you to <strong>Prototyping</strong>',
-      time: "45 min ago",
-    },
-    {
-      id: 2,
-      profile: "profile-34.jpeg",
-      message:
-        '<strong class="text-sm mr-1">Adam Nolan</strong>mentioned you to <strong>UX Basics</strong>',
-      time: "9h Ago",
-    },
-    {
-      id: 3,
-      profile: "profile-16.jpeg",
-      message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
-      time: "9h Ago",
-    },
-  ]);
+  const [notifications, setNotifications] = useState<noti[]>([]);
 
-  const removeNotification = (value: number) => {
-    setNotifications(notifications.filter((user) => user.id !== value));
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const mynoti = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}noti?user_id=${user?.id}&is_read=false`,
+          {
+            withCredentials: true,
+          }
+        );
+        setNotifications(mynoti.data.data);
+      } catch (error) {
+        console.error("ไม่สามารถโหลดการแจ้งเตือนได้", error);
+      }
+    };
+    fetch();
+  }, []);
+
+  const removeNotification = async (id: number) => {
+    try {
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}noti/read/${id}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      setNotifications((prevNoti) => prevNoti.filter((n) => n.id !== id));
+    } catch (error) {
+      console.error("ไม่สามารถอัปเดตการแจ้งเตือนได้", error);
+    }
   };
-
+  
   const [search, setSearch] = useState(false);
 
   const user = useAuthStore((state) => state.user);
@@ -269,25 +285,35 @@ const Headermentor = () => {
                           >
                             <div className="group flex items-center px-4 py-2">
                               <div className="grid place-content-center rounded">
-                                <div className="relative h-12 w-12">
+                                {/* <div className="relative h-12 w-12">
                                   <img
                                     className="h-12 w-12 rounded-full object-cover"
                                     alt="profile"
                                     src={`/assets/images/${notification.profile}`}
                                   />
                                   <span className="absolute bottom-0 right-[6px] block h-2 w-2 rounded-full bg-success"></span>
-                                </div>
+                                </div> */}
                               </div>
-                              <div className="flex flex-auto ltr:pl-3 rtl:pr-3">
+                              <div onClick={()=>router.push("/mentor/approver")} className="flex flex-auto cursor-pointer ltr:pl-3 rtl:pr-3">
                                 <div className="ltr:pr-3 rtl:pl-3">
+                                  <h5
+                                    className="font-semibold mb-2"
+                                    dangerouslySetInnerHTML={{
+                                      __html: notification.title,
+                                    }}
+                                  ></h5>
                                   <h6
                                     dangerouslySetInnerHTML={{
                                       __html: notification.message,
                                     }}
                                   ></h6>
-                                  <span className="block text-xs font-normal dark:text-gray-500">
-                                    {notification.time}
-                                  </span>
+                                  {/* <span className="block text-xs font-normal dark:text-gray-500">
+                                    {new Date(notification.created_at)
+                                    .toISOString()
+                                    .slice(0, 19)
+                                    .replace("T", " ")}
+                                  </span> */}
+                                  
                                 </div>
                                 <button
                                   type="button"
