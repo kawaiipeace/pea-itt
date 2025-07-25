@@ -1,13 +1,13 @@
 import { Metadata } from "next";
-import SumDashbord from "../../../../components/admin/sum-dashbord";
+import SumDashboard from "../../../../components/admin/sum-dashboard";
 export const metadata: Metadata = {
-  title: "DASHBORD",
+  title: "DASHBOARD",
 };
 
 const profile = () => {
   return (
     <>
-      <SumDashbord/>
+      <SumDashboard/>
     </>
   );
 };
