@@ -122,7 +122,7 @@ export default function MentorForm() {
         icon: "success",
         title: "ลบพี่เลี้ยงสำเร็จ",
         confirmButtonColor: "#74045F",
-        confirmButtonText: "ปิด",
+        confirmButtonText: "ตกลง",
       });
     } catch (err) {
       console.error("ลบพี่เลี้ยงล้มเหลว", err);
@@ -130,7 +130,6 @@ export default function MentorForm() {
         icon: "error",
         title: "เกิดข้อผิดพลาด",
         text: "ไม่สามารถลบพี่เลี้ยงได้",
-        confirmButtonColor: "#74045F",
         confirmButtonText: "ปิด",
       });
     }
@@ -208,7 +207,7 @@ export default function MentorForm() {
                         className="borde ml-auto rounded p-2 transition-colors"
                         aria-label="ลบ"
                       >
-                        <Trash2 className="h-4 w-4 text-black" />
+                        <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
                       </button>
                     </div>
                   ))}

@@ -23,7 +23,7 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
         value={value ? `${day}/${month}/${buddhistYear}` : ""}
         readOnly
         placeholder="เลือกวันที่"
-        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400"
+        className="w-full rounded border px-3 py-2 pr-10 text-sm dark:bg-gray-900 dark:border-gray-500 dark:text-gray-400 focus:outline-none focus:ring-0"
       />
       <IconCalendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
     </div>
@@ -31,24 +31,12 @@ const CustomDateInput = React.forwardRef(({ value, onClick }: any, ref) => {
 });
 CustomDateInput.displayName = "CustomDateInput";
 
-type FormField = "name" | "surname" | "email" | "university" | "phone" | "start_date" | "end_date" | "mentor_id" | "department";
-
 const UserProfile = () => {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.actionSetUser);
   const refreshUser = useAuthStore((state) => state.refreshUser);
 
-  const [formData, setFormData] = useState<{
-    name: string;
-    surname: string;
-    email: string;
-    university: string;
-    phone: string;
-    start_date: string;
-    end_date: string;
-    mentor_id: string | number;
-    department: string | number;
-  }>({
+  const [formData, setFormData] = useState({
     name: user?.fname || "",
     surname: user?.lname || "",
     email: user?.email || "",
@@ -85,14 +73,17 @@ const UserProfile = () => {
       try {
         if (!user || !user.student_profile) return;
 
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user.student_profile.mentor_id}`
-        );
-        const dept = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}dept/${user.department_id}`
-        );
-        const deptName = dept.data.data.dept_name;
-        const mentor = response.data.data[0];
+        const [mentorRes, deptRes] = await Promise.all([
+          axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user.student_profile.mentor_id}`
+          ),
+          axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}dept/${user.department_id}`
+          ),
+        ]);
+
+        const mentor = mentorRes.data.data[0];
+        const deptName = deptRes.data.data.dept_name;
 
         if (mentor) {
           const fullName = `${mentor.fname} ${mentor.lname}`;
@@ -244,46 +235,56 @@ const UserProfile = () => {
               </div>
             ))}
 
-            <div className="w-full md:col-span-2 flex flex-col gap-4 md:flex-row md:items-end">
-              <div className="w-full md:w-[50%] flex gap-4">
-                {(["start_date", "end_date"] as const).map((field, index) => (
-                  <div className="w-full" key={field}>
-                    <label className="block text-sm font-medium">
-                      {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
-                    </label>
-                    <DatePicker
-                      selected={formData[field] ? new Date(formData[field]) : null}
-                      onChange={(date: Date | null) =>
-                        setFormData({
-                          ...formData,
-                          [field]: date ? format(date, "yyyy-MM-dd") : "",
-                        })
-                      }
-                      dateFormat="dd/MM/yyyy"
-                      locale="th"
-                      minDate={
-                        field === "end_date" && formData.start_date
-                          ? new Date(formData.start_date)
-                          : undefined
-                      }
-                      customInput={<CustomDateInput />}
-                    />
-                  </div>
-                ))}
+            <div className="flex w-full flex-col gap-4 md:col-span-2 md:flex-row md:items-end">
+              <div className="w-full md:w-[50%]">
+                <label className="block text-sm font-medium">
+                  มหาวิทยาลัยที่ศึกษาอยู่
+                </label>
+                <input
+                  type="text"
+                  value={formData.university}
+                  readOnly
+                  className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900 dark:text-[#506690]"
+                />
               </div>
-            </div>
 
-            `  {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
-                <div key={label}>
-                  <label className="block text-sm font-medium">{label}</label>
-                  <input
-                    type="text"
-                    value={value}
-                    readOnly
-                    className="w-full rounded border bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
+              {(["start_date", "end_date"] as const).map((field, index) => (
+                <div className="w-full md:w-[25%]" key={field}>
+                  <label className="block text-sm font-medium">
+                    {index === 0 ? "วันที่เริ่มฝึกงาน" : "วันที่สิ้นสุดฝึกงาน"}
+                  </label>
+                  <DatePicker
+                    selected={formData[field] ? new Date(formData[field]) : null}
+                    onChange={(date: Date | null) =>
+                      setFormData({
+                        ...formData,
+                        [field]: date ? format(date, "yyyy-MM-dd") : "",
+                      })
+                    }
+                    dateFormat="dd/MM/yyyy"
+                    locale="th"
+                    minDate={
+                      field === "end_date" && formData.start_date
+                        ? new Date(formData.start_date)
+                        : undefined
+                    }
+                    customInput={<CustomDateInput />}
                   />
                 </div>
-              ))}`
+              ))}
+            </div>
+
+              {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
+              <div key={label}>
+                <label className="block text-sm font-medium">{label}</label>
+                <input
+                  type="text"
+                  value={value}
+                  readOnly
+                  className="w-full rounded border bg-gray-100 p-2 dark:bg-gray-900 dark:border-gray-500"
+                />
+              </div>
+            ))}
 
             <div className="mt-4 md:col-span-2">
               <button
