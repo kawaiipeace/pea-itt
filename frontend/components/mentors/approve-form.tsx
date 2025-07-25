@@ -9,6 +9,12 @@ import Swal from "sweetalert2";
 
 registerLocale("th", th);
 
+interface notileave {
+  user_id: number;
+  title: string;
+  message: string;
+}
+
 const CustomDateButton = forwardRef<HTMLButtonElement, any>(
   ({ value, onClick }, ref) => (
     <button
@@ -50,13 +56,15 @@ interface UserData {
 }
 
 const ApproveForm = () => {
+  const [noti, setNoti] = useState<notileave>();
+  const [menID, setMenID] = useState<number>();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [leaveData, setLeaveData] = useState<
     (LeaveItem & { user?: UserData })[]
   >([]);
   const [loading, setLoading] = useState(false);
   const user = useAuthStore((state) => state.user);
-
+  
   const fetchLeaveRequests = async () => {
     setLoading(true);
     try {
@@ -91,6 +99,7 @@ const ApproveForm = () => {
   };
 
   const updateLeaveStatus = async (
+    
     id: number,
     status: "approved" | "rejected"
   ) => {
@@ -104,6 +113,29 @@ const ApproveForm = () => {
         prev.map((item) =>
           item.id === id ? { ...item, status } : item
         )
+      );
+       const mentorData = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user?.mentor_id}`
+      );
+
+      const res = mentorData.data.data;
+      const menID = res[0].id;
+
+      // ✅ แปลงวันที่ให้อ่านง่ายแบบไทย + เวลา
+      const formattedLeaveDate = leaveData.toLocaleString("th-TH", {
+        dateStyle: "long",
+        timeStyle: "short",
+        hour12: false,
+      }) + " น.";
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}noti`,
+        {
+          user_id: menID,
+          title: `${user?.fname} ${user?.lname}`,
+          message: `ยื่นลาเมื่อวันที่ ${formattedLeaveDate}`,
+        },
+        { withCredentials: true }
       );
     } catch (error) {
       console.error("Error updating leave status:", error);

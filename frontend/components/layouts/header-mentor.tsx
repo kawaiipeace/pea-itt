@@ -174,10 +174,20 @@ const Headermentor = () => {
     fetch();
   }, []);
 
-  const removeNotification = (value: number) => {
-    setNotifications(notifications.filter((user) => user.id !== value));
+  const removeNotification = async (id: number) => {
+    try {
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}noti/read/${id}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      setNotifications((prevNoti) => prevNoti.filter((n) => n.id !== id));
+    } catch (error) {
+      console.error("ไม่สามารถอัปเดตการแจ้งเตือนได้", error);
+    }
   };
-
   const [search, setSearch] = useState(false);
 
   const user = useAuthStore((state) => state.user);
@@ -283,7 +293,7 @@ const Headermentor = () => {
                                   <span className="absolute bottom-0 right-[6px] block h-2 w-2 rounded-full bg-success"></span>
                                 </div> */}
                               </div>
-                              <div className="flex flex-auto ltr:pl-3 rtl:pr-3">
+                              <div onClick={()=>router.push("/mentor/approver")} className="flex flex-auto cursor-pointer ltr:pl-3 rtl:pr-3">
                                 <div className="ltr:pr-3 rtl:pl-3">
                                   <h5
                                     className="font-semibold mb-2"
