@@ -115,7 +115,7 @@ const ApproveForm = () => {
         )
       );
        const mentorData = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user?.mentor_id}`
+        `${process.env.NEXT_PUBLIC_API_URL}user/mentor?mentor_id=${user?.student_profile?.mentor_id}`
       );
 
       const res = mentorData.data.data;
