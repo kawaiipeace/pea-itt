@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useAuthStore from "../store/authStore";
 import IconLockDots from "../components/icon/icon-lock-dots";
 import IconAccount from "../components/icon/icon-user";
@@ -111,6 +111,17 @@ const ComponentsAuthLoginForm = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    if (user) {
+      if (user.role_id === 3) {
+        router.replace("/admin/dashboard");
+      } else if (user.role_id === 2) {
+        router.replace("/mentor/mentor-student");
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [user, router]);
 
 
 
