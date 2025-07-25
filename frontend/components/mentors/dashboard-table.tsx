@@ -82,12 +82,7 @@ const DashboardTable = () => {
         value: startMonth,
         setValue: setStartMonth,
         options: toSelectOptions(months),
-      }, {
-        label: "เดือนสิ้นสุดฝึกงาน",
-        value: endMonth,
-        setValue: setEndMonth,
-        options: toSelectOptions(months),
-        }, {
+      },{
           label: "ปี",
           value: year,
           setValue: setYear,
@@ -97,7 +92,11 @@ const DashboardTable = () => {
             <label className="mb-1 text-sm font-medium dark:text-gray-200">{selectField.label}</label>
             <Select
               options={selectField.options}
-              value={{ label: selectField.value, value: selectField.value }}
+              value={
+                selectField.value
+                  ? { label: selectField.value, value: selectField.value }
+                  : null
+              }
               onChange={(opt) => selectField.setValue(opt.value)}
               className="text-sm"
               classNames={{
@@ -106,34 +105,29 @@ const DashboardTable = () => {
                 control: () => "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
                 singleValue: () => "dark:text-gray-100",
                 option: ({ isFocused, isSelected }) =>
-                  `dark:bg-gray-900 dark:text-gray-100 ${
-                    isFocused
-                      ? "bg-[#F7E3F0] dark:bg-[#9B006C] dark:text-white"
-                      : ""
-                  } ${
+                  `${
                     isSelected
-                      ? "bg-[#ECB9DB] dark:bg-[#9B006C] dark:text-white"
-                      : ""
+                      ? "bg-[#B10073] text-white dark:bg-[#B10073] dark:text-white"
+                      : isFocused
+                      ? "bg-[#F7E3F0] dark:bg-[#9B006C] dark:text-white"
+                      : "dark:bg-gray-900 dark:text-gray-100"
                   }`,
               }}
-              theme={(theme) => ({
-                ...theme,
-                colors: {
-                  ...theme.colors,
-                  neutral0: "#fff",
-                  neutral80: "#333",
-                  primary25: "#F7E3F0",
-                  primary: "#ECB9DB",
-                  ...(typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
-                    ? {
-                        neutral0: "#1a202c",
-                        neutral80: "#f3f4f6",
-                        primary25: "#9B006C",
-                        primary: "#ECB9DB",
-                      }
-                    : {}),
-                },
-              })}
+              theme={(theme) => {
+                const isDark =
+                  typeof window !== "undefined" &&
+                  window.matchMedia("(prefers-color-scheme: dark)").matches;
+                return {
+                  ...theme,
+                  colors: {
+                    ...theme.colors,
+                    neutral0: isDark ? "#1a202c" : "#fff",
+                    neutral80: isDark ? "#f3f4f6" : "#333",
+                    primary25: isDark ? "#9B006C" : "#F7E3F0", // hover
+                    primary: "#B10073", // selected
+                  },
+                };
+              }}
             />
           </div>
         ))}
