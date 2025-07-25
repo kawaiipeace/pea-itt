@@ -118,13 +118,45 @@ const SumDashboard = () => {
           options: toSelectOptions(years),
         }].map((selectField, i) => (
           <div key={i} className="flex w-full max-w-xs flex-grow flex-col sm:w-auto">
-            <label className="mb-1 text-sm font-medium dark:text-[#506690]">{selectField.label}</label>
+            <label className="mb-1 text-sm font-medium dark:text-gray-200">{selectField.label}</label>
             <Select
               options={selectField.options}
-              value={{ label: selectField.value, value: selectField.value }}
+              value={
+                selectField.value
+                  ? { label: selectField.value, value: selectField.value }
+                  : null
+              }
               onChange={(opt) => selectField.setValue(opt.value)}
               className="text-sm"
-              classNames={selectClassNames}
+              classNames={{
+                menu: () => "z-[9999] dark:bg-gray-900 dark:text-gray-100",
+                menuList: () => "max-h-32 overflow-y-auto dark:bg-gray-900 dark:text-gray-100",
+                control: () => "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
+                singleValue: () => "dark:text-gray-100",
+                option: ({ isFocused, isSelected }) =>
+                  `${
+                    isSelected
+                      ? "bg-[#B10073] text-white dark:bg-[#B10073] dark:text-white"
+                      : isFocused
+                      ? "bg-[#F7E3F0] dark:bg-[#9B006C] dark:text-white"
+                      : "dark:bg-gray-900 dark:text-gray-100"
+                  }`,
+              }}
+              theme={(theme) => {
+                const isDark =
+                  typeof window !== "undefined" &&
+                  window.matchMedia("(prefers-color-scheme: dark)").matches;
+                return {
+                  ...theme,
+                  colors: {
+                    ...theme.colors,
+                    neutral0: isDark ? "#1a202c" : "#fff",
+                    neutral80: isDark ? "#f3f4f6" : "#333",
+                    primary25: isDark ? "#9B006C" : "#F7E3F0", // hover
+                    primary: "#B10073", // selected
+                  },
+                };
+              }}
             />
           </div>
         ))}
