@@ -12,31 +12,13 @@ import {
 } from "@/store/themeConfigSlice";
 import Dropdown from "@/components/dropdown";
 import IconMenu from "@/components/icon/icon-menu";
-import IconCalendar from "@/components/icon/icon-calendar";
-import IconEdit from "@/components/icon/icon-edit";
-import IconChatNotification from "@/components/icon/icon-chat-notification";
-import IconSearch from "@/components/icon/icon-search";
 import IconXCircle from "@/components/icon/icon-x-circle";
 import IconSun from "@/components/icon/icon-sun";
 import IconMoon from "@/components/icon/icon-moon";
-import IconLaptop from "@/components/icon/icon-laptop";
-import IconMailDot from "@/components/icon/icon-mail-dot";
-import IconArrowLeft from "@/components/icon/icon-arrow-left";
 import IconInfoCircle from "@/components/icon/icon-info-circle";
 import IconBellBing from "@/components/icon/icon-bell-bing";
 import IconUser from "@/components/icon/icon-user";
-import IconMail from "@/components/icon/icon-mail";
-import IconLockDots from "@/components/icon/icon-lock-dots";
 import IconLogout from "@/components/icon/icon-logout";
-import IconMenuDashboard from "@/components/icon/menu/icon-menu-dashboard";
-import IconCaretDown from "@/components/icon/icon-caret-down";
-import IconMenuApps from "@/components/icon/menu/icon-menu-apps";
-import IconMenuComponents from "@/components/icon/menu/icon-menu-components";
-import IconMenuElements from "@/components/icon/menu/icon-menu-elements";
-import IconMenuDatatables from "@/components/icon/menu/icon-menu-datatables";
-import IconMenuForms from "@/components/icon/menu/icon-menu-forms";
-import IconMenuPages from "../../components/icon/menu/icon-menu-pages";
-import IconMenuMore from "../../components/icon/menu/icon-menu-more";
 import { usePathname, useRouter } from "next/navigation";
 import { getTranslation } from "@/i18n";
 import Image from "next/image";
@@ -61,7 +43,6 @@ const Header = () => {
 
   useEffect(() => {
     let imgUrl: string;
-
     const heyimg = async () => {
       try {
         const res = await axios.get(
@@ -86,6 +67,7 @@ const Header = () => {
       if (imgUrl) URL.revokeObjectURL(imgUrl);
     };
   }, [user]);
+
   useEffect(() => {
     const selector = document.querySelector(
       'ul.horizontal-menu a[href="' + window.location.pathname + '"]'
@@ -122,6 +104,7 @@ const Header = () => {
     useSelector((state: IRootState) => state.themeConfig.rtlClass) === "rtl";
 
   const themeConfig = useSelector((state: IRootState) => state.themeConfig);
+
   const setLocale = (flag: string) => {
     if (flag.toLowerCase() === "ae") {
       dispatch(toggleRTL("rtl"));
@@ -130,10 +113,6 @@ const Header = () => {
     }
     router.refresh();
   };
-
-  function createMarkup(messages: any) {
-    return { __html: messages };
-  }
 
   const haddleLogout = async () => {
     try {
@@ -145,67 +124,55 @@ const Header = () => {
     }
   };
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      image:
-        '<span class="grid place-content-center w-9 h-9 rounded-full bg-success-light dark:bg-success text-success dark:text-success-light"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>',
-      title: "Congratulations!",
-      message: "Your OS has been updated.",
-      time: "1hr",
-    },
-    {
-      id: 2,
-      image:
-        '<span class="grid place-content-center w-9 h-9 rounded-full bg-info-light dark:bg-info text-info dark:text-info-light"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>',
-      title: "Did you know?",
-      message: "You can switch between artboards.",
-      time: "2hr",
-    },
-    {
-      id: 3,
-      image:
-        '<span class="grid place-content-center w-9 h-9 rounded-full bg-danger-light dark:bg-danger text-danger dark:text-danger-light"> <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span>',
-      title: "Something went wrong!",
-      message: "Send Reposrt",
-      time: "2days",
-    },
-    {
-      id: 4,
-      image:
-        '<span class="grid place-content-center w-9 h-9 rounded-full bg-warning-light dark:bg-warning text-warning dark:text-warning-light"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">    <circle cx="12" cy="12" r="10"></circle>    <line x1="12" y1="8" x2="12" y2="12"></line>    <line x1="12" y1="16" x2="12.01" y2="16"></line></svg></span>',
-      title: "Warning",
-      message: "Your password strength is low.",
-      time: "5days",
-    },
-  ]);
-
-  const removeMessage = (value: number) => {
-    setMessages(messages.filter((user) => user.id !== value));
-  };
-
   const [notifications, setNotifications] = useState<noti[]>([]);
+
   useEffect(() => {
     const fetch = async () => {
-      const mynoti = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}noti?user_id=${user?.id}`,
+      try {
+        const mynoti = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}noti?user_id=${user?.id}&is_read=false`,
+          {
+            withCredentials: true,
+          }
+        );
+        setNotifications(mynoti.data.data);
+      } catch (error) {
+        console.error("ไม่สามารถโหลดการแจ้งเตือนได้", error);
+      }
+    };
+    fetch();
+  }, [user?.id]);
+
+  const removeNotification = async (id: number) => {
+    try {
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}noti/read/${id}`,
+        {},
         {
           withCredentials: true,
         }
       );
-      setNotifications(mynoti.data.data);
-    };
-    fetch();
-  }, []);
-  const removeNotification = async (value: number) => {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_API_URL}noti/read/${value}`,{},
-      {
-        withCredentials: true,
-      }
-    );
+      setNotifications((prevNoti) => prevNoti.filter((n) => n.id !== id));
+    } catch (error) {
+      console.error("ไม่สามารถอัปเดตการแจ้งเตือนได้", error);
+    }
+  };
 
-    console.log(res);
+  const readAllNotifications = async () => {
+    try {
+      await Promise.all(
+        notifications.map((n) =>
+          axios.put(
+            `${process.env.NEXT_PUBLIC_API_URL}noti/read/${n.id}`,
+            {},
+            { withCredentials: true }
+          )
+        )
+      );
+      setNotifications([]);
+    } catch (error) {
+      console.error("ไม่สามารถอ่านการแจ้งเตือนทั้งหมดได้", error);
+    }
   };
 
   const [search, setSearch] = useState(false);
@@ -225,9 +192,6 @@ const Header = () => {
                 src={Logo}
                 alt="logo"
               />
-              {/* <span className="hidden align-middle text-2xl  font-semibold  transition-all duration-300 ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light md:inline">
-                PEA-iTT
-              </span> */}
             </Link>
             <button
               type="button"
@@ -243,23 +207,14 @@ const Header = () => {
             <div>
               {themeConfig.theme === "light" ? (
                 <button
-                  className={`${
-                    themeConfig.theme === "light" &&
-                    "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                  }`}
+                  className="flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
                   onClick={() => dispatch(toggleTheme("dark"))}
                 >
                   <IconSun />
                 </button>
               ) : (
-                ""
-              )}
-              {themeConfig.theme === "dark" && (
                 <button
-                  className={`${
-                    themeConfig.theme === "dark" &&
-                    "flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
-                  }`}
+                  className="flex items-center rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
                   onClick={() => dispatch(toggleTheme("light"))}
                 >
                   <IconMoon />
@@ -288,7 +243,7 @@ const Header = () => {
                       <h4 className="text-lg">Notification</h4>
                       {notifications.length ? (
                         <span className="badge bg-primary/80">
-                          {notifications.length}New
+                          {notifications.length} New
                         </span>
                       ) : (
                         ""
@@ -297,58 +252,57 @@ const Header = () => {
                   </li>
                   {notifications.length > 0 ? (
                     <>
-                      {notifications.map((notification) => {
-                        return (
-                          <li
-                            key={notification.id}
-                            className="dark:text-white-light/90"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="group flex items-center px-4 py-2">
-                              <div className="grid place-content-center rounded">
-                                <div className="relative h-12 w-12">
-                                  <img
-                                    className="h-12 w-12 rounded-full object-cover"
-                                    alt="profile"
-                                    src={`/assets/images/k`}
-                                  />
-                                  <span className="absolute bottom-0 right-[6px] block h-2 w-2 rounded-full bg-success"></span>
-                                </div>
-                              </div>
-                              <div className="flex flex-auto ltr:pl-3 rtl:pr-3">
-                                <div className="ltr:pr-3 rtl:pl-3">
-                                  <h5
-                                    className="font-semibold"
-                                    dangerouslySetInnerHTML={{
-                                      __html: notification.title,
-                                    }}
-                                  ></h5>
-                                  <h6
-                                    dangerouslySetInnerHTML={{
-                                      __html: notification.message,
-                                    }}
-                                  ></h6>
-                                  <span className="block text-xs font-normal dark:text-gray-500">
-                                    {notification.created_at}
-                                  </span>
-                                </div>
-                                <button
-                                  type="button"
-                                  className="text-neutral-300 opacity-0 hover:text-danger group-hover:opacity-100 ltr:ml-auto rtl:mr-auto"
-                                  onClick={() =>
-                                    removeNotification(notification.id)
-                                  }
-                                >
-                                  <IconXCircle />
-                                </button>
-                              </div>
+                      {notifications.map((notification) => (
+                        <li
+                          key={notification.id}
+                          className="dark:text-white-light/90"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="group flex items-center px-4 py-2">
+                            <div className="grid place-content-center rounded">
+                              {/* <div className="relative h-12 w-12">
+                                <span className="absolute bottom-0 right-[6px] block h-2 w-2 rounded-full bg-success"></span>
+                              </div> */}
                             </div>
-                          </li>
-                        );
-                      })}
+                            <div className="flex flex-auto ltr:pl-3 rtl:pr-3">
+                              <div className="ltr:pr-3 rtl:pl-3">
+                                <h5
+                                  className="font-semibold"
+                                  dangerouslySetInnerHTML={{
+                                    __html: notification.title,
+                                  }}
+                                ></h5>
+                                <h6
+                                  dangerouslySetInnerHTML={{
+                                    __html: notification.message,
+                                  }}
+                                ></h6>
+                                <span className="block text-xs  text-gray-500 font-normal dark:text-gray-500">
+                                  {new Date(notification.created_at)
+                                    .toISOString()
+                                    .slice(0, 19)
+                                    .replace("T", " ")}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="text-neutral-300 opacity-0 hover:text-danger group-hover:opacity-100 ltr:ml-auto rtl:mr-auto"
+                                onClick={() =>
+                                  removeNotification(notification.id)
+                                }
+                              >
+                                <IconXCircle />
+                              </button>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
                       <li>
                         <div className="p-4">
-                          <button className="btn btn-primary btn-small block w-full">
+                          <button
+                            className="btn btn-primary btn-small block w-full"
+                            onClick={readAllNotifications}
+                          >
                             Read All Notifications
                           </button>
                         </div>
@@ -373,6 +327,7 @@ const Header = () => {
                 </ul>
               </Dropdown>
             </div>
+
             <div className="dropdown flex shrink-0">
               <Dropdown
                 offset={[0, 8]}
@@ -381,9 +336,7 @@ const Header = () => {
                 button={
                   <img
                     className="h-9 w-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                    src={
-                      myimg ? myimg : "../../public/assets/images/watdee.jpeg"
-                    }
+                    src={myimg ? myimg : "/assets/images/watdee.jpeg"}
                     alt="userProfile"
                   />
                 }
@@ -393,11 +346,7 @@ const Header = () => {
                     <div className="flex items-center px-4 py-4">
                       <img
                         className="h-10 w-10 rounded-md object-cover"
-                        src={
-                          myimg
-                            ? myimg
-                            : "../../public/assets/images/watdee.jpeg"
-                        }
+                        src={myimg ? myimg : "/assets/images/watdee.jpeg"}
                         alt="userProfile"
                       />
                       <div className="truncate ltr:pl-4 rtl:pr-4">
