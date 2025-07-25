@@ -129,9 +129,9 @@ const Sidebar = () => {
               
               <li className="menu nav-item">
                 <Link
-                      href="/admin/dashbord"
+                      href="/admin/dashboard"
                       className={`nav-link group w-full ${
-                        pathname.startsWith("/admin/dashbord")
+                        pathname.startsWith("/admin/dashboard")
                           ? "active"
                           : ""
                       }`}
