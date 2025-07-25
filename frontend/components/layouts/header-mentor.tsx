@@ -97,11 +97,11 @@ const Headermentor = () => {
     return { __html: messages };
   }
 
+  const actionLogout = useAuthStore((s) => s.actionLogout)
+
   const haddleLogout = async () => {
     try {
-      await axios.get(`${process.env.NEXT_PUBLIC_API_URL}logout`, {
-        withCredentials: true,
-      });
+      await actionLogout()
     } catch (error) {
       console.log(error);
     }
