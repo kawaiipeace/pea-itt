@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Select from "react-select"; // เพิ่ม
+import Select from "react-select";
 import Card from "../card";
 import axios from "axios";
 import useAuthStore from "@/store/authStore";
@@ -18,29 +18,27 @@ interface mystuData {
   picture_url?: string | null;
 }
 
-// ตัวเลือก dropdown
 const months = [
-  { value: "ปัจจุบัน", label: "ปัจจุบัน" },
-  { value: "มกราคม", label: "มกราคม" },
-  { value: "กุมภาพันธ์", label: "กุมภาพันธ์" },
-  { value: "มีนาคม", label: "มีนาคม" },
-  { value: "เมษายน", label: "เมษายน" },
-  { value: "พฤษภาคม", label: "พฤษภาคม" },
-  { value: "มิถุนายน", label: "มิถุนายน" },
-  { value: "กรกฎาคม", label: "กรกฎาคม" },
-  { value: "สิงหาคม", label: "สิงหาคม" },
-  { value: "กันยายน", label: "กันยายน" },
-  { value: "ตุลาคม", label: "ตุลาคม" },
-  { value: "พฤศจิกายน", label: "พฤศจิกายน" },
-  { value: "ธันวาคม", label: "ธันวาคม" },
+  { value: 1, label: "มกราคม" },
+  { value: 2, label: "กุมภาพันธ์" },
+  { value: 3, label: "มีนาคม" },
+  { value: 4, label: "เมษายน" },
+  { value: 5, label: "พฤษภาคม" },
+  { value: 6, label: "มิถุนายน" },
+  { value: 7, label: "กรกฎาคม" },
+  { value: 8, label: "สิงหาคม" },
+  { value: 9, label: "กันยายน" },
+  { value: 10, label: "ตุลาคม" },
+  { value: 11, label: "พฤศจิกายน" },
+  { value: 12, label: "ธันวาคม" },
 ];
 
 const years = [
-  { value: "2568", label: "2568" },
-  { value: "2567", label: "2567" },
-  { value: "2566", label: "2566" },
-  { value: "2565", label: "2565" },
-  { value: "2564", label: "2564" },
+  { value: "2025", label: "2568" },
+  { value: "2024", label: "2567" },
+  { value: "2023", label: "2566" },
+  { value: "2022", label: "2565" },
+  { value: "2021", label: "2564" },
 ];
 
 const Student = () => {
@@ -49,7 +47,6 @@ const Student = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("false");
 
   const [startMonth, setStartMonth] = useState(months[0]);
-  const [endMonth, setEndMonth] = useState(months[0]);
   const [year, setYear] = useState(years[0]);
 
   useEffect(() => {
@@ -58,7 +55,7 @@ const Student = () => {
 
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&show_ended=${selectedFilter}`,
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&month=${startMonth.value}&year=${year.value}`,
           { withCredentials: true }
         );
 
@@ -90,8 +87,9 @@ const Student = () => {
       }
     };
 
+    // ✅ trigger ทุกครั้งที่ user, month, year หรือ show_ended เปลี่ยน
     fetchStudents();
-  }, [user?.mentor_profile?.id, selectedFilter]);
+  }, [user?.mentor_profile?.id, selectedFilter, startMonth, year]);
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -100,19 +98,17 @@ const Student = () => {
           ข้อมูลนักศึกษาในความดูแล
         </h2>
 
-        {/* ✅ Dropdowns แบบ scroll ได้แบบมี scrollbar เดียว */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 mt-11">
-          {/* เดือนเริ่มต้น */}
+          {/* เดือน */}
           <div className="flex flex-col">
-            <h3 className="mb-1 text-[14px] font-semibold">เดือนเริ่มต้นฝึกงาน</h3>
+            <h3 className="mb-1 text-[14px] font-semibold">เดือน</h3>
             <Select
               options={months}
               value={startMonth}
-              onChange={(val) => setStartMonth(val!)}
+              onChange={(val: any) => setStartMonth(val!)}
               classNames={{
                 control: () =>
                   "border border-gray-300 dark:border-gray-600 shadow-sm rounded-md",
-                
                 menuList: () =>
                   "max-h-48 overflow-y-auto bg-white dark:bg-gray-800",
                 option: () =>
@@ -127,11 +123,10 @@ const Student = () => {
             <Select
               options={years}
               value={year}
-              onChange={(val) => setYear(val!)}
+              onChange={(val: any) => setYear(val!)}
               classNames={{
                 control: () =>
                   "border border-gray-300 dark:border-gray-600 shadow-sm rounded-md",
-        
                 menuList: () =>
                   "max-h-48 overflow-y-auto bg-white dark:bg-gray-800",
                 option: () =>
