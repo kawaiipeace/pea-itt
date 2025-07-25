@@ -15,6 +15,7 @@ import IconUsers from "@/components/icon/icon-users"
 import IconMinus from "@/components/icon/icon-minus";
 import IconSquareCheck from "@/components/icon/icon-square-check"
 import Logo from "../../public/assets/images/PEAITT2.png";
+import IconMenuCharts from "@/components/icon/menu/icon-menu-charts";
 
 const SidebarMentor = () => {
   const dispatch = useDispatch();
@@ -60,6 +61,23 @@ const SidebarMentor = () => {
 
               <li className="nav-item">
                 <ul>
+                  <li className="menu nav-item">
+                    <Link
+                          href="/mentor/dashboard"
+                          className={`nav-link group w-full ${
+                            pathname.startsWith("/admin/dashbord")
+                              ? "active"
+                              : ""
+                          }`}
+                        >
+                      <div className="flex items-center">
+                        <IconMenuCharts className="shrink-0 group-hover:!text-primary" />
+                        <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                            {t("แดชบอร์ดนักศึกษา")}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
                   
                   <li className="menu nav-item">
                     <Link
