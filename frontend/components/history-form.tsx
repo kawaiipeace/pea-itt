@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
 import { BiExport } from "react-icons/bi";
-import IconArrowBackward from "../components/icon/icon-arrow-backward";
+import { ChevronLeft } from "lucide-react";;
 import IconLogout from "../components/icon/icon-logout";
 import useAuthStore from "../store/authStore";
 import { Trash2 } from "lucide-react";
@@ -248,12 +248,13 @@ const HistoryForm: React.FC = () => {
 
   return (
     <section className="flex h-full flex-col px-6 py-4">
-      <button
-        onClick={() => router.back()}
-        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
-      >
-        <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
-      </button>
+        <div
+            className="mb-4 flex cursor-pointer items-center gap-2 px-4 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white"
+            onClick={() => router.back()}
+        >
+            <ChevronLeft size={20} />
+            <span>ย้อนกลับ</span>
+        </div>
 
       <div className="overflow-auto rounded-lg border border-gray-200 bg-white dark:border-gray-900 dark:bg-black-dark-light/5 dark:text-[#506690]">
         <div className="grid min-w-[920px] grid-cols-7 bg-gray-100 text-center text-sm font-semibold text-gray-800 dark:border-[#506690] dark:bg-black-dark-light/90 dark:text-[#506690]">

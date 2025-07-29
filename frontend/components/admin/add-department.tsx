@@ -4,13 +4,14 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import axios from "axios";
-import IconArrowBackward from "@/components/icon/icon-arrow-backward";
+import { ChevronLeft } from "lucide-react";
 
 const AddDepartment = () => {
   const router = useRouter();
 
   const [deptName, setDeptName] = useState("");
   const [errors, setErrors] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     if (!deptName.trim()) {
@@ -25,6 +26,7 @@ const AddDepartment = () => {
     e.preventDefault();
 
     if (!validateForm()) return;
+    setLoading(true);
 
     try {
       await axios.post(
@@ -46,7 +48,6 @@ const AddDepartment = () => {
         router.push("/admin/department");
       });
     } catch (error) {
-      console.error("เพิ่มกองไม่สำเร็จ:", error);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
@@ -54,53 +55,52 @@ const AddDepartment = () => {
         confirmButtonText: "ปิด",
         confirmButtonColor: "#74045F",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gray-50 dark:bg-black px-4 py-6 top-0">
-      {/* ปุ่มย้อนกลับ */}
+    <div className="w-full">
       <div
-        className="mb-4 flex cursor-pointer items-center gap-2 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white self-start"
+        className="mb-4 flex cursor-pointer items-center gap-2 px-4 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white"
         onClick={() => router.back()}
       >
-        <IconArrowBackward className="h-4 w-4" />
-        ย้อนกลับ
+        <ChevronLeft size={20} />
+        <span>ย้อนกลับ</span>
       </div>
 
-      {/* ฟอร์มเพิ่มชื่อกอง */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white border rounded-lg shadow-md p-6 w-full max-w-4xl dark:bg-gray-900 dark:border-gray-700"
-      >
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              ชื่อย่อกอง
-            </label>
-            <input
-              type="text"
-              name="deptName"
-              value={deptName}
-              onChange={(e) => setDeptName(e.target.value)}
-              className="w-full rounded border border-gray-300 p-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-              placeholder="กรุณากรอกชื่อย่อกอง"
-            />
-            {errors && (
-              <p className="text-red-500 text-sm mt-1">{errors}</p>
-            )}
-          </div>
+      <div className="mx-auto w-full max-w-5xl px-4">
+        <div className="rounded border bg-white p-6 shadow-md dark:text-[#506690] dark:border-gray-800 dark:bg-gray-900">
+          <h1 className="mb-6 text-xl font-bold dark:text-gray-400">เพิ่มลกอง</h1>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">ชื่อกอง</label>
+              <input
+                type="text"
+                name="dept_name"
+                value={deptName}
+                onChange={(e) => setDeptName(e.target.value)}
+                required
+                className="w-full rounded border bg-gray-100 border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 dark:text-[#506690]"
+                placeholder="กรุณากรอกชื่อกอง"
+              />
+              {errors && (
+                <p className="text-red-500 text-xs mt-1">{errors}</p>
+              )}
+            </div>
+            <div className="sm:col-span-2 mt-6">
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded bg-[#74045F] px-6 py-2.5 font-medium text-white hover:bg-[#B10073] disabled:opacity-50"
+              >
+                {loading ? "กำลังบันทึก..." : "บันทึก"}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div className="mt-6 flex justify-center items-center">
-          <button
-            type="submit"
-            className="bg-[#74045F] hover:bg-[#B10073] text-white px-6 py-2 rounded font-medium transition"
-          >
-            บันทึก
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };

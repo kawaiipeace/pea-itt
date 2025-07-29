@@ -7,7 +7,7 @@ import { th } from "date-fns/locale";
 import { format } from "date-fns";
 import Select from "react-select";
 import IconCalendar from "../icon/icon-calendar";
-import IconArrowBackward from "../icon/icon-arrow-backward";
+import { ChevronLeft } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -226,12 +226,13 @@ const EditStudent = ({ id }: { id: number }) => {
 
   return (
     <div>
-      <button
-        onClick={() => router.back()}
-        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
-      >
-        <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
-      </button>
+      <div
+            className="mb-4 flex cursor-pointer items-center gap-2 px-4 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white"
+            onClick={() => router.back()}
+        >
+            <ChevronLeft size={20} />
+            <span>ย้อนกลับ</span>
+        </div>
 
       <div className="mx-auto w-full max-w-6xl p-4 dark:rounded-lg dark:bg-black-dark-light/5">
         <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 shadow-md dark:border-gray-900 dark:bg-gray-900 dark:text-[#506690] md:flex-row">
