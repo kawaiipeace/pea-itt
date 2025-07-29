@@ -277,12 +277,12 @@ const Header = () => {
                                     __html: notification.message,
                                   }}
                                 ></h6>
-                                <span className="block text-xs  text-gray-500 font-normal dark:text-gray-500">
+                                {/* <span className="block text-xs  text-gray-500 font-normal dark:text-gray-500">
                                   {new Date(notification.created_at)
                                     .toISOString()
                                     .slice(0, 19)
                                     .replace("T", " ")}
-                                </span>
+                                </span> */}
                               </div>
                               <button
                                 type="button"

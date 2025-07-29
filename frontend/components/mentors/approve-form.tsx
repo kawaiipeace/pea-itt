@@ -9,6 +9,12 @@ import Swal from "sweetalert2";
 
 registerLocale("th", th);
 
+interface notileave {
+  user_id: number;
+  title: string;
+  message: string;
+}
+
 const CustomDateButton = forwardRef<HTMLButtonElement, any>(
   ({ value, onClick }, ref) => (
     <button
@@ -50,6 +56,8 @@ interface UserData {
 }
 
 const ApproveForm = () => {
+  const [noti, setNoti] = useState<notileave>();
+  const [menID, setMenID] = useState<number>();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [leaveData, setLeaveData] = useState<
     (LeaveItem & { user?: UserData })[]
@@ -92,18 +100,40 @@ const ApproveForm = () => {
 
   const updateLeaveStatus = async (
     id: number,
-    status: "approved" | "rejected"
+    status: "approved" | "rejected",
+    user_id: number,
+    leave_datetime: any
   ) => {
     try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
-        { status },
-        { withCredentials: true }
-      );
-      setLeaveData((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, status } : item
+      await axios
+        .put(
+          `${process.env.NEXT_PUBLIC_API_URL}leave-request/${id}`,
+          { status },
+          { withCredentials: true }
         )
+        .then(async () => {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}noti`,
+            {
+              user_id: user_id,
+              title: `ผลการอนุมัติการลา`,
+              message: `สถานะ: ${
+                status === "approved"
+                  ? "ได้รับการอนุมัติ"
+                  : "ไม่ได้รับการอนุมัติ"
+              } ฉบับของวันที่ ${new Date(leave_datetime).toLocaleString("th-TH", {
+                dateStyle: "long",
+                timeStyle: "short",
+              })} เมื่อวันที่ ${new Date().toLocaleString("th-TH", {
+                dateStyle: "long",
+                timeStyle: "short",
+              })}`,
+            },
+            { withCredentials: true }
+          );
+        });
+      setLeaveData((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, status } : item))
       );
     } catch (error) {
       console.error("Error updating leave status:", error);
@@ -123,7 +153,10 @@ const ApproveForm = () => {
   const filteredLeaveData = leaveData.filter((item) => {
     if (!item.leave_datetime || !selectedDate) return false;
     const leaveDate = new Date(item.leave_datetime);
-    return isSameDay(leaveDate, selectedDate) && (item.status === "pending" || !item.status);
+    return (
+      isSameDay(leaveDate, selectedDate) &&
+      (item.status === "pending" || !item.status)
+    );
   });
 
   return (
@@ -186,7 +219,7 @@ const ApproveForm = () => {
               </div>
               <div className="space-x-2">
                 <button
-                  className="rounded px-3 py-1 text-white bg-green-500 hover:bg-green-600"
+                  className="rounded bg-green-500 px-3 py-1 text-white hover:bg-green-600"
                   onClick={() => {
                     Swal.fire({
                       title: "บันทึกข้อมูลการอนุมัติ",
@@ -194,17 +227,23 @@ const ApproveForm = () => {
                       confirmButtonText: "ตกลง",
                       width: "400px",
                       customClass: {
-                        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+                        confirmButton:
+                          "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
                       },
                     }).then(() => {
-                      updateLeaveStatus(item.id, "approved");
+                      updateLeaveStatus(
+                        item.id,
+                        "approved",
+                        item.user_id,
+                        item.leave_datetime
+                      );
                     });
                   }}
                 >
                   อนุมัติ
                 </button>
                 <button
-                  className="rounded px-3 py-1 text-white bg-red-500 hover:bg-red-600"
+                  className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
                   onClick={() => {
                     Swal.fire({
                       title: "บันทึกข้อมูลการอนุมัติ",
@@ -212,10 +251,16 @@ const ApproveForm = () => {
                       confirmButtonText: "ตกลง",
                       width: "400px",
                       customClass: {
-                        confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+                        confirmButton:
+                          "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
                       },
                     }).then(() => {
-                      updateLeaveStatus(item.id, "rejected");
+                      updateLeaveStatus(
+                        item.id,
+                        "rejected",
+                        item.user_id,
+                        item.leave_datetime
+                      );
                     });
                   }}
                 >
