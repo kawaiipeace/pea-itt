@@ -74,7 +74,16 @@ export const getAllUsers = async (req: Request, res: Response) => {
           }),
       },
       include: {
-        student_profile: true,
+        student_profile: {
+          select: {
+            id: true,
+            mentor_id: true,
+            start_date: true,
+            end_date: true,
+            hours: true,
+            university: true
+          }
+        },
         mentor_profile: true,
       },
       orderBy: {

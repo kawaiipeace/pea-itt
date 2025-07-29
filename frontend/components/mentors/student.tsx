@@ -55,7 +55,7 @@ const Student = () => {
 
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&month=${startMonth.value}&year=${year.value}`,
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&month=${startMonth.value}&year=${year.value}&show_ended=true`,
           { withCredentials: true }
         );
 
