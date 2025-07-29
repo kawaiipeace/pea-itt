@@ -122,77 +122,103 @@ const Sidebar = () => {
             <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
               <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                 <IconMinus className="hidden h-5 w-4 flex-none" />
-                <span>{t("Administrator")}</span>
+                <span>{t("ผู้ดูแลระบบ")}</span>
               </h2>
 
-
-              
+              {/* Dashboard */}
               <li className="menu nav-item">
                 <Link
-                      href="/admin/dashboard"
-                      className={`nav-link group w-full ${
-                        pathname.startsWith("/admin/dashboard")
-                          ? "active"
-                          : ""
+                  href="/admin/dashboard"
+                  className={`nav-link group w-full ${
+                    pathname.startsWith("/admin/dashboard") ? "active" : ""
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <IconMenuCharts
+                      className={`shrink-0 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/dashboard") ? "!text-[#B10073]" : ""
+                      }`}
+                    />
+                    <span
+                      className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/dashboard") ? "!text-[#B10073] dark:!text-[#B10073]" : ""
                       }`}
                     >
-                  <div className="flex items-center">
-                    <IconMenuCharts className="shrink-0 group-hover:!text-primary" />
-                    <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("แดชบอร์ดนักศึกษา")}
                     </span>
                   </div>
                 </Link>
               </li>
 
+              {/* Student */}
               <li className="menu nav-item">
                 <Link
-                      href="/admin/student"
-                      className={`nav-link group w-full ${
-                        pathname.startsWith("/admin/student")
-                          ? "active"
-                          : ""
+                  href="/admin/student"
+                  className={`nav-link group w-full ${
+                    pathname.startsWith("/admin/student") ? "active" : ""
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <IconUser
+                      className={`shrink-0 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/student") ? "!text-[#B10073]" : ""
+                      }`}
+                    />
+                    <span
+                      className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/student") ? "!text-[#B10073] dark:!text-[#B10073]" : ""
                       }`}
                     >
-                  <div className="flex items-center">
-                    <IconUser className="shrink-0 group-hover:!text-primary" />
-                    <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("จัดการข้อมูลนักศึกษา")}
                     </span>
                   </div>
                 </Link>
               </li>
 
+              {/* Mentor */}
               <li className="menu nav-item">
                 <Link
-                      href="/admin/mentor"
-                      className={`nav-link group w-full ${
-                        pathname.startsWith("/admin/mentor")
-                          ? "active"
-                          : ""
+                  href="/admin/mentor"
+                  className={`nav-link group w-full ${
+                    pathname.startsWith("/admin/mentor") ? "active" : ""
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <IconMenuUsers
+                      className={`shrink-0 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/mentor") ? "!text-[#B10073]" : ""
+                      }`}
+                    />
+                    <span
+                      className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/mentor") ? "!text-[#B10073] dark:!text-[#B10073]" : ""
                       }`}
                     >
-                  <div className="flex items-center">
-                    <IconMenuUsers className="shrink-0 group-hover:!text-primary" />
-                    <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("จัดการข้อมูลพี่เลี้ยง")}
                     </span>
                   </div>
                 </Link>
               </li>
 
+              {/* Department */}
               <li className="menu nav-item">
                 <Link
-                      href="/admin/department"
-                      className={`nav-link group w-full ${
-                        pathname.startsWith("/admin/department")
-                          ? "active"
-                          : ""
+                  href="/admin/department"
+                  className={`nav-link group w-full ${
+                    pathname.startsWith("/admin/department") ? "active" : ""
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <IconMenuWidgets
+                      className={`shrink-0 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/department") ? "!text-[#B10073]" : ""
+                      }`}
+                    />
+                    <span
+                      className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 group-hover:!text-[#B10073] ${
+                        pathname.startsWith("/admin/department") ? "!text-[#B10073] dark:!text-[#B10073]" : ""
                       }`}
                     >
-                  <div className="flex items-center">
-                    <IconMenuWidgets className="shrink-0 group-hover:!text-primary" />
-                    <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
                       {t("จัดการข้อมูลกอง")}
                     </span>
                   </div>

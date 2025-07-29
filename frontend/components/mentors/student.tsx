@@ -55,7 +55,7 @@ const Student = () => {
 
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&month=${startMonth.value}&year=${year.value}`,
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&month=${startMonth.value}&year=${year.value}&show_ended=true`,
           { withCredentials: true }
         );
 
@@ -75,7 +75,8 @@ const Student = () => {
               return { ...student, picture_url: imageUrl };
             } catch (error: any) {
               if (error?.response?.status == 404) console.log("ไม่มีรูปภาพ");
-              else console.error("เกิดข้อผิดพลาดในการโหลดรูป:", student.id, error);
+              else
+                console.error("เกิดข้อผิดพลาดในการโหลดรูป:", student.id, error);
               return { ...student, picture_url: null };
             }
           })
@@ -98,7 +99,7 @@ const Student = () => {
           ข้อมูลนักศึกษาในความดูแล
         </h2>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 mt-11">
+        <div className="mt-11 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           {/* เดือน */}
           <div className="flex flex-col">
             <h3 className="mb-1 text-[14px] font-semibold">เดือน</h3>
@@ -107,12 +108,13 @@ const Student = () => {
               value={startMonth}
               onChange={(val: any) => setStartMonth(val!)}
               classNames={{
-                control: () =>
-                  "border border-gray-300 dark:border-gray-600 shadow-sm rounded-md",
+                menu: () => "z-[9999] dark:bg-gray-900 dark:text-gray-100",
                 menuList: () =>
-                  "max-h-48 overflow-y-auto bg-white dark:bg-gray-800",
-                option: () =>
-                  "text-sm px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700",
+                  "max-h-32 overflow-y-auto dark:bg-gray-900 dark:text-gray-100",
+                control: () =>
+                  "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
+                singleValue: () => "dark:text-gray-100",
+                
               }}
             />
           </div>
@@ -125,12 +127,12 @@ const Student = () => {
               value={year}
               onChange={(val: any) => setYear(val!)}
               classNames={{
-                control: () =>
-                  "border border-gray-300 dark:border-gray-600 shadow-sm rounded-md",
+                menu: () => "z-[9999] dark:bg-gray-900 dark:text-gray-100",
                 menuList: () =>
-                  "max-h-48 overflow-y-auto bg-white dark:bg-gray-800",
-                option: () =>
-                  "text-sm px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700",
+                  "max-h-32 overflow-y-auto dark:bg-gray-900 dark:text-gray-100",
+                control: () =>
+                  "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
+                singleValue: () => "dark:text-gray-100",
               }}
             />
           </div>
