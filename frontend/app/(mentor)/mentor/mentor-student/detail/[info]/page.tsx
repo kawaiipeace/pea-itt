@@ -6,7 +6,7 @@ import clsx from "clsx";
 import IconArrowBackward from "../../../../../../components/icon/icon-arrow-backward";
 import IconLogout from "../../../../../../components/icon/icon-logout"; 
 import axios from "axios";
-import IconUsers from "@/components/icon/icon-users";
+import { ChevronLeft } from "lucide-react";;
 import wattdee from "../../../../../../public/assets/images/watdee.jpeg";
 import Image from "next/image";
 import * as XLSX from "xlsx";
@@ -228,12 +228,13 @@ const InfoPage = ({ params }: PageProps) => {
 
   return (
     <section className="space-y-6 p-4">
-      <button
-        onClick={() => router.back()}
-        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
-      >
-        <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
-      </button>
+        <div
+            className="mb-4 flex cursor-pointer items-center gap-2 px-4 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white"
+            onClick={() => router.back()}
+        >
+            <ChevronLeft size={20} />
+            <span>ย้อนกลับ</span>
+        </div>
 
       {/* ข้อมูลส่วนตัว */}
       <div className="flex items-center justify-center px-4">
