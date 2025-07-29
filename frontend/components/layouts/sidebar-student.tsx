@@ -69,11 +69,17 @@ const SidebarStudent = () => {
                     >
                       <div className="flex items-center">
                         <img
-                          className="w-[20px] flex-none"
+                          className={`w-[20px] flex-none ${
+                            pathname === "/" ? "peaitt-active-icon" : ""
+                          }`}
                           src="/assets/images/time.png"
                           alt="logo"
                         />
-                        <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                        <span
+                          className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 ${
+                            pathname === "/" ? "peaitt-active-text" : ""
+                          }`}
+                        >
                           {t("การลงเวลาปฏิบัติงาน")}
                         </span>
                       </div>
@@ -91,8 +97,20 @@ const SidebarStudent = () => {
                       }`}
                     >
                       <div className="flex items-center">
-                        <IconMenuCalendar className="shrink-0 group-hover:!text-primary" />
-                        <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                        <IconMenuCalendar
+                          className={`shrink-0 group-hover:!text-primary ${
+                            pathname.startsWith("/users/leaverequest")
+                              ? "peaitt-active-icon"
+                              : ""
+                          }`}
+                        />
+                        <span
+                          className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 ${
+                            pathname.startsWith("/users/leaverequest")
+                              ? "peaitt-active-text"
+                              : ""
+                          }`}
+                        >
                           {t("การลาปฏิบัติงาน")}
                         </span>
                       </div>
@@ -104,6 +122,25 @@ const SidebarStudent = () => {
           </PerfectScrollbar>
         </div>
       </nav>
+      <style jsx global>{`
+        .peaitt-active-text {
+          color: #B10073 !important;
+        }
+        .peaitt-active-icon,
+        .peaitt-active-icon svg {
+          filter: none !important;
+          color: #B10073 !important;
+          fill: #B10073 !important;
+        }
+        .dark .peaitt-active-text {
+          color: #B10073 !important;
+        }
+        .dark .peaitt-active-icon,
+        .dark .peaitt-active-icon svg {
+          color: #B10073 !important;
+          fill: #B10073 !important;
+        }
+      `}</style>
     </div>
   );
 };

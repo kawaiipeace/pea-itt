@@ -147,32 +147,36 @@ export default function DepartmentForm() {
           <div className="flex-1 overflow-y-auto">
             <div className="flex w-full flex-col gap-3 sm:gap-4">
               {(selectedDept
-                ? departments.filter(
-                    (dept) => dept.dept_id === selectedDept.value
-                  )
-                : departments
-              ).map((dept) => (
-                <div
-                  key={dept.dept_id}
-                  className="flex items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4"
-                >
-                  <div className="flex flex-1 items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10">
+                  ? departments.filter(
+                      (dept) => dept.dept_id === selectedDept.value
+                    )
+                  : departments
+                ).map((dept) => (
+                    <div
+                    key={dept.dept_id}
+                    onClick={() => router.push(`/admin/department/edit?id=${dept.dept_id}`)}
+                    className="flex items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:cursor-pointer hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4"
+                    >
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10">
                       <IconUser />
-                    </div>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
+                      </div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
                       {dept.dept_name}
-                    </p>
-                  </div>
-                  <button
-                    onClick={(e) => handleDeptDelete(dept, e)}
-                    className="ml-auto rounded p-2 transition-colors"
-                    aria-label="ลบ"
-                  >
-                    <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
-                  </button>
-                </div>
-              ))}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeptDelete(dept, e);
+                      }}
+                      className="ml-auto rounded p-2 transition-colors"
+                      aria-label="ลบ"
+                    >
+                      <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
+                    </button>
+                    </div>
+                ))}
             </div>
           </div>
         ) : (

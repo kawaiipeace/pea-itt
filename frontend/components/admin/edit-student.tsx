@@ -7,7 +7,7 @@ import { th } from "date-fns/locale";
 import { format } from "date-fns";
 import Select from "react-select";
 import IconCalendar from "../icon/icon-calendar";
-import IconArrowBackward from "../icon/icon-arrow-backward";
+import { ChevronLeft } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -18,7 +18,7 @@ interface stuPro {
   end_date: string;
   start_date: string;
   university: string;
-  mentor_id: number;
+  mentor_id: number; // นี่คือ mentor_profile.id ที่ student มี
 }
 
 interface deptData {
@@ -81,7 +81,7 @@ const EditStudent = ({ id }: { id: number }) => {
     phone: "",
     start_date: "",
     end_date: "",
-    mentor_id: "",
+    mentor_id: "", // จะเก็บเป็น mentor_profile.id (string)
     department: "",
   });
 
@@ -124,6 +124,9 @@ const EditStudent = ({ id }: { id: number }) => {
 
   useEffect(() => {
     if (stuInfo) {
+      // debug log
+      console.log("student_profile mentor_id (mentor_profile.id):", stuInfo.student_profile?.mentor_id);
+
       setFormData({
         name: stuInfo.fname || "",
         surname: stuInfo.lname || "",
@@ -132,26 +135,12 @@ const EditStudent = ({ id }: { id: number }) => {
         phone: stuInfo.phone_number || "",
         start_date: stuInfo.student_profile?.start_date || "",
         end_date: stuInfo.student_profile?.end_date || "",
+        // ใช้ mentor_profile.id ตรงๆ ที่ student_profile.mentor_id เป็น string เพื่อ match กับ options
         mentor_id: stuInfo.student_profile?.mentor_id?.toString() || "",
         department: stuInfo.department?.dept_id.toString() || "",
       });
     }
   }, [stuInfo]);
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const result = event.target?.result;
-        if (typeof result === "string") {
-          setImageSrc(result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -162,13 +151,13 @@ const EditStudent = ({ id }: { id: number }) => {
             withCredentials: true,
           }
         );
+        // ใช้ mentor_profile.id เป็น value เพื่อให้ตรงกับ mentor_id ใน student_profile
         const mentors = mentorRes.data.data.map((m: any) => ({
           label: `${m.fname} ${m.lname}`,
-          value: m.id.toString(),
+          value: m.mentor_profile.id.toString(),
         }));
         setMentorOptions(mentors);
 
-        // แก้ URL ให้แน่ใจว่ามี / ตรงกลางระหว่าง base กับ endpoint
         const deptRes = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}dept`,
           {
@@ -177,7 +166,7 @@ const EditStudent = ({ id }: { id: number }) => {
         );
         const depts = deptRes.data.data.map((d: any) => ({
           label: d.dept_name,
-          value: (d.dept_id).toString(), // รองรับทั้ง dept_id หรือ id
+          value: d.dept_id.toString(),
         }));
 
         setDepartmentOptions(depts);
@@ -196,16 +185,19 @@ const EditStudent = ({ id }: { id: number }) => {
     }
 
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users/${formData.mentor_id}`, { withCredentials: true })
-      const mentID = res.data.data.mentor_profile.id
-  
+      // เนื่องจาก mentor_id ใน formData คือ mentor_profile.id 
+      // แต่ API อาจต้อง user.id ในการอัปเดต ให้ fetch user id ก่อน
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}mentor-profile/${formData.mentor_id}`,
+        { withCredentials: true }
+      );
+      const userIdOfMentor = res.data.data.user_id;
 
-
-       axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}users/admin/${id}`, // ✅ ใช้ id จาก props
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}users/admin/${id}`, // id ของนักศึกษา
         {
-          "department_id": formData.department,
-          "mentor_id": mentID
+          department_id: formData.department,
+          mentor_id: userIdOfMentor,
         },
         { withCredentials: true }
       );
@@ -224,14 +216,30 @@ const EditStudent = ({ id }: { id: number }) => {
     }
   };
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event: ProgressEvent<FileReader>) => {
+        const result = event.target?.result;
+        if (typeof result === "string") {
+          setImageSrc(result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   return (
     <div>
-      <button
-        onClick={() => router.back()}
-        className="mb-4 flex w-max items-center gap-1 text-sm text-gray-600 hover:text-primary dark:border-[#506690] dark:bg-black-dark-light/5 dark:text-[#506690]"
-      >
-        <IconArrowBackward className="h-4 w-4" /> ย้อนกลับ
-      </button>
+      <div
+            className="mb-4 flex cursor-pointer items-center gap-2 px-4 text-sm text-gray-600 hover:text-black dark:text-[#506690] dark:hover:text-white"
+            onClick={() => router.back()}
+        >
+            <ChevronLeft size={20} />
+            <span>ย้อนกลับ</span>
+        </div>
 
       <div className="mx-auto w-full max-w-6xl p-4 dark:rounded-lg dark:bg-black-dark-light/5">
         <div className="flex flex-col gap-6 rounded-lg border bg-white p-6 shadow-md dark:border-gray-900 dark:bg-gray-900 dark:text-[#506690] md:flex-row">
@@ -320,9 +328,8 @@ const EditStudent = ({ id }: { id: number }) => {
                     className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900  dark:text-[#506690]"
                   />
                 </div>
-                
                 {["start_date", "end_date"].map((field, index) => (
-                  <div className="w-full md:flex-1" key={field}>
+                  <div className="w-full md:w-[25%]" key={field}>
                     <label className="block text-sm font-medium dark:text-[#506690]">
                       {index === 0
                         ? "วันที่เริ่มฝึกงาน"
@@ -353,9 +360,7 @@ const EditStudent = ({ id }: { id: number }) => {
                 ))}
               </div>
               <div className="w-full">
-                <label className="block text-sm font-medium">
-                  กองที่สังกัด
-                </label>
+                <label className="block text-sm font-medium">กองที่สังกัด</label>
                 <Select
                   options={departmentOptions}
                   value={departmentOptions.find(
@@ -372,9 +377,10 @@ const EditStudent = ({ id }: { id: number }) => {
                   classNames={{
                     //@ts-ignore
                     control: ({ isFocused }) =>
-                      `rounded border text-sm ${isFocused
-                        ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                        : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
+                      `rounded border text-sm ${
+                        isFocused
+                          ? "border-[#9B006C] bg-white dark:bg-gray-900"
+                          : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
                       } text-gray-900 dark:text-gray-300`,
                     singleValue: () => "text-gray-900 dark:text-gray-300",
                     placeholder: () => "text-gray-400 dark:text-gray-500",
@@ -382,9 +388,10 @@ const EditStudent = ({ id }: { id: number }) => {
                       "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
                     //@ts-ignore
                     option: ({ isFocused, isSelected }) =>
-                      `cursor-pointer ${isSelected
-                        ? "bg-[#9B006C] text-white"
-                        : isFocused
+                      `cursor-pointer ${
+                        isSelected
+                          ? "bg-[#9B006C] text-white"
+                          : isFocused
                           ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                           : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                       }`,
@@ -392,9 +399,7 @@ const EditStudent = ({ id }: { id: number }) => {
                 />
               </div>
               <div className="w-full">
-                <label className="block text-sm font-medium">
-                  ชื่อพี่เลี้ยง
-                </label>
+                <label className="block text-sm font-medium">ชื่อพี่เลี้ยง</label>
                 <Select
                   options={mentorOptions}
                   value={mentorOptions.find(
@@ -408,9 +413,10 @@ const EditStudent = ({ id }: { id: number }) => {
                   classNames={{
                     //@ts-ignore
                     control: ({ isFocused }) =>
-                      `rounded border text-sm ${isFocused
-                        ? "border-[#9B006C] bg-white dark:bg-gray-900"
-                        : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
+                      `rounded border text-sm ${
+                        isFocused
+                          ? "border-[#9B006C] bg-white dark:bg-gray-900"
+                          : "border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-900"
                       } text-gray-900 dark:text-gray-300`,
                     singleValue: () => "text-gray-900 dark:text-gray-300",
                     placeholder: () => "text-gray-400 dark:text-gray-500",
@@ -418,9 +424,10 @@ const EditStudent = ({ id }: { id: number }) => {
                       "z-50 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded shadow-md",
                     //@ts-ignore
                     option: ({ isFocused, isSelected }) =>
-                      `cursor-pointer ${isSelected
-                        ? "bg-[#9B006C] text-white"
-                        : isFocused
+                      `cursor-pointer ${
+                        isSelected
+                          ? "bg-[#9B006C] text-white"
+                          : isFocused
                           ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                           : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                       }`,
