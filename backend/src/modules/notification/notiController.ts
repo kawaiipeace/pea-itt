@@ -34,40 +34,49 @@ export const creatNotification = async (req: Request, res: Response) => {
 };
 
 export const getNotification = async (req: Request, res: Response) => {
-    try {
-        const { user_id }: notiModels.GetNotificationQuery = req.query
-        const userID: number | undefined = user_id ? Number(user_id) : undefined;
+  try {
+    const { user_id, is_read }: notiModels.GetNotificationQuery = req.query;
 
-        const mynoti = await prisma.notification.findMany({
-            where: {
-                ...(userID !== undefined && { user_id: userID })
-            }
-        })
-        if (mynoti.length === 0) {
-            res.status(httpStatus.NOT_FOUND).json({
-                message: "No notifications found",
-                data: []
-            });
-            return
-        }
-        res.status(httpStatus.OK).json({
-            message: "Notifications fetched successfully",
-            data: mynoti
-        })
+    const userID = user_id ? Number(user_id) : undefined;
+    const isRead =
+      typeof is_read === "string"
+        ? is_read === "true"
+        : typeof is_read === "boolean"
+        ? is_read
+        : undefined;
 
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(httpStatus.BAD_REQUEST).json({
-                message: "Something went wrong!",
-                errors: error,
-            });
-        } else {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-                message: "Internal server error",
-            });
-        }
+    const mynoti = await prisma.notification.findMany({
+      where: {
+        ...(userID !== undefined && { user_id: userID }),
+        ...(isRead !== undefined && { is_read: isRead }),
+      },
+    });
+
+    if (mynoti.length === 0) {
+      res.status(httpStatus.NOT_FOUND).json({
+        message: "No notifications found",
+        data: [],
+      });
+      return;
     }
-}
+
+    res.status(httpStatus.OK).json({
+      message: "Notifications fetched successfully",
+      data: mynoti,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "Something went wrong!",
+        errors: error.message,
+      });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  }
+};
 
 export const readNotification = async (req: Request, res: Response) => {
     try {

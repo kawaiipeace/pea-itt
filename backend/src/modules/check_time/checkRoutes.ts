@@ -140,8 +140,16 @@ router.post(
 router.get(
   "/check-time",
   authenticateJWT,
-  authorizeRoles(ROLE_IDS.STUDENT,ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
+  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN),
   chackController.getTimeCheck
 );
+
+router.get(
+  "/check-summary/:id", 
+  authenticateJWT, 
+  authorizeRoles(ROLE_IDS.STUDENT, ROLE_IDS.MENTOR, ROLE_IDS.ADMIN), 
+  chackController.getCheckTimeSummary
+);
+
 
 export default router;

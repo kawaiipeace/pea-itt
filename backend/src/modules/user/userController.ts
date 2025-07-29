@@ -4,34 +4,86 @@ import httpStatus from "http-status-codes";
 import { ZodError } from "zod";
 import * as usersModels from "./userModels";
 import { logAction } from "../../common/utils/logger";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const { department_id, mentor_id, show_ended } = req.query;
+    const {
+      department_id,
+      stu_id,
+      mentor_id,
+      show_ended,
+      month,
+      year,
+    } = req.query;
 
     const departmentId = department_id ? Number(department_id) : undefined;
     const mentorId = mentor_id ? Number(mentor_id) : undefined;
+    const studentId = stu_id ? Number(stu_id) : undefined;
     const showEnded = show_ended === "true";
+    const monthNum = month ? Number(month) : undefined;
+    const yearNum = year ? Number(year) : undefined;
 
     const today = new Date();
+
+    let startOfSelectedMonth: Date | undefined;
+    let endOfSelectedMonth: Date | undefined;
+
+    if (monthNum && yearNum) {
+      startOfSelectedMonth = startOfMonth(new Date(yearNum, monthNum - 1));
+      endOfSelectedMonth = endOfMonth(new Date(yearNum, monthNum - 1));
+    }
 
     const users = await prisma.user.findMany({
       where: {
         ...(departmentId ? { department_id: departmentId } : {}),
-        student_profile: {
-          ...(mentorId ? { mentor_id: mentorId } : {}),
-          ...(showEnded
-            ? {} 
-            : {
-                OR: [
-                  { end_date: { gte: today } },
-                  { end_date: null },
-                ],
-              }),
-        },
+        ...(studentId
+          ? {
+            student_profile: {
+              id: studentId,
+            },
+          }
+          : {
+            student_profile: {
+              ...(mentorId ? { mentor_id: mentorId } : {}),
+              ...(showEnded
+                ? {}
+                : {
+                  OR: [
+                    { end_date: { gte: today } },
+                    { end_date: null },
+                  ],
+                }),
+              ...(startOfSelectedMonth && endOfSelectedMonth
+                ? {
+                  AND: [
+                    {
+                      start_date: {
+                        lte: endOfSelectedMonth,
+                      },
+                    },
+                    {
+                      end_date: {
+                        gte: startOfSelectedMonth,
+                      },
+                    },
+                  ],
+                }
+                : {}),
+            },
+          }),
       },
       include: {
-        student_profile: true,
+        student_profile: {
+          select: {
+            id: true,
+            mentor_id: true,
+            start_date: true,
+            end_date: true,
+            hours: true,
+            university: true
+          }
+        },
         mentor_profile: true,
       },
       orderBy: {
@@ -41,8 +93,8 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
     res.status(httpStatus.OK).json({
       success: true,
-      data: users,
       message: "Users retrieved successfully",
+      data: users,
     });
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -53,7 +105,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 export const getUserById = async (req: Request, res: Response) => {
   try {

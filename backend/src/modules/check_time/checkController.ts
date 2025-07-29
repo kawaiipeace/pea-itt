@@ -4,6 +4,8 @@ import { ZodError } from "zod";
 import httpStatus from "http-status-codes";
 import * as checkModels from "./checkModels";
 import getClientIp from "../../common/utils/ipUtils";
+import { startOfDay, endOfDay, addDays } from "date-fns";
+
 
 export const checkTime = async (req: Request, res: Response) => {
   try {
@@ -123,13 +125,13 @@ export const checkTime = async (req: Request, res: Response) => {
 
       if (checkInToday && checkInToday.time) {
         const durationMs = new Date().getTime() - checkInToday.time.getTime();
-        const durationHours = durationMs / (1000 * 60 * 60); 
+        const durationHours = durationMs / (1000 * 60 * 60);
 
         await prisma.student_profile.updateMany({
           where: { user_id: user.id },
           data: {
             hours: {
-              increment: parseFloat(durationHours.toFixed(2)), 
+              increment: parseFloat(durationHours.toFixed(2)),
             },
           },
         });
@@ -207,3 +209,99 @@ export const getTimeCheck = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const getCheckTimeSummary = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+
+    const studentProfile = await prisma.student_profile.findUnique({
+      where: { user_id: Number(userId) },
+    });
+
+    if (!studentProfile?.start_date || !studentProfile?.end_date) {
+      res.status(httpStatus.BAD_REQUEST).json({
+        message: "ยังไม่มีข้อมูลวันเริ่มและสิ้นสุดการฝึกงาน",
+      });
+      return
+    }
+
+    const startDate = startOfDay(studentProfile.start_date);
+    const endDate = endOfDay(studentProfile.end_date);
+
+    const totalDays =
+      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    // ------------------ ดึงวันที่เช็กอิน ------------------
+    const checkIns = await prisma.check_time.findMany({
+      where: {
+        user_id: Number(userId),
+        type_check: "in",
+        time: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        time: true,
+      },
+    });
+
+    const uniqueCheckInDays = new Set(
+      checkIns
+        .filter((c) => c.time !== null)
+        .map((c) => startOfDay(c.time!).toDateString())
+    );
+
+    // ------------------ ดึงวันที่ลา ------------------
+    const approvedLeaves = await prisma.leave_request.findMany({
+      where: {
+        user_id: Number(userId),
+        status: "approved",
+        leave_datetime: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        leave_datetime: true,
+      },
+    });
+
+    const uniqueLeaveDays = new Set(
+      approvedLeaves
+        .filter((l) => l.leave_datetime !== null)
+        .map((l) => startOfDay(l.leave_datetime!).toDateString())
+    );
+
+    // ------------------ คำนวณวันไม่มาและไม่ลา ------------------
+    const allDates = Array.from({ length: totalDays }, (_, i) => {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
+      return d.toDateString();
+    });
+
+    const daysAbsent = allDates.filter(
+      (d) => !uniqueCheckInDays.has(d) && !uniqueLeaveDays.has(d)
+    );
+
+    res.status(httpStatus.OK).json({
+      message: "สรุปการเข้าเช็กชื่อสำเร็จ",
+      start_date: startDate,
+      end_date: endDate,
+      total_days: totalDays,
+      days_checked_in: uniqueCheckInDays.size,
+      check_in_dates: Array.from(uniqueCheckInDays),
+      days_leave: uniqueLeaveDays.size,
+      leave_dates: Array.from(uniqueLeaveDays),
+      days_absent: daysAbsent.length,
+      absent_dates: daysAbsent,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "ไม่สามารถสรุปข้อมูลการเช็กชื่อได้",
+    });
+  }
+};
+
+

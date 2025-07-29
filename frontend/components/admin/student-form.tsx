@@ -95,7 +95,7 @@ const StudentForm = () => {
     const fetchStudentsWithPicture = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`,
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=true`,
           { withCredentials: true }
         );
 

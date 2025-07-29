@@ -234,7 +234,7 @@ const HistoryForm: React.FC = () => {
         confirmButtonText: "ตกลง",
         width: "400px",
         customClass: {
-          confirmButton: "swal2-confirm !bg-purple-700 !text-white !px-6 !py-3",
+          confirmButton: "swal2-confirm !bg-[#74045F] !text-white !px-6 !py-3",
         },
       });
     } catch (error) {
