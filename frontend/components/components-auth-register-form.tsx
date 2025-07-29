@@ -128,15 +128,16 @@ const ComponentsAuthRegisterForm = () => {
 
   const validate = () => {
     const newErr: ErrorType = {};
-    if (!formData.fname) newErr.fname = "กรุณากรอกชื่อจริง";
-    if (!formData.lname) newErr.lname = "กรุณากรอกนามสกุล";
-    if (!formData.email) newErr.email = "กรุณากรอกอีเมล";
+
+    if (!formData.fname.trim()) newErr.fname = "กรุณากรอกชื่อจริง";
+    if (!formData.lname.trim()) newErr.lname = "กรุณากรอกนามสกุล";
+    if (!formData.email.trim()) newErr.email = "กรุณากรอกอีเมล";
     if (!/^0[0-9]{9}$/.test(formData.phone_number))
       newErr.phone_number = "กรุณากรอกเบอร์ 10 หลัก";
-    if (!formData.university) newErr.university = "กรุณากรอกมหาวิทยาลัย";
+    if (!formData.university.trim()) newErr.university = "กรุณากรอกมหาวิทยาลัย";
     if (!formData.start_date) newErr.start_date = "กรุณากรอกวันที่เริ่มฝึก";
     if (!formData.end_date) newErr.end_date = "กรุณากรอกวันที่สิ้นสุดฝึก";
-    if (!password || password.length < 8)
+    if (!password.trim() || password.length < 8)
       newErr.password = "รหัสผ่านต้อง 8 ตัวขึ้นไป";
     if (password !== confirmPassword)
       newErr.confirmPassword = "รหัสผ่านไม่ตรงกัน";
@@ -157,7 +158,6 @@ const ComponentsAuthRegisterForm = () => {
         department_id: Number(formData.department),
         password_hash: password,
       });
-
 
       Swal.fire({
         title: "บันทึกข้อมูลเรียบร้อย",
@@ -207,8 +207,9 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.fname}
         onChange={handleChange}
         placeholder="กรุณากรอกชื่อจริง"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-          }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
+          errors.fname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
       />
       <InputField
         label="นามสกุล"
@@ -217,8 +218,9 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.lname}
         onChange={handleChange}
         placeholder="กรุณากรอกนามสกุล"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.lname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-          }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
+          errors.lname ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
       />
       <InputField
         label="อีเมล"
@@ -228,8 +230,9 @@ const ComponentsAuthRegisterForm = () => {
         onChange={handleChange}
         type="email"
         placeholder="กรุณากรอกอีเมล"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.email ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-          }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
+          errors.email ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
       />
       <div>
         <label className="mb-1 block font-medium">เบอร์โทรศัพท์</label>
@@ -242,8 +245,9 @@ const ComponentsAuthRegisterForm = () => {
           maxLength={10}
           value={formData.phone_number}
           placeholder="กรุณากรอกเบอร์โทรศัพท์"
-          className={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.phone_number ? "border-red-400" : "border-gray-300"
-            }`}
+          className={`w-full max-w-[300px] rounded border px-3 py-2 ${
+            errors.phone_number ? "border-red-400" : "border-gray-300"
+          }`}
         />
         {errors.phone_number && (
           <p className="mt-1 text-[11px] text-red-500">{errors.phone_number}</p>
@@ -256,8 +260,9 @@ const ComponentsAuthRegisterForm = () => {
         error={errors.university}
         onChange={handleChange}
         placeholder="กรุณากรอกชื่อมหาวิทยาลัย"
-        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${errors.university ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
-          }`}
+        styles={`w-full max-w-[300px] rounded border px-3 py-2 ${
+          errors.university ? "border-red-400 bg-[#FFEBEE]" : "border-gray-300"
+        }`}
       />
 
       <div className="flex gap-1">
@@ -278,10 +283,11 @@ const ComponentsAuthRegisterForm = () => {
             locale="th"
             customInput={<CustomDateInput />}
             placeholderText="เลือกวันที่เริ่ม"
-            className={`w-full rounded border px-3 py-2 pr-10 ${errors.start_date
+            className={`w-full rounded border px-3 py-2 pr-10 ${
+              errors.start_date
                 ? "border-red-400 bg-[#FFEBEE]"
                 : "border-gray-300"
-              }`}
+            }`}
           />
           <IconCalendar className="pointer-events-none absolute right-3 top-8 text-gray-500" />
           {errors.start_date && (
@@ -306,10 +312,11 @@ const ComponentsAuthRegisterForm = () => {
             locale="th"
             customInput={<CustomDateInput />}
             placeholderText="เลือกวันที่สิ้นสุด"
-            className={`w-full rounded border px-3 py-2 pr-10 ${errors.end_date
+            className={`w-full rounded border px-3 py-2 pr-10 ${
+              errors.end_date
                 ? "border-red-400 bg-[#FFEBEE]"
                 : "border-gray-300"
-              }`}
+            }`}
           />
           <IconCalendar className="pointer-events-none absolute right-3 top-8 text-gray-500" />
           {errors.end_date && (

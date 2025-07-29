@@ -243,7 +243,9 @@ const UserProfile = () => {
                 <input
                   type="text"
                   value={formData.university}
-                  readOnly
+                  onChange={(e) =>
+                    setFormData({ ...formData, university: e.target.value })
+                  }
                   className="w-full rounded border p-2 dark:border-gray-500 dark:bg-gray-900 dark:text-[#506690]"
                 />
               </div>
@@ -274,7 +276,7 @@ const UserProfile = () => {
               ))}
             </div>
 
-              {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
+            {[{ label: "กองที่สังกัด", value: formData.department }, { label: "ชื่อพี่เลี้ยง", value: formData.mentor_id }].map(({ label, value }) => (
               <div key={label}>
                 <label className="block text-sm font-medium">{label}</label>
                 <input
