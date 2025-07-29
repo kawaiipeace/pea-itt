@@ -189,6 +189,24 @@ const Headermentor = () => {
     }
   };
   
+   const readAllNotifications = async () => {
+    try {
+      await Promise.all(
+        notifications.map((n) =>
+          axios.put(
+            `${process.env.NEXT_PUBLIC_API_URL}noti/read/${n.id}`,
+            {},
+            { withCredentials: true }
+          )
+        )
+      );
+      setNotifications([]);
+    } catch (error) {
+      console.error("ไม่สามารถอ่านการแจ้งเตือนทั้งหมดได้", error);
+    }
+  };
+
+
   const [search, setSearch] = useState(false);
 
   const user = useAuthStore((state) => state.user);
@@ -329,9 +347,12 @@ const Headermentor = () => {
                           </li>
                         );
                       })}
-                      <li>
+                       <li>
                         <div className="p-4">
-                          <button className="btn btn-primary btn-small block w-full">
+                          <button
+                            className="btn btn-primary btn-small block w-full"
+                            onClick={readAllNotifications}
+                          >
                             Read All Notifications
                           </button>
                         </div>
