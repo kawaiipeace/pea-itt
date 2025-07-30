@@ -19,6 +19,7 @@ interface mystuData {
 }
 
 const months = [
+  { value: "", label: "ทั้งหมด" },
   { value: 1, label: "มกราคม" },
   { value: 2, label: "กุมภาพันธ์" },
   { value: 3, label: "มีนาคม" },
@@ -34,6 +35,7 @@ const months = [
 ];
 
 const years = [
+  { value: "", label: "ทั้งหมด" },
   { value: "2025", label: "2568" },
   { value: "2024", label: "2567" },
   { value: "2023", label: "2566" },
@@ -44,23 +46,30 @@ const years = [
 const Student = () => {
   const user = useAuthStore((state) => state.user);
   const [mystu, setMystu] = useState<mystuData[]>([]);
-  const [selectedFilter, setSelectedFilter] = useState<string>("false");
-
-  const [startMonth, setStartMonth] = useState(months[0]);
-  const [year, setYear] = useState(years[0]);
+  const [startMonth, setStartMonth] = useState(months[0]); // ค่าเริ่มต้น "ทั้งหมด"
+  const [year, setYear] = useState(years[0]); // ค่าเริ่มต้น "ทั้งหมด"
 
   useEffect(() => {
     const fetchStudents = async () => {
       if (!user?.mentor_profile?.id) return;
 
+      // สร้าง params เฉพาะเมื่อเลือกจริง
+      const params: any = {
+        mentor_id: user.mentor_profile.id,
+        show_ended: true,
+      };
+      if (startMonth.value) params.month = startMonth.value;
+      if (year.value) params.year = year.value;
+
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${user.mentor_profile.id}&month=${startMonth.value}&year=${year.value}&show_ended=true`,
-          { withCredentials: true }
-        );
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}users`, {
+          params,
+          withCredentials: true,
+        });
 
         const students = res.data.data;
 
+        // โหลดรูปภาพนักศึกษา (ถ้ามี)
         const studentsWithPicture = await Promise.all(
           students.map(async (student: mystuData) => {
             try {
@@ -74,9 +83,13 @@ const Student = () => {
               const imageUrl = URL.createObjectURL(imageRes.data);
               return { ...student, picture_url: imageUrl };
             } catch (error: any) {
-              if (error?.response?.status == 404) console.log("ไม่มีรูปภาพ");
+              if (error?.response?.status === 404) console.log("ไม่มีรูปภาพ");
               else
-                console.error("เกิดข้อผิดพลาดในการโหลดรูป:", student.id, error);
+                console.error(
+                  "เกิดข้อผิดพลาดในการโหลดรูป:",
+                  student.id,
+                  error
+                );
               return { ...student, picture_url: null };
             }
           })
@@ -88,9 +101,8 @@ const Student = () => {
       }
     };
 
-    // ✅ trigger ทุกครั้งที่ user, month, year หรือ show_ended เปลี่ยน
     fetchStudents();
-  }, [user?.mentor_profile?.id, selectedFilter, startMonth, year]);
+  }, [user?.mentor_profile?.id, startMonth, year]);
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -100,7 +112,7 @@ const Student = () => {
         </h2>
 
         <div className="mt-11 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          {/* เดือน */}
+          {/* เลือกเดือน */}
           <div className="flex flex-col">
             <h3 className="mb-1 text-[14px] font-semibold">เดือน</h3>
             <Select
@@ -114,12 +126,11 @@ const Student = () => {
                 control: () =>
                   "dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
                 singleValue: () => "dark:text-gray-100",
-                
               }}
             />
           </div>
 
-          {/* ปี */}
+          {/* เลือกปี */}
           <div className="flex flex-col">
             <h3 className="mb-1 text-[14px] font-semibold">ปี</h3>
             <Select
@@ -139,7 +150,7 @@ const Student = () => {
         </div>
       </div>
 
-      {/* รายการนักศึกษา */}
+      {/* แสดงข้อมูลนักศึกษา */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {mystu.map((student) => (
           <Card key={student.id} student={student} />
