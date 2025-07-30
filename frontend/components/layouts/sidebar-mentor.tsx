@@ -63,41 +63,64 @@ const SidebarMentor = () => {
                 <ul>
                   <li className="menu nav-item">
                     <Link
-                          href="/mentor/dashboard"
-                          className={`nav-link group w-full ${
-                            pathname.startsWith("/admin/dashbord")
-                              ? "active"
-                              : ""
-                          }`}
-                        >
-                      <div className="flex items-center">
-                        <IconMenuCharts className="shrink-0 group-hover:!text-primary" />
-                        <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
-                            {t("แดชบอร์ดนักศึกษา")}
-                        </span>
-                      </div>
-                    </Link>
-                  </li>
-                  
-                  <li className="menu nav-item">
-                    <Link
-                      href="mentor-student"
+                      href="/mentor/dashboard"
                       className={`nav-link group w-full ${
-                        pathname.startsWith("/mentor-student")
+                        pathname.startsWith("/mentor/dashboard")
                           ? "active"
                           : ""
                       }`}
                     >
                       <div className="flex items-center">
-                        <IconUsers className="shrink-0 group-hover:!text-primary" />
-                        <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                        <IconMenuCharts
+                          className={`shrink-0 group-hover:!text-primary ${
+                            pathname.startsWith("/mentor/dashboard")
+                              ? "peaitt-active-icon"
+                              : ""
+                          }`}
+                        />
+                        <span
+                          className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 ${
+                            pathname.startsWith("/mentor/dashboard")
+                              ? "peaitt-active-text"
+                              : ""
+                          }`}
+                        >
+                          {t("แดชบอร์ดนักศึกษา")}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+
+                  <li className="menu nav-item">
+                    <Link
+                      href="/mentor/mentor-student"
+                      className={`nav-link group w-full ${
+                        pathname.startsWith("/mentor/mentor-student")
+                          ? "active"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <IconUsers
+                          className={`shrink-0 group-hover:!text-primary ${
+                            pathname.startsWith("/mentor/mentor-student")
+                              ? "peaitt-active-icon"
+                              : ""
+                          }`}
+                        />
+                        <span
+                          className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 ${
+                            pathname.startsWith("/mentor/mentor-student")
+                              ? "peaitt-active-text"
+                              : ""
+                          }`}
+                        >
                           {t("นักศึกษาของคุณ")}
                         </span>
                       </div>
                     </Link>
                   </li>
 
-                  
                   <li className="nav-item">
                     <Link
                       href="/mentor/approver"
@@ -108,8 +131,20 @@ const SidebarMentor = () => {
                       }`}
                     >
                       <div className="flex items-center">
-                        <IconSquareCheck className="shrink-0 group-hover:!text-primary" />
-                        <span className="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                        <IconSquareCheck
+                          className={`shrink-0 group-hover:!text-primary ${
+                            pathname.startsWith("/mentor/approver")
+                              ? "peaitt-active-icon"
+                              : ""
+                          }`}
+                        />
+                        <span
+                          className={`text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3 ${
+                            pathname.startsWith("/mentor/approver")
+                              ? "peaitt-active-text"
+                              : ""
+                          }`}
+                        >
                           {t("อนุมัติการลา")}
                         </span>
                       </div>
@@ -121,6 +156,25 @@ const SidebarMentor = () => {
           </PerfectScrollbar>
         </div>
       </nav>
+      <style jsx global>{`
+        .peaitt-active-text {
+          color: #B10073 !important;
+        }
+        .peaitt-active-icon,
+        .peaitt-active-icon svg {
+          filter: none !important;
+          color: #B10073 !important;
+          fill: #B10073 !important;
+        }
+        .dark .peaitt-active-text {
+          color: #B10073 !important;
+        }
+        .dark .peaitt-active-icon,
+        .dark .peaitt-active-icon svg {
+          color: #B10073 !important;
+          fill: #B10073 !important;
+        }
+      `}</style>
     </div>
   );
 };

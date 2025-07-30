@@ -95,7 +95,7 @@ const StudentForm = () => {
     const fetchStudentsWithPicture = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=false`,
+          `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${selectedMentor.value}&show_ended=true`,
           { withCredentials: true }
         );
 
@@ -217,7 +217,7 @@ const StudentForm = () => {
       <div className="mb-10 flex flex-wrap justify-center gap-4 sm:gap-6 sm:px-6">
         <div>
           <label className="mb-2 block text-base font-medium dark:text-[#506690]">
-            ชื่อกอง
+            ชื่อหน่วยงาน
           </label>
           <Select
             options={departmentOptions}

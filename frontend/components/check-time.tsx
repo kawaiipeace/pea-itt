@@ -105,7 +105,7 @@ const CheckTime = () => {
       showSuccessSwal();
     } catch (error: any) {
       Swal.fire({
-        title: "ไม่สามารถเช็กอินได้",
+        title: "ลงเวลาเข้างานไม่สำเร็จ",
         text:
           error.response?.data?.message ||
           "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
@@ -144,7 +144,7 @@ const CheckTime = () => {
       showSuccessSwal();
     } catch (error: any) {
       Swal.fire({
-        title: "ไม่สามารถเช็กเอาต์ได้",
+        title: "ลงเวลาออกงานไม่สำเร็จ",
         text:
           error.response?.data?.message ||
           "เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่",
@@ -168,7 +168,7 @@ const CheckTime = () => {
         const isWithin = distance <= 500;
 
         setCanCheckIn(isWithin && hour >= 8 && hour <= 16);
-        setCanCheckOut(isWithin && hour === 17);
+        setCanCheckOut(isWithin && hour >= 12 && hour <= 20);
       }
     }, 1000);
     return () => clearInterval(timer); 

@@ -121,18 +121,18 @@ export default function DepartmentForm() {
       {/* หัวเรื่อง และ หาชื่อกอง */}
       <div className="bg-gray-50 px-4 pb-10 pt-6 dark:bg-black-dark-light/5 sm:px-6 md:px-10">
         <h1 className="mb-[40px] text-2xl font-semibold dark:text-gray-400 sm:text-3xl md:text-[32px]">
-          ข้อมูลกอง
+          ข้อมูลหน่วยงาน
         </h1>
         <div className="mb-2 flex flex-wrap gap-4 px-0 sm:gap-6">
           <div>
             <label className="mb-2 block text-base font-medium dark:text-[#506690]">
-              ค้นหากอง
+              ค้นหาหน่วยงาน
             </label>
             <Select<Option, false>
               options={deptOpts}
               value={selectedDept}
               onChange={setSelectedDept}
-              placeholder="ค้นหากอง"
+              placeholder="ค้นหาหน่วยงาน"
               className="w-[200px] sm:w-[240px] md:w-[280px]"
               classNames={selectClassNames as any}
               isClearable
@@ -147,38 +147,42 @@ export default function DepartmentForm() {
           <div className="flex-1 overflow-y-auto">
             <div className="flex w-full flex-col gap-3 sm:gap-4">
               {(selectedDept
-                ? departments.filter(
-                    (dept) => dept.dept_id === selectedDept.value
-                  )
-                : departments
-              ).map((dept) => (
-                <div
-                  key={dept.dept_id}
-                  className="flex items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4"
-                >
-                  <div className="flex flex-1 items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10">
+                  ? departments.filter(
+                      (dept) => dept.dept_id === selectedDept.value
+                    )
+                  : departments
+                ).map((dept) => (
+                    <div
+                    key={dept.dept_id}
+                    onClick={() => router.push(`/admin/department/edit?id=${dept.dept_id}`)}
+                    className="flex items-center gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:cursor-pointer hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4"
+                    >
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10">
                       <IconUser />
-                    </div>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
+                      </div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
                       {dept.dept_name}
-                    </p>
-                  </div>
-                  <button
-                    onClick={(e) => handleDeptDelete(dept, e)}
-                    className="ml-auto rounded p-2 transition-colors"
-                    aria-label="ลบ"
-                  >
-                    <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
-                  </button>
-                </div>
-              ))}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeptDelete(dept, e);
+                      }}
+                      className="ml-auto rounded p-2 transition-colors"
+                      aria-label="ลบ"
+                    >
+                      <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500" />
+                    </button>
+                    </div>
+                ))}
             </div>
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center">
             <p className="text-center text-sm text-gray-400 dark:text-[#506690] sm:text-base">
-              ไม่พบข้อมูลกองในระบบ
+              ไม่พบข้อมูลหน่วยงานในระบบ
             </p>
           </div>
         )}
@@ -189,10 +193,10 @@ export default function DepartmentForm() {
         <button
           type="button"
           onClick={() => router.push("/admin/department/add")}
-          className="flex h-[48px] w-[128px] items-center justify-center gap-2 rounded-lg bg-[#74045F] px-4 py-2 text-[14px] text-white shadow-lg transition-colors hover:bg-[#B10073]"
+          className="flex h-[48px] w-[150px] items-center justify-center gap-2 rounded-lg bg-[#74045F] px-4 py-2 text-[14px] text-white shadow-lg transition-colors hover:bg-[#B10073]"
         >
           <IconUserPlus />
-          เพิ่มกอง
+          เพิ่มหน่วยงาน
         </button>
       </div>
     </>
