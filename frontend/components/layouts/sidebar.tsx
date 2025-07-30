@@ -122,7 +122,7 @@ const Sidebar = () => {
             <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
               <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                 <IconMinus className="hidden h-5 w-4 flex-none" />
-                <span>{t("ผู้ดูแลระบบ")}</span>
+                <span>{t("ผู้บริหารประจำหน่วยงาน")}</span>
               </h2>
 
               {/* Dashboard */}
@@ -219,7 +219,7 @@ const Sidebar = () => {
                         pathname.startsWith("/admin/department") ? "!text-[#B10073] dark:!text-[#B10073]" : ""
                       }`}
                     >
-                      {t("จัดการข้อมูลกอง")}
+                      {t("จัดการข้อมูลหน่วยงาน")}
                     </span>
                   </div>
                 </Link>

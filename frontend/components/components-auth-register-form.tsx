@@ -342,7 +342,7 @@ const ComponentsAuthRegisterForm = () => {
       <SelectField
         label="ชื่อสถานที่ฝึกงาน"
         options={departmentOptions}
-        placeholder="เลือกสถานที่ฝึกงาน (กอง)"
+        placeholder="เลือกสถานที่ฝึกงาน (หน่วยงาน)"
         value={departmentOptions.find((o) => o.value === formData.department)}
         onChange={(sel) =>
           setFormData((f) => ({

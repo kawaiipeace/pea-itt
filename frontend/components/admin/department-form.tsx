@@ -121,18 +121,18 @@ export default function DepartmentForm() {
       {/* หัวเรื่อง และ หาชื่อกอง */}
       <div className="bg-gray-50 px-4 pb-10 pt-6 dark:bg-black-dark-light/5 sm:px-6 md:px-10">
         <h1 className="mb-[40px] text-2xl font-semibold dark:text-gray-400 sm:text-3xl md:text-[32px]">
-          ข้อมูลกอง
+          ข้อมูลหน่วยงาน
         </h1>
         <div className="mb-2 flex flex-wrap gap-4 px-0 sm:gap-6">
           <div>
             <label className="mb-2 block text-base font-medium dark:text-[#506690]">
-              ค้นหากอง
+              ค้นหาหน่วยงาน
             </label>
             <Select<Option, false>
               options={deptOpts}
               value={selectedDept}
               onChange={setSelectedDept}
-              placeholder="ค้นหากอง"
+              placeholder="ค้นหาหน่วยงาน"
               className="w-[200px] sm:w-[240px] md:w-[280px]"
               classNames={selectClassNames as any}
               isClearable
@@ -182,7 +182,7 @@ export default function DepartmentForm() {
         ) : (
           <div className="flex flex-1 items-center justify-center">
             <p className="text-center text-sm text-gray-400 dark:text-[#506690] sm:text-base">
-              ไม่พบข้อมูลกองในระบบ
+              ไม่พบข้อมูลหน่วยงานในระบบ
             </p>
           </div>
         )}
@@ -193,10 +193,10 @@ export default function DepartmentForm() {
         <button
           type="button"
           onClick={() => router.push("/admin/department/add")}
-          className="flex h-[48px] w-[128px] items-center justify-center gap-2 rounded-lg bg-[#74045F] px-4 py-2 text-[14px] text-white shadow-lg transition-colors hover:bg-[#B10073]"
+          className="flex h-[48px] w-[150px] items-center justify-center gap-2 rounded-lg bg-[#74045F] px-4 py-2 text-[14px] text-white shadow-lg transition-colors hover:bg-[#B10073]"
         >
           <IconUserPlus />
-          เพิ่มกอง
+          เพิ่มหน่วยงาน
         </button>
       </div>
     </>

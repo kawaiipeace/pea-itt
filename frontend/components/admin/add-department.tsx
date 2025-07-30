@@ -41,7 +41,7 @@ const AddDepartment = () => {
 
       Swal.fire({
         icon: "success",
-        title: "เพิ่มกองสำเร็จ",
+        title: "เพิ่มหน่วยงานสำเร็จ",
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#74045F",
       }).then(() => {
@@ -51,7 +51,7 @@ const AddDepartment = () => {
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถเพิ่มกองได้ อาจมีชื่อซ้ำ หรือเกิดข้อผิดพลาดจากเซิร์ฟเวอร์",
+        text: "ไม่สามารถเพิ่มหน่วยงานได้ อาจมีชื่อซ้ำ หรือเกิดข้อผิดพลาดจากเซิร์ฟเวอร์",
         confirmButtonText: "ปิด",
         confirmButtonColor: "#74045F",
       });
@@ -72,10 +72,10 @@ const AddDepartment = () => {
 
       <div className="mx-auto w-full max-w-5xl px-4">
         <div className="rounded border bg-white p-6 shadow-md dark:text-[#506690] dark:border-gray-800 dark:bg-gray-900">
-          <h1 className="mb-6 text-xl font-bold dark:text-gray-400">เพิ่มกอง</h1>
+          <h1 className="mb-6 text-xl font-bold dark:text-gray-400">เพิ่มหน่วยงาน</h1>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">ชื่อกอง</label>
+              <label className="mb-1 block text-sm font-medium">ชื่อหน่วยงาน</label>
               <input
                 type="text"
                 name="dept_name"
@@ -83,7 +83,7 @@ const AddDepartment = () => {
                 onChange={(e) => setDeptName(e.target.value)}
                 required
                 className="w-full rounded border bg-gray-100 border-gray-300 p-2 text-black dark:border-gray-600 dark:bg-gray-800 dark:text-[#506690]"
-                placeholder="กรุณากรอกชื่อกอง"
+                placeholder="กรุณากรอกชื่อหน่วยงาน"
               />
               {errors && (
                 <p className="text-red-500 text-xs mt-1">{errors}</p>
