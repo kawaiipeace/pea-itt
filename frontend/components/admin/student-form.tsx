@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import IconUser from "@/components/icon/icon-user";
+import IconUser from "../../components/icon/icon-user";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -250,33 +250,28 @@ const StudentForm = () => {
         {selectedDivision && selectedMentor ? (
           filteredStudents.length > 0 ? (
             <div className="flex-1 overflow-y-auto">
-              <div className="flex w-full flex-col gap-3 sm:gap-4">
+              <div className="flex w-full cursor-pointer flex-col gap-3 sm:gap-4">
                 {filteredStudents.map((student) => (
                   <div
+                    onClick={() => router.push(`/admin/student/${student.id}`)}
                     key={student.id}
                     className="flex items-center justify-between gap-3 rounded-md border border-transparent bg-white p-3 duration-150 hover:border-[#B10073] hover:bg-[#F7E3F0] hover:shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:hover:bg-gray-500 sm:gap-4 sm:p-4"
                   >
-                    <div
-                      onClick={() =>
-                        router.push(`/admin/student/${student.id}`)
-                      }
-                    >
-                      <div className="flex cursor-pointer items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                          {student.picture_url ? (
-                            <img
-                              src={student.picture_url}
-                              alt="student"
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <IconUser />
-                          )}
-                        </div>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
-                          {student.fname} {student.lname}
-                        </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                        {student.picture_url ? (
+                          <img
+                            src={student.picture_url}
+                            alt="student"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <IconUser />
+                        )}
                       </div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-400 sm:text-base">
+                        {student.fname} {student.lname}
+                      </p>
                     </div>
                     <div>
                       <button onClick={() => handleDelete(student)}>

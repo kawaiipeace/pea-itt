@@ -39,8 +39,6 @@ const Header = () => {
   const router = useRouter();
   const { t, i18n } = getTranslation();
   const user = useAuthStore((state) => state.user)
-  const actionLogout = useAuthStore((s)=> s.actionLogout)
-  const setuser = useAuthStore((s)=>s.actionSetUser)
   const [myimg, setMyimg] = useState<string | null>(null)
 
   useEffect(() => {
