@@ -146,7 +146,7 @@ const SumDashboard = () => {
 
         for (const m of mentors) {
           const mentorId = m.mentor_profile?.id || m.id;
-          const url = `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${mentorId}&show_ended=false`;
+          const url = `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${mentorId}&show_ended=true`;
           const studentRes = await axios.get(url, { withCredentials: true });
           const studentsInMentor = studentRes.data?.data || [];
 

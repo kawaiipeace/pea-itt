@@ -76,7 +76,7 @@ const AddMentor = () => {
       newErrors.confirmPassword = "กรุณากรอกยืนยันรหัสผ่าน";
     if (password !== confirmPassword)
       newErrors.confirmPassword = "รหัสผ่านไม่ตรงกัน";
-    if (!division) newErrors.division = "กรุณาเลือกชื่อกอง";
+    if (!division) newErrors.division = "กรุณาเลือกชื่อหน่วยงาน";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -139,7 +139,7 @@ const AddMentor = () => {
             {/* ชื่อจริง */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
-                ชื่อจริง
+                ชื่อหน่วยงาน
               </label>
               <input
                 type="text"
@@ -263,13 +263,13 @@ const AddMentor = () => {
             {/* ชื่อกอง */}
             <div className="col-span-1 flex flex-col md:col-span-2">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
-                ชื่อกอง
+                ชื่อหน่วยงาน
               </label>
               <Select
                 options={divisionOptions}
                 value={division}
                 onChange={setDivision}
-                placeholder="กรุณาเลือกกอง"
+                placeholder="กรุณาเลือกหน่วยงาน"
                 isClearable
                 classNames={selectClassNames}
               />

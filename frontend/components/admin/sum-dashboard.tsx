@@ -146,7 +146,7 @@ const SumDashboard = () => {
 
         for (const m of mentors) {
           const mentorId = m.mentor_profile?.id || m.id;
-          const url = `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${mentorId}&show_ended=false`;
+          const url = `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${mentorId}&show_ended=true`;
           const studentRes = await axios.get(url, { withCredentials: true });
           const studentsInMentor = studentRes.data?.data || [];
 
@@ -358,7 +358,7 @@ const SumDashboard = () => {
       <div className="mb-6 mt-10 flex flex-wrap justify-center gap-4 md:justify-start">
         <div className="flex w-full max-w-xs flex-col">
           <label className="mb-1 text-sm font-medium dark:text-[#506690]">
-            ชื่อกอง
+            ชื่อหน่วยงาน
           </label>
           <Select
             options={departmentOptions}

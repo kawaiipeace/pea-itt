@@ -217,7 +217,7 @@ const StudentForm = () => {
       <div className="mb-10 flex flex-wrap justify-center gap-4 sm:gap-6 sm:px-6">
         <div>
           <label className="mb-2 block text-base font-medium dark:text-[#506690]">
-            ชื่อกอง
+            ชื่อหน่วยงาน
           </label>
           <Select
             options={departmentOptions}

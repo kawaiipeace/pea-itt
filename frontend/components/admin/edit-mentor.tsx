@@ -170,7 +170,7 @@ const EditMentor = () => {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">ชื่อกอง</label>
+              <label className="mb-1 block text-sm font-medium">ชื่อหน่วยงาน</label>
               <select
                 value={division}
                 onChange={(e) => setDivision(Number(e.target.value))}
@@ -179,7 +179,7 @@ const EditMentor = () => {
                 }`}
               >
                 <option value="" disabled hidden>
-                  เลือกชื่อกอง
+                  เลือกหน่วยงาน
                 </option>
                 {divisions.map((d) => (
                   <option key={d.value} value={d.value}>
