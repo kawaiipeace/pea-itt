@@ -278,7 +278,7 @@ const ComponentsAuthRegisterForm = () => {
                 start_date: date ? format(date, "yyyy-MM-dd") : "",
               }))
             }
-            minDate={new Date()}
+            // ✅ ลบ minDate ออก เพื่อให้เลือกวันย้อนหลังได้
             dateFormat="dd/MM/yyyy"
             locale="th"
             customInput={<CustomDateInput />}
