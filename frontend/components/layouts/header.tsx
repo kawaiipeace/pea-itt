@@ -40,6 +40,7 @@ const Header = () => {
   const { t, i18n } = getTranslation();
   const user = useAuthStore((state) => state.user)
   const [myimg, setMyimg] = useState<string | null>(null)
+  const actionLogout = useAuthStore((s) => s.actionLogout)
 
   useEffect(() => {
     let imgUrl: string;
@@ -177,9 +178,8 @@ const Header = () => {
 
   return (
     <header
-      className={`z-40 ${
-        themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
-      }`}
+      className={`z-40 ${themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""
+        }`}
     >
       <div className="shadow-sm">
         <div className="relative flex w-full items-center bg-white px-5 py-2.5 dark:bg-black">
