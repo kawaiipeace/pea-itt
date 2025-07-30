@@ -28,10 +28,9 @@ interface Student {
 
 const selectClassNames = {
   control: ({ isFocused }: { isFocused: boolean }) =>
-    `border rounded-lg shadow-sm min-h-[42px] px-2 py-1 ${
-      isFocused
-        ? "border-blue-500 ring-1 ring-blue-300"
-        : "border-gray-300 dark:border-gray-600"
+    `border rounded-lg shadow-sm min-h-[42px] px-2 py-1 ${isFocused
+      ? "border-blue-500 ring-1 ring-blue-300"
+      : "border-gray-300 dark:border-gray-600"
     } bg-white dark:bg-gray-800`,
   placeholder: () => "text-gray-500 dark:text-gray-400",
   singleValue: () => "text-gray-800 dark:text-gray-400",
@@ -138,191 +137,181 @@ const SumDashboard = () => {
   }, []);
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        let mentorUrl = `${process.env.NEXT_PUBLIC_API_URL}user/mentor`;
-        if (selectedDept) mentorUrl += `?department_id=${selectedDept.value}`;
-        const mentorRes = await axios.get(mentorUrl);
-        const mentors = mentorRes.data?.data || [];
+  const fetchStudents = async () => {
+    try {
+      let mentorUrl = `${process.env.NEXT_PUBLIC_API_URL}user/mentor`;
+      if (selectedDept) mentorUrl += `?department_id=${selectedDept.value}`;
+      const mentorRes = await axios.get(mentorUrl);
+      const mentors = mentorRes.data?.data || [];
 
-        let allStudents: Student[] = [];
+      let allStudents: Student[] = [];
 
-        for (const m of mentors) {
-          const mentorId = m.mentor_profile?.id || m.id;
-          const url = `${process.env.NEXT_PUBLIC_API_URL}users?mentor_id=${mentorId}&show_ended=true`;
-          const studentRes = await axios.get(url, { withCredentials: true });
-          const studentsInMentor = studentRes.data?.data || [];
+      for (const m of mentors) {
+        const mentorId = m.mentor_profile?.id || m.id;
+        const studentRes = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}users?&show_ended=true`,
+          { withCredentials: true }
+        );
 
-          const studentsWithSummary = await Promise.all(
-            studentsInMentor.map(async (s: any) => {
-              try {
-                const summaryRes = await axios.get(
-                  `${process.env.NEXT_PUBLIC_API_URL}check-summary/${s.id}`,
-                  { withCredentials: true }
-                );
-                const summary = summaryRes?.data?.data || summaryRes.data;
+        const filteredStudents = studentRes.data.data.filter(
+          (student: any) => student.student_profile !== null
+        );
 
-                console.log(
-                  `Summary for student ${s.fname} ${s.lname}:`,
-                  summary
-                );
+        console.log(filteredStudents, "เฉพาะที่มี student_profile");
 
-                // ดึงข้อมูลลาจาก leave-request API
-                const leaveRes = await axios.get(
-                  `${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${s.id}`,
-                  { withCredentials: true }
-                );
+        const studentsInMentor = filteredStudents || [];
 
-                console.log(
-                  leaveRes.data.data.length,
-                  "leave requests for",
-                  s.fname
-                );
-
-                const leaveRequests = leaveRes?.data?.data || [];
-
-                const now = new Date();
-
-                const filterDatesInRange = (
-                  dates: string[] | undefined,
-                  start: string | null,
-                  end: string | null
-                ) => {
-                  if (!dates || !start || !end) return [];
-                  const startDate = new Date(start);
-                  startDate.setHours(0, 0, 0, 0);
-                  const endDate = new Date(end);
-                  endDate.setHours(23, 59, 59, 999);
-
-                  return dates.filter((dateStr) => {
-                    const d = new Date(dateStr);
-                    d.setHours(12, 0, 0, 0);
-
-                    const isToday =
-                      d.getFullYear() === now.getFullYear() &&
-                      d.getMonth() === now.getMonth() &&
-                      d.getDate() === now.getDate();
-
-                    if (isToday) {
-                      return false;
-                    }
-
-                    return d >= startDate && d <= endDate && d <= now;
-                  });
-                };
-
-                // กรอง absent dates เดิม
-                const filteredAbsent = filterDatesInRange(
-                  summary.absent_dates,
-                  s.student_profile?.start_date || null,
-                  s.student_profile?.end_date || null
-                );
-
-                // กรอง leave dates จาก summary ที่อนุมัติ
-                const approvedLeaveDates = (summary.leave_dates || [])
-                  .filter(
-                    (item: any) =>
-                      item &&
-                      typeof item.status === "string" &&
-                      item.status.toLowerCase() === "approved"
-                  )
-                  .map((item: any) => item.date)
-                  .filter((date: any) => typeof date === "string" && date);
-
-                // กรอง leave dates จาก leaveRequests API ที่อนุมัติ
-
-                const approvedLeaveRequests = leaveRequests
-                  .filter(
-                    (lr: any) =>
-                      lr &&
-                      typeof lr.status === "string" &&
-                      lr.status.toLowerCase() === "approved" &&
-                      typeof lr.date === "string"
-                  )
-                  .map((lr: any) => lr.date);
-
-                // รวมวันที่ลา ทั้งสองที่ (ลบซ้ำ)
-                const combinedLeaveDates = Array.from(
-                  new Set([...approvedLeaveDates, ...approvedLeaveRequests])
-                );
-
-                const filteredLeave = filterDatesInRange(
-                  combinedLeaveDates,
-                  s.student_profile?.start_date || null,
-                  s.student_profile?.end_date || null
-                );
-
-                const totalHours = calculateTotalHours(summary.logs ?? []);
-
-                return {
-                  id: s.id,
-                  fname: s.fname,
-                  lname: s.lname,
-                  start_date: s.student_profile?.start_date || null,
-                  end_date: s.student_profile?.end_date || null,
-                  hours: totalHours, 
-                  present: summary.days_checked_in ?? 0,
-                  absent: filteredAbsent.length,
-                  leave: leaveRequests.length,
-                };
-              } catch (error) {
-                console.error(
-                  `❌ Failed to fetch summary or leave for student ${s.id}:`,
-                  error
-                );
-                return {
-                  id: s.id,
-                  fname: s.fname,
-                  lname: s.lname,
-                  start_date: s.student_profile?.start_date || null,
-                  end_date: s.student_profile?.end_date || null,
-                  hours: 0,
-                  present: 0,
-                  absent: 0,
-                  leave: 0,
-                };
-              }
-            })
-          );
-
-          allStudents.push(...studentsWithSummary);
-        }
-
-        // ฟิลเตอร์เดือนและปีตามเดิม
-        const matchMonth = (dateStr: string | null) => {
-          if (!startMonth) return true;
-          if (!dateStr) return false;
-          const date = new Date(dateStr);
-          return date.getMonth() === months.indexOf(startMonth);
-        };
-
-        const matchYear = (dateStr: string | null) => {
-          if (!year) return true;
-          if (!dateStr) return false;
-          const date = new Date(dateStr);
-          return date.getFullYear() === parseInt(year) - 543;
-        };
-
-        const filtered = allStudents.filter((s) => {
-          const monthMatch = startMonth
-            ? matchMonth(s.start_date) || matchMonth(s.end_date)
-            : true;
-          const yearMatch = year
-            ? matchYear(s.start_date) || matchYear(s.end_date)
-            : true;
-          return monthMatch && yearMatch;
+        studentsInMentor.forEach((student: any, index: any) => {
+          console.log(`นักศึกษาคนที่ ${index + 1}:`, student.student_profile);
         });
 
-        setStudents(filtered);
-        setCurrentPage(1);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-        Swal.fire("เกิดข้อผิดพลาด", "โหลดนักศึกษาไม่สำเร็จ", "error");
-      }
-    };
+        const studentsWithSummary = await Promise.all(
+          studentsInMentor.map(async (s: any) => {
+            try {
+              const summaryRes = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}check-summary/${s.id}`,
+                { withCredentials: true }
+              );
+              const summary = summaryRes?.data?.data || summaryRes.data;
 
-    fetchStudents();
-  }, [selectedDept, startMonth, year]);
+              const leaveRes = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}leave-request?user_id=${s.id}`,
+                { withCredentials: true }
+              );
+              const leaveRequests = leaveRes?.data?.data || [];
+
+              const now = new Date();
+
+              const filterDatesInRange = (
+                dates: string[] | undefined,
+                start: string | null,
+                end: string | null
+              ) => {
+                if (!dates || !start || !end) return [];
+                const startDate = new Date(start);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(end);
+                endDate.setHours(23, 59, 59, 999);
+
+                return dates.filter((dateStr) => {
+                  const d = new Date(dateStr);
+                  d.setHours(12, 0, 0, 0);
+
+                  const isToday =
+                    d.getFullYear() === now.getFullYear() &&
+                    d.getMonth() === now.getMonth() &&
+                    d.getDate() === now.getDate();
+
+                  if (isToday) return false;
+                  return d >= startDate && d <= endDate && d <= now;
+                });
+              };
+
+              const filteredAbsent = filterDatesInRange(
+                summary.absent_dates,
+                s.student_profile?.start_date || null,
+                s.student_profile?.end_date || null
+              );
+
+              const approvedLeaveDates = (summary.leave_dates || [])
+                .filter(
+                  (item: any) =>
+                    item &&
+                    typeof item.status === "string" &&
+                    item.status.toLowerCase() === "approved"
+                )
+                .map((item: any) => item.date)
+                .filter((date: any) => typeof date === "string" && date);
+
+              const approvedLeaveRequests = leaveRequests
+                .filter(
+                  (lr: any) =>
+                    lr &&
+                    typeof lr.status === "string" &&
+                    lr.status.toLowerCase() === "approved" &&
+                    typeof lr.date === "string"
+                )
+                .map((lr: any) => lr.date);
+
+              const combinedLeaveDates = Array.from(
+                new Set([...approvedLeaveDates, ...approvedLeaveRequests])
+              );
+
+              const filteredLeave = filterDatesInRange(
+                combinedLeaveDates,
+                s.student_profile?.start_date || null,
+                s.student_profile?.end_date || null
+              );
+
+              return {
+                id: s.id,
+                fname: s.fname,
+                lname: s.lname,
+                start_date: s.student_profile?.start_date || null,
+                end_date: s.student_profile?.end_date || null,
+                hours: s.student_profile?.hours ?? "0",
+                present: summary.days_checked_in ?? 0,
+                absent: filteredAbsent.length,
+                leave: leaveRequests.length,
+              };
+            } catch (error) {
+              console.error(
+                `❌ Failed to fetch summary or leave for student ${s.id}:`,
+                error
+              );
+              return {
+                id: s.id,
+                fname: s.fname,
+                lname: s.lname,
+                start_date: s.student_profile?.start_date || null,
+                end_date: s.student_profile?.end_date || null,
+                hours: s.student_profile?.hours ?? "0",
+                present: 0,
+                absent: 0,
+                leave: 0,
+              };
+            }
+          })
+        );
+
+        allStudents.push(...studentsWithSummary);
+      }
+
+      const matchMonth = (dateStr: string | null) => {
+        if (!startMonth) return true;
+        if (!dateStr) return false;
+        const date = new Date(dateStr);
+        return date.getMonth() === months.indexOf(startMonth);
+      };
+
+      const matchYear = (dateStr: string | null) => {
+        if (!year) return true;
+        if (!dateStr) return false;
+        const date = new Date(dateStr);
+        return date.getFullYear() === parseInt(year) - 543;
+      };
+
+      const filtered = allStudents.filter((s) => {
+        const monthMatch = startMonth
+          ? matchMonth(s.start_date) || matchMonth(s.end_date)
+          : true;
+        const yearMatch = year
+          ? matchYear(s.start_date) || matchYear(s.end_date)
+          : true;
+        return monthMatch && yearMatch;
+      });
+
+      setStudents(filtered);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      Swal.fire("เกิดข้อผิดพลาด", "โหลดนักศึกษาไม่สำเร็จ", "error");
+    }
+  };
+
+  fetchStudents();
+}, [selectedDept, startMonth, year]);
+
 
   const handleExport = (type: "xlsx" | "csv") => {
     const exportData = students.map((row) => ({
@@ -342,12 +331,12 @@ const SumDashboard = () => {
     const fileData =
       type === "xlsx"
         ? new Blob(
-            [XLSX.write(workbook, { bookType: "xlsx", type: "array" })],
-            { type: "application/octet-stream" }
-          )
+          [XLSX.write(workbook, { bookType: "xlsx", type: "array" })],
+          { type: "application/octet-stream" }
+        )
         : new Blob([XLSX.utils.sheet_to_csv(worksheet)], {
-            type: "text/csv;charset=utf-8;",
-          });
+          type: "text/csv;charset=utf-8;",
+        });
 
     saveAs(fileData, `student_report.${type}`);
   };
@@ -379,6 +368,7 @@ const SumDashboard = () => {
           <Select
             options={months.map((m) => ({ label: m, value: m }))}
             value={startMonth ? { label: startMonth, value: startMonth } : null}
+            //@ts-ignore
             onChange={(opt) => setStartMonth(opt?.value || null)}
             className="text-sm"
             classNames={selectClassNames}
@@ -392,6 +382,7 @@ const SumDashboard = () => {
           <Select
             options={years.map((y) => ({ label: y, value: y }))}
             value={year ? { label: year, value: year } : null}
+            //@ts-ignore
             onChange={(opt) => setYear(opt?.value || null)}
             className="text-sm"
             classNames={selectClassNames}
@@ -426,35 +417,35 @@ const SumDashboard = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-  {currentRows.map((item, index) => (
-    <tr key={index} className="hover:bg-[#F7E3F0] dark:hover:bg-gray-700">
-      <td
-        onClick={() => router.push(`/admin/admin-student/detail/${item.id}`)}
-        className="cursor-pointer px-3 py-2 text-[#000000] hover:underline dark:text-[#ECB9DB]"
-      >
-        {item.fname} {item.lname}
-      </td>
-      <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
-        {formatThaiDate(item.start_date)}
-      </td>
-      <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
-        {formatThaiDate(item.end_date)}
-      </td>
-      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-        {item.present}
-      </td>
-      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-        {item.absent}
-      </td>
-      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-        {item.leave}
-      </td>
-      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-        {item.hours}
-      </td>
-    </tr>
-  ))}
-</tbody>
+            {currentRows.map((item, index) => (
+              <tr key={index} className="hover:bg-[#F7E3F0] dark:hover:bg-gray-700">
+                <td
+                  onClick={() => router.push(`/admin/admin-student/detail/${item.id}`)}
+                  className="cursor-pointer px-3 py-2 text-[#000000] hover:underline dark:text-[#ECB9DB]"
+                >
+                  {item.fname} {item.lname}
+                </td>
+                <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
+                  {formatThaiDate(item.start_date)}
+                </td>
+                <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
+                  {formatThaiDate(item.end_date)}
+                </td>
+                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+                  {item.present}
+                </td>
+                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+                  {item.absent}
+                </td>
+                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+                  {item.leave}
+                </td>
+                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+                  {item.hours}
+                </td>
+              </tr>
+            ))}
+          </tbody>
 
         </table>
       </div>
@@ -463,8 +454,8 @@ const SumDashboard = () => {
         <div>
           <button
             onClick={() => setShowExportMenu((prev) => !prev)}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#ECB9DB] dark:text-gray-400"
-          >
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#ECB9DB] dark:text-gray-400">
+            {/* @ts-ignore */}
             <IconLogout className="h-5 w-5 rotate-[-90deg] text-[#B10073]" />
             ส่งออกตาราง
           </button>
@@ -497,11 +488,10 @@ const SumDashboard = () => {
             <button
               key={i + 1}
               onClick={() => setCurrentPage(i + 1)}
-              className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                currentPage === i + 1
-                  ? "bg-[#9B006C] text-white"
-                  : "bg-[#EEEEEE] text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
-              }`}
+              className={`flex h-8 w-8 items-center justify-center rounded-full ${currentPage === i + 1
+                ? "bg-[#9B006C] text-white"
+                : "bg-[#EEEEEE] text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+                }`}
             >
               {i + 1}
             </button>
