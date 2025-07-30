@@ -151,7 +151,7 @@ export default function MentorForm() {
               options={divisionOpts}
               value={selectedDivision}
               onChange={setSelectedDivision}
-              placeholder="เลือกกอง"
+              placeholder="เลือกหน่วยงาน"
               className="w-[200px] sm:w-[240px] md:w-[280px]"
               classNames={selectClassNames as any}
               isClearable
