@@ -6,6 +6,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useRouter } from "next/navigation";
 import { FiLogOut as IconLogout } from "react-icons/fi";
 
 interface DepartmentOption {
@@ -112,6 +113,8 @@ const SumDashboard = () => {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [startMonth, setStartMonth] = useState<string | null>(null);
   const [year, setYear] = useState<string | null>(null);
+  const router = useRouter();
+
 
   const rowsPerPage = 10;
   const indexOfLastRow = currentPage * rowsPerPage;
@@ -327,7 +330,7 @@ const SumDashboard = () => {
       วันที่เริ่มฝึกงาน: formatThaiDate(row.start_date),
       วันที่สิ้นสุดฝึกงาน: formatThaiDate(row.end_date),
       "มา (ครั้ง)": row.present,
-      "ไม่มา (ครั้ง)": row.absent,
+      "ขาด (ครั้ง)": row.absent,
       "ลา (ครั้ง)": row.leave,
       ชั่วโมงการฝึกงาน: row.hours,
     }));
@@ -412,7 +415,7 @@ const SumDashboard = () => {
                 มา (ครั้ง)
               </th>
               <th className="whitespace-nowrap px-3 py-3 text-center">
-                ไม่มา (ครั้ง)
+                ขาด (ครั้ง)
               </th>
               <th className="whitespace-nowrap px-3 py-3 text-center">
                 ลา (ครั้ง)
@@ -423,35 +426,36 @@ const SumDashboard = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {currentRows.map((item, index) => (
-              <tr
-                key={index}
-                className="hover:bg-[#F7E3F0] dark:hover:bg-gray-700"
-              >
-                <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
-                  {item.fname} {item.lname}
-                </td>
-                <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
-                  {formatThaiDate(item.start_date)}
-                </td>
-                <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
-                  {formatThaiDate(item.end_date)}
-                </td>
-                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-                  {item.present}
-                </td>
-                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-                  {item.absent}
-                </td>
-                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-                  {item.leave}
-                </td>
-                <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
-                  {item.hours}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {currentRows.map((item, index) => (
+    <tr key={index} className="hover:bg-[#F7E3F0] dark:hover:bg-gray-700">
+      <td
+        onClick={() => router.push(`/admin/admin-student/detail/${item.id}`)}
+        className="cursor-pointer px-3 py-2 text-[#000000] hover:underline dark:text-[#ECB9DB]"
+      >
+        {item.fname} {item.lname}
+      </td>
+      <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
+        {formatThaiDate(item.start_date)}
+      </td>
+      <td className="px-3 py-2 text-gray-800 dark:text-gray-400">
+        {formatThaiDate(item.end_date)}
+      </td>
+      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+        {item.present}
+      </td>
+      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+        {item.absent}
+      </td>
+      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+        {item.leave}
+      </td>
+      <td className="px-3 py-2 text-center text-gray-800 dark:text-gray-400">
+        {item.hours}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
       </div>
 
