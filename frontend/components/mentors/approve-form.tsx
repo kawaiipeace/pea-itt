@@ -47,6 +47,7 @@ interface LeaveItem {
   reason: string;
   status?: "approved" | "rejected" | "pending";
   user_id: number;
+  picture?: string | null; // เพิ่ม picture สำหรับเช็กหลักฐาน
 }
 
 interface UserData {
@@ -57,8 +58,7 @@ interface UserData {
 
 const ApproveForm = () => {
   const [noti, setNoti] = useState<notileave>();
-  const [menID, setMenID] = useState<number>();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
   const [leaveData, setLeaveData] = useState<
     (LeaveItem & { user?: UserData })[]
   >([]);
@@ -117,21 +117,21 @@ const ApproveForm = () => {
             {
               user_id: user_id,
               title: `ผลการอนุมัติการลา`,
-              message: `สถานะ: ${
-                status === "approved"
-                  ? "ได้รับการอนุมัติ"
-                  : "ไม่ได้รับการอนุมัติ"
-              } ฉบับของวันที่ ${new Date(leave_datetime).toLocaleString("th-TH", {
-                dateStyle: "long",
-                timeStyle: "short",
-              })} เมื่อวันที่ ${new Date().toLocaleString("th-TH", {
-                dateStyle: "long",
-                timeStyle: "short",
-              })}`,
+              message: `สถานะ: ${status === "approved" ? "ได้รับการอนุมัติ" : "ไม่ได้รับการอนุมัติ"
+                } ฉบับของวันที่ ${new Date(
+                  leave_datetime
+                ).toLocaleString("th-TH", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                })} เมื่อวันที่ ${new Date().toLocaleString("th-TH", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                })}`,
             },
             { withCredentials: true }
           );
         });
+
       setLeaveData((prev) =>
         prev.map((item) => (item.id === id ? { ...item, status } : item))
       );
@@ -142,33 +142,40 @@ const ApproveForm = () => {
 
   useEffect(() => {
     fetchLeaveRequests();
-  }, [selectedDate]);
+  }, []);
 
-  const isSameDay = (date1: Date, date2: Date) =>
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate();
-
-  // ✅ filter เฉพาะ status pending
   const filteredLeaveData = leaveData.filter((item) => {
-    if (!item.leave_datetime || !selectedDate) return false;
-    const leaveDate = new Date(item.leave_datetime);
-    return (
-      isSameDay(leaveDate, selectedDate) &&
-      (item.status === "pending" || !item.status)
-    );
+    if (!item.leave_datetime) return false;
+    if (selectedMonth) {
+      const leaveDate = new Date(item.leave_datetime);
+      return (
+        leaveDate.getMonth() === selectedMonth.getMonth() &&
+        leaveDate.getFullYear() === selectedMonth.getFullYear()
+      );
+    }
+    return true;
   });
 
   return (
     <div className="mx-auto max-w-6xl p-4 text-gray-900 dark:text-[#506690]">
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <DatePicker
-          selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
+          selected={selectedMonth}
+          onChange={(date) => setSelectedMonth(date)}
           locale="th"
-          dateFormat="dd MMMM yyyy"
-          customInput={<CustomDateButton />}
+          dateFormat="MMMM yyyy"
+          showMonthYearPicker
+          placeholderText="เลือกเดือน"
+          className="rounded border px-4 py-2 text-sm"
         />
+        {selectedMonth && (
+          <button
+            onClick={() => setSelectedMonth(null)}
+            className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400"
+          >
+            แสดงทั้งหมด
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -177,33 +184,42 @@ const ApproveForm = () => {
         </div>
       ) : filteredLeaveData.length === 0 ? (
         <div className="py-6 text-center text-gray-500 dark:text-[#506690]">
-          ไม่พบข้อมูลการลาในวันที่เลือก
+          ไม่พบข้อมูลการลา
         </div>
       ) : (
-        <div className="w-full rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-900 dark:bg-black-dark-light/5">
-          <div className="grid-cols-4 rounded-t-lg bg-gray-100 px-6 py-3 text-base font-semibold text-gray-700 dark:bg-gray-900 dark:text-[#506690] sm:grid">
+        <div className="w-full overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-900 dark:bg-black-dark-light/5">
+          {/* หัวตาราง */}
+          <div className="grid grid-cols-5 min-w-[800px] rounded-t-lg bg-gray-100 px-6 py-3 text-sm font-semibold text-gray-700 dark:bg-gray-900 dark:text-[#506690]">
+            <div>วันที่</div>
             <div>ชื่อ-นามสกุล</div>
             <div>หลักฐาน</div>
             <div>เหตุผล</div>
-            <div>การอนุมัติ</div>
+            <div className="text-center">การอนุมัติ</div>
           </div>
+
+          {/* รายการข้อมูล */}
           {filteredLeaveData.map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-1 items-start gap-y-2 border-t border-gray-200 px-6 py-4 text-base text-gray-800 dark:border-gray-600 dark:text-[#506690] sm:grid-cols-4"
+              className="grid grid-cols-5 min-w-[800px] items-start border-t border-gray-200 px-6 py-4 text-sm text-gray-800 dark:border-gray-600 dark:text-[#506690]"
             >
               <div>
-                <div className="text-sm text-gray-500 sm:hidden">
-                  ชื่อ-นามสกุล
-                </div>
-                <div>
-                  {item.user
-                    ? `${item.user.fname} ${item.user.lname}`
-                    : "ไม่พบชื่อ"}
-                </div>
+                {item.leave_datetime ? (
+                  new Date(item.leave_datetime).toLocaleDateString("th-TH", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                ) : (
+                  "ไม่ระบุวันที่"
+                )}
               </div>
               <div>
-                <div className="text-sm text-gray-500 sm:hidden">หลักฐาน</div>
+                {item.user
+                  ? `${item.user.fname} ${item.user.lname}`
+                  : "ไม่พบชื่อ"}
+              </div>
+              <div>
                 <a
                   href={`${process.env.NEXT_PUBLIC_API_URL}leave-request/picture/${item.id}`}
                   target="_blank"
@@ -212,12 +228,10 @@ const ApproveForm = () => {
                 >
                   เปิดหลักฐาน
                 </a>
+
               </div>
-              <div>
-                <div className="text-sm text-gray-500 sm:hidden">เหตุผล</div>
-                <div>{item.reason}</div>
-              </div>
-              <div className="space-x-2">
+              <div>{item.reason}</div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <button
                   className="rounded bg-green-500 px-3 py-1 text-white hover:bg-green-600"
                   onClick={() => {
