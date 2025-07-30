@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import IconUser from "@/components/icon/icon-user";
+import IconUser from "../../components/icon/icon-user";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Swal from "sweetalert2";
