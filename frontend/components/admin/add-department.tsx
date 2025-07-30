@@ -72,7 +72,7 @@ const AddDepartment = () => {
 
       <div className="mx-auto w-full max-w-5xl px-4">
         <div className="rounded border bg-white p-6 shadow-md dark:text-[#506690] dark:border-gray-800 dark:bg-gray-900">
-          <h1 className="mb-6 text-xl font-bold dark:text-gray-400">เพิ่มลกอง</h1>
+          <h1 className="mb-6 text-xl font-bold dark:text-gray-400">เพิ่มกอง</h1>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium">ชื่อกอง</label>
