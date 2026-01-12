@@ -1,27 +1,23 @@
-FROM postgres:17
+FROM postgres:18.1
 
-LABEL author="PEACE"
-LABEL description="PEA-iTT Database"
-LABEL version="1.0"
+RUN apt-get update && apt-get install -y \
+    postgresql-18-cron \
+    postgresql-18-tds-fdw \
+    freetds-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN localedef -i th_TH -c -f UTF-8 -A /usr/share/locale/locale.alias th_TH.UTF-8
-ENV LANG=th_TH.utf8
-ENV USE_PGXS=1
-ENV TZ=Asia/Bangkok
-ENV PG_INITDB_OPTS "--locale=C --encoding=UTF8"
+# เพิ่มการตั้งค่า shared_preload_libraries เพื่อให้ pg_cron ทำงานได้
+# (tds_fdw ไม่ต้องใส่ใน preload libraries)
+RUN echo "shared_preload_libraries = 'pg_cron'" >> /usr/share/postgresql/postgresql.conf.sample
 
-RUN apt-get update && \
-    apt-get install -y postgresql-server-dev-17 postgresql-17-cron make gcc git curl libkrb5-dev && \
-    apt-get clean
+# หากต้องการระบุให้ pg_cron รันเฉพาะใน DB ที่กำหนด (ทางเลือก)
+# RUN echo "cron.database_name = 'your_db_name'" >> /usr/share/postgresql/postgresql.conf.sample
 
-RUN git clone --branch main https://github.com/pgaudit/pgaudit.git /tmp/pgaudit && \
-    cd /tmp/pgaudit && \
-    make && \
-    make install && \
-    rm -rf /tmp/pgaudit
-
-COPY ./PEA-iTT.sql /docker-entrypoint-initdb.d/
-
+# คำสั่ง Build และ Run (เหมือนเดิม)
+# docker build -f Dockerfile.pgcron -t vms-db .
+# docker run --name pg-container -p 2405:5432 -e POSTGRES_PASSWORD=123456 -d vms-db
+# CREATE EXTENSION IF NOT EXISTS tds_fdw;
+# CREATE EXTENSION IF NOT EXISTS pg_cron;
 EXPOSE 10002
 
 # Override postgres to listen on port 10002
