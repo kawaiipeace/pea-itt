@@ -171,7 +171,7 @@ const CheckTime = () => {
         setCanCheckOut(isWithin && hour >= 12 && hour <= 20);
       }
     }, 1000);
-    return () => clearInterval(timer); 
+    return () => clearInterval(timer);
   }, [userLocation]);
 
   useEffect(() => {
@@ -198,6 +198,14 @@ const CheckTime = () => {
     const year = date.getFullYear() + 543;
     return `${day} ${month} ${year}`;
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime((prev) => new Date(prev.getTime() + 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative flex h-[calc(100vh-150px)] flex-col items-center justify-center text-center">
@@ -261,7 +269,10 @@ const CheckTime = () => {
         </button>
       </div>
 
-      <a href="/users/historystudent" className="mb-4 text-sm text-purple-700 underline">
+      <a
+        href="/users/historystudent"
+        className="mb-4 text-sm text-purple-700 underline"
+      >
         ประวัติการลงเวลา
       </a>
     </div>

@@ -139,7 +139,7 @@ const AddMentor = () => {
             {/* ชื่อจริง */}
             <div className="flex flex-col">
               <label className="mb-1 font-semibold text-gray-800 dark:text-gray-300">
-                ชื่อหน่วยงาน
+                ชื่อจริง
               </label>
               <input
                 type="text"
