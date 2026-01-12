@@ -68,11 +68,24 @@ CREATE TABLE "student_profile" (
     "user_id" INTEGER NOT NULL,
     "mentor_id" INTEGER,
     "picture" BYTEA,
+    "hours" DECIMAL(65,30) DEFAULT 0,
     "university" VARCHAR(255),
     "start_date" TIMESTAMP(6),
     "end_date" TIMESTAMP(6),
 
     CONSTRAINT "student_profile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "notification" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "message" TEXT NOT NULL,
+    "is_read" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "notification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -129,6 +142,9 @@ ALTER TABLE "student_profile" ADD CONSTRAINT "student_profile_mentor_id_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "student_profile" ADD CONSTRAINT "student_profile_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "notification" ADD CONSTRAINT "notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "user" ADD CONSTRAINT "user_department_id_fkey" FOREIGN KEY ("department_id") REFERENCES "department"("dept_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
